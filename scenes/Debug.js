@@ -123,7 +123,7 @@ class Debug extends Phaser.Scene {
         this.missCollider = this.physics.add.sprite(this.player.x - 80, this.player.y);
         this.missCollider.setSize(20, 200);
         this.physics.add.overlap(this.missCollider, Note.Notes, function(missCollider, note) {
-            if(!note.hitted) {
+            if(!note.hitted && !note.type === NoteType.NO_HIT) {
                 note.destroyNote();
                 this.score.add(NoteHitResult.MISS);
                 let t = new HitText(this, this.player.x - 80, this.player.y, "X", null, 64);

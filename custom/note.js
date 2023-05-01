@@ -312,7 +312,7 @@ class Note extends Phaser.GameObjects.Sprite {
             }
 
             // None hittable note
-            if(note.type === NoteType.NO_HIT && note.noHitActive && distance <= 0) {
+            if(note.type === NoteType.NO_HIT && note.noHitActive && distance == 0 && player.isDownLane === note.down) {
                 let text;
                 // TODO: Do not use scene.judgementPosition
                 if(note.down) {
@@ -448,7 +448,7 @@ class Note extends Phaser.GameObjects.Sprite {
                         text = new HitText(scene, scene.judgementPositions[0].x, scene.judgementPositions[0].y, NoteHitResult.MISS, null, 32);
                     }
                     text.destroyText();
-                    scene.score.add(NoteHitResult.MISS);
+                    //scene.score.add(NoteHitResult.MISS);
                     this.destroyNote();
                 }
             }

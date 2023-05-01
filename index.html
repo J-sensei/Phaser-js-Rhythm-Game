@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Rhythm Car</title>
+        <!-- Font Style -->
+        <style media="screen" type="text/css">
+            @font-face {
+                font-family: "Silkscreen";
+                src: url("assets/font/slkscr.ttf");
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- Load the font family here to make work in Phaser JS -->
+        <div style="font-family:'Silkscreen'; opacity: 0; position: absolute;">Font</div>
+
+        <!-- Phaser JS Library -->
+        <script type="text/javascript" src="library/phaser.min.js"></script>
+
+        <!-- Custom Classes -->
+        <script type="text/javascript" src="custom/background.js"></script>
+        <script type="text/javascript" src="custom/note.js"></script>
+        <script type="text/javascript" src="custom/score.js"></script>
+        <script type="text/javascript" src="custom/judgeCollider.js"></script>
+        <script type="text/javascript" src="custom/beatmap.js"></script>
+        <script type="text/javascript" src="custom/song.js"></script>
+        <script type="text/javascript" src="custom/player.js"></script>
+        <script type="text/javascript" src="custom/playerCar.js"></script>
+        <script type="text/javascript" src="custom/ui/hitText.js"></script>
+
+        <!-- Scenes -->
+        <script type="text/javascript" src="scenes/Preload.js"></script>
+        <script type="text/javascript" src="scenes/Debug.js"></script>
+
+        <!-- Main Game js -->
+        <script type="text/javascript" src="game.js"></script>
+    </body>
+</html>

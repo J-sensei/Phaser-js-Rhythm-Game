@@ -163,8 +163,13 @@ class Beatmap {
 
             new NoteData(7, 0, 1, 0, 2, 0, 0, 1),
             new NoteData(7, 1, 1, 0, 2, 0, 0, 1),
+            new NoteData(7, 2, 1, 0, 2, 0, 0, 1),
+            new NoteData(7, 3, 1, 0, 2, 0, 0, 1),
+            new NoteData(8, 0, 1, 0, 2, 0, 0, 1),
+            new NoteData(8, 1, 1, 0, 2, 0, 0, 1),
+            new NoteData(8, 2, 1, 0, 2, 0, 0, 1),
+            new NoteData(8, 3, 1, 0, 2, 0, 0, 1),
         ];
-        //console.log(this.data2);
     }
 
     /** Load neccessary common resources for Beatmap, call it in the preload scene to load the note sfx audio */

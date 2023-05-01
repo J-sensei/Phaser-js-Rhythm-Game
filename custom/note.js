@@ -160,6 +160,7 @@ class Note extends Phaser.GameObjects.Sprite {
 
         this.endNoteSpawned = false;
         this.endNoteActive = false;
+        this.noHitActive = false;
         this.result = "None";
 
         // Create hit circle to let player see the perfect point
@@ -311,7 +312,7 @@ class Note extends Phaser.GameObjects.Sprite {
             }
 
             // None hittable note
-            if(note.type === NoteType.NO_HIT && note.active && distance <= 0) {
+            if(note.type === NoteType.NO_HIT && note.noHitActive && distance <= 0) {
                 let text;
                 // TODO: Do not use scene.judgementPosition
                 if(note.down) {
@@ -335,11 +336,15 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {Note} note 
      */
     static NoteOverlap(judgement, note) {
-        if(!note.active && !note.activeHold && note.type != NoteType.END) // Note is not active and not holding
+        if(!note.active && !note.activeHold && note.type != NoteType.END && note.type != NoteType.NO_HIT) // Note is not active and not holding
         note.activate();
     
         if(note.type == NoteType.END && note.parentNote.activeHold) {
             note.endNoteActive = true; // Ready to destroy end note
+        }
+
+        if(note.type === NoteType.NO_HIT) {
+            note.noHitActive = true;
         }
     }
 

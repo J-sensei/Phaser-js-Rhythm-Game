@@ -276,7 +276,7 @@ class Note extends Phaser.GameObjects.Sprite {
         let notesArray = []; // Empty note array
         for(let i = 0; i < Note.Notes.getChildren().length; i++) {
             let note = Note.Notes.getChildren()[i]; // Get the note
-            note.update(player); // Update note here
+            note.update(player, scene); // Update note here
             let distance = 0; // Distance between note and the judgement colliders
 
             // Check which lane the note is to calculate the distance
@@ -361,7 +361,7 @@ class Note extends Phaser.GameObjects.Sprite {
     //     this.body.setSize(x, y);
     // }
 
-    update(player) {
+    update(player, scene) {
         this.circle.x = this.x;
         this.circle.y = this.y;
 
@@ -439,6 +439,16 @@ class Note extends Phaser.GameObjects.Sprite {
                     }
                 } else { // Player failed to hold it while the active hold is still true
                     // Failed 
+                    //this.destroyNote();
+                    let text;
+                    // TODO: Do not use scene.judgementPosition
+                    if(this.down) {
+                        text = new HitText(scene, scene.judgementPositions[1].x, scene.judgementPositions[1].y, NoteHitResult.MISS, null, 32);
+                    } else {
+                        text = new HitText(scene, scene.judgementPositions[0].x, scene.judgementPositions[0].y, NoteHitResult.MISS, null, 32);
+                    }
+                    text.destroyText();
+                    scene.score.add(NoteHitResult.MISS);
                     this.destroyNote();
                 }
             }

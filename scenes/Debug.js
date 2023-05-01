@@ -16,7 +16,7 @@ class Debug extends Phaser.Scene {
     create() {
         Note.Reset(this); // Reset the note
         this.noteCount = 0; // Reset the note count
-        this.travelTime = 1500;
+        this.travelTime = 1000;
         this.beatmap = new Beatmap(this, testSong1); // Test
         this.beatmap.create();
         this.beatmap.drawBeatLine = false;
@@ -132,8 +132,7 @@ class Debug extends Phaser.Scene {
             }
         }, null, this);
 
-        this.physics.add.sprite(260, 500, SpriteId.VEHICLE1).play(AnimationId.VEHICLE1);
-        
+        this.physics.add.sprite(260, 500, SpriteId.MUSIC_NOTE).setOrigin(0.5).setScale(0.2);
     }
 
     togglePause() {
@@ -207,12 +206,14 @@ class Debug extends Phaser.Scene {
         else
             this.playTimeLabel.text = testSong1.playTimeString();
 
-        const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this.downJudge, this.upJudge);
+        const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this.downJudge, this.upJudge, this);
         let n = Note.HitNotes(notesArray, this);
         if(n != null) {
             this.noteDestroyCount++;
             this.noteDestroyLabel.text = "Note Destroy: " + this.noteDestroyCount;
             let text;
+
+            // TODO: Do not use scene.judgementPosition
             if(n.down) {
                 text = new HitText(this, this.judgementPositions[1].x, this.judgementPositions[1].y, n.result, null, 32);
             } else {
@@ -284,6 +285,10 @@ class Debug extends Phaser.Scene {
             //n.setOrigin(0.5);
             n.setScale(0.2);
             //n.body.setSize(200, 200);
+        } else if(type === NoteType.NO_HIT) {
+            let n = Note.Instantiate(this, SpriteId.MUSIC_NOTE, spawn.x, spawn.y, 
+                judgementPos.x, judgementPos.y, this.travelTime, down, type);
+                n.setScale(0.15);
         }
     }
 }

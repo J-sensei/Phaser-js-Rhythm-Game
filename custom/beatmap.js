@@ -160,6 +160,9 @@ class Beatmap {
             new NoteData(6, 1, 1, 0, 0, 0, 0, 1),
             new NoteData(6, 2, 1, 0, 0, 0, 0, 1),
             new NoteData(6, 3, 1, 0, 0, 0, 0, 1),
+
+            new NoteData(7, 0, 1, 0, 2, 0, 0, 1),
+            new NoteData(7, 1, 1, 0, 2, 0, 0, 1),
         ];
         //console.log(this.data2);
     }
@@ -360,7 +363,7 @@ class Beatmap {
     instantiateNote(note) {
         if(note.type == NoteType.HOLD) {
             this.scene.instantiateNote(note.type, note.down, note.holdTime); // Need hold time reference
-        } else if(note.type == NoteType.NORMAL) {
+        } else {
             this.scene.instantiateNote(note.type, note.down);
         }
 
@@ -401,7 +404,7 @@ class NoteData {
      * @param {int} subBeat 
      * @param {int} beatSnapDivisor 
      * @param {int} beatSnapDivisorPosition 
-     * @param {int} type Note Type 0 - Normal, 1 - Hold
+     * @param {int} type Note Type 0 - Normal, 1 - Hold, 2 - No Hit
      * @param {int} down Note 0 - false, 1 - true
      */
     constructor(beat, subBeat, beatSnapDivisor, beatSnapDivisorPosition, type, holdSnapDivisor, holdMultiplier, down) {
@@ -431,6 +434,9 @@ class NoteData {
                     break;
                 case 1:
                     this.type = NoteType.HOLD;
+                    break;
+                case 2:
+                    this.type = NoteType.NO_HIT;
                     break;
                 default:
                     this.type = NoteType.NORMAL;

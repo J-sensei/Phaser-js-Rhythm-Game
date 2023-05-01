@@ -20,7 +20,8 @@ const SpriteId = {
     CONE: "Cone",
     VEHICLE1: "Vehicle1",
     VEHICLE2: "Vehicle2",
-    VEHICLE3: "Vehicle3"
+    VEHICLE3: "Vehicle3",
+    MUSIC_NOTE: "MusicNote"
 }
 
 const AnimationId = {
@@ -47,6 +48,7 @@ const BackgroundId = {
 const SFXId = {
     NOTE_HIT: "NoteHit",
     NOTE_HOLD_HIT: "NoteHoldHit",
+    MUSIC_HIT: "MusicHit",
     METRONOME1: "Metronome1",
     METRONOME2: "Metronome2"
 }
@@ -85,6 +87,7 @@ class Preload extends Phaser.Scene {
         this.load.spritesheet(SpriteId.VEHICLE1, "assets/note/vehicle1.png", {frameWidth: 176, frameHeight: 96});
         this.load.spritesheet(SpriteId.VEHICLE2, "assets/note/vehicle2.png", {frameWidth: 176, frameHeight: 125});
         this.load.spritesheet(SpriteId.VEHICLE3, "assets/note/vehicle3.png", {frameWidth: 329, frameHeight: 160});
+        this.load.spritesheet(SpriteId.MUSIC_NOTE, "assets/note/music_note.png", {frameWidth: 360, frameHeight: 360});
 
         // Load backgrounds
         this.load.image(BackgroundId.SUNSET_BACK, "assets/background/sunset/back.png");
@@ -96,6 +99,7 @@ class Preload extends Phaser.Scene {
 
         this.load.audio(SFXId.NOTE_HIT, "assets/sfx/punch.wav");
         this.load.audio(SFXId.NOTE_HOLD_HIT, "assets/sfx/holdHit.wav");
+        this.load.audio(SFXId.MUSIC_HIT, "assets/sfx/music_hit.wav");
 
         this.load.audio(SFXId.METRONOME1, "assets/sfx/metronome1.mp3");
         this.load.audio(SFXId.METRONOME2, "assets/sfx/metronome2.mp3");

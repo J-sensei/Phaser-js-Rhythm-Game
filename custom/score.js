@@ -67,14 +67,19 @@ class Score {
                 accuracyWeight = AccuracyWeight.MISS;
                 noteScore = ScoreWeight.MISS;
             break;
+            case NoteHitResult.NO_HIT:
+                noteScore = ScoreWeight.PERFECT;
+            break;
             default:
                 console.warn("[Score] Invalid note type: " + noteType);
             break;
         }
 
-        this.currentTotal++; // Plus total hitted note
-        this.accuracySum += accuracyWeight;
-        this.accuracy = this.accuracySum / this.currentTotal;
+        if(noteType != NoteHitResult.NO_HIT) {
+            this.currentTotal++; // Plus total hitted note
+            this.accuracySum += accuracyWeight;
+            this.accuracy = this.accuracySum / this.currentTotal;
+        }
 
         // Score simply multiply by current combo
         // Higher combo hold = higher score

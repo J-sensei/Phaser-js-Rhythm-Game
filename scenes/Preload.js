@@ -17,7 +17,10 @@ const SpriteId = {
     RC_CAR: "RcCar",
     BUTTON_UP: "ButtonUp",
     BUTTON_DOWN: "ButtonDown",
-    CONE: "Cone"
+    CONE: "Cone",
+    VEHICLE1: "Vehicle1",
+    VEHICLE2: "Vehicle2",
+    VEHICLE3: "Vehicle3"
 }
 
 const AnimationId = {
@@ -27,6 +30,9 @@ const AnimationId = {
     CAR_RUNNING: "CarRunningAnimation",
     BOT_RUNNING: "BotRunningAnimation",
     RC_CAR_RUNNING: "RcCarAnimation",
+    VEHICLE1: "Vehicle1Animation",
+    VEHICLE2: "Vehicle2Animation",
+    VEHICLE3: "Vehicle3Animation",
 }
 
 const BackgroundId = {
@@ -76,6 +82,9 @@ class Preload extends Phaser.Scene {
         this.load.spritesheet(SpriteId.BOT_RUNNING, "assets/note/bot_running.png", {frameWidth: 61, frameHeight: 64});
         this.load.spritesheet(SpriteId.RC_CAR, "assets/note/rc_car.png", {frameWidth: 32, frameHeight: 32});
         this.load.spritesheet(SpriteId.CONE, "assets/note/cone.png", {frameWidth: 371, frameHeight: 421});
+        this.load.spritesheet(SpriteId.VEHICLE1, "assets/note/vehicle1.png", {frameWidth: 176, frameHeight: 96});
+        this.load.spritesheet(SpriteId.VEHICLE2, "assets/note/vehicle2.png", {frameWidth: 176, frameHeight: 125});
+        this.load.spritesheet(SpriteId.VEHICLE3, "assets/note/vehicle3.png", {frameWidth: 329, frameHeight: 160});
 
         // Load backgrounds
         this.load.image(BackgroundId.SUNSET_BACK, "assets/background/sunset/back.png");
@@ -148,6 +157,24 @@ class Preload extends Phaser.Scene {
             key: AnimationId.RC_CAR_RUNNING,
             frames: this.anims.generateFrameNumbers(SpriteId.RC_CAR, {start: 6, end: 9}),
             frameRate: 20,
+            repeat: -1
+        });
+        this.anims.create({
+            key: AnimationId.VEHICLE1,
+            frames: this.anims.generateFrameNumbers(SpriteId.VEHICLE1),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.anims.create({
+            key: AnimationId.VEHICLE2,
+            frames: this.anims.generateFrameNumbers(SpriteId.VEHICLE2),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.anims.create({
+            key: AnimationId.VEHICLE3,
+            frames: this.anims.generateFrameNumbers(SpriteId.VEHICLE3),
+            frameRate: 8,
             repeat: -1
         });
 

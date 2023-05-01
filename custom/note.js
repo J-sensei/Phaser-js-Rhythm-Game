@@ -17,6 +17,8 @@ const NoteType = {
     NO_HIT: "No Hit"
 }
 
+const NoteSize = 20;
+
 const NoteHitResult = {
     PERFECT: "Perfect",
     GREAT: "Great",
@@ -157,6 +159,23 @@ class Note extends Phaser.GameObjects.Sprite {
         this.endNoteSpawned = false;
         this.endNoteActive = false;
         this.result = "None";
+
+        // Create hit circle to let player see the perfect point
+        this.circle = this.scene.add.circle(x, y, JudgeConfig.circleRadius + 10, Phaser.Display.Color.HexStringToColor("#d0ff61").color);
+        this.circle.iterations = JudgeConfig.circleIteration;
+        this.circle.alpha = 0.5;
+        let circleTween = scene.tweens.add({
+            targets: this.circle,
+            angle: this.circle.angle + 360,
+            duration: JudgeConfig.rotateDuration,
+            repeat: -1,
+            callbackScope: this,
+        });
+        scene.add.existing(this.circle);
+
+        // Collision body configuration
+        this.setOrigin(0.5);
+        this.body.setSize(NoteSize * this.scale, NoteSize * this.scale);
     }
 
     /**
@@ -180,14 +199,18 @@ class Note extends Phaser.GameObjects.Sprite {
             notes[0].hitted = true; // Note is hitted by the player
             note = notes[0];
 
+            const distance = Math.abs(note.hitDistance);
             // Check not hit distance to determine the hit result
-            if(Math.abs(note.hitDistance) <= JudgeConfig.perfectDistance) {
+            if(distance <= JudgeConfig.perfectDistance) {
                 note.result = NoteHitResult.PERFECT;
-            } else if(Math.abs(note.hitDistance) <= JudgeConfig.greatDistance) {
+            } else if(distance <= JudgeConfig.greatDistance) {
                 note.result = NoteHitResult.GREAT;
-            } else if(Math.abs(note.hitDistance) <= JudgeConfig.badDistance) {
+            } else if(distance <= JudgeConfig.badDistance) {
                 note.result = NoteHitResult.BAD;;
-            } else { // Treat the rest as miss note
+            } else if(distance <= JudgeConfig.missDistance){ // Treat the rest as miss note
+                note.result = NoteHitResult.MISS;
+            } else {
+                // console.warn("[Note] Invalid distance: " + distance);
                 note.result = NoteHitResult.MISS;
             }
 
@@ -304,6 +327,9 @@ class Note extends Phaser.GameObjects.Sprite {
     // }
 
     update(player) {
+        this.circle.x = this.x;
+        this.circle.y = this.y;
+
         // Update will check holding note only
         if(this.type === NoteType.HOLD) {
             // Update line position follow the note
@@ -324,16 +350,20 @@ class Note extends Phaser.GameObjects.Sprite {
             // Update end note to spawn it in right timing
             // Method 1
             if(t >= this.endNoteSpawnTime && !this.endNoteSpawned) {
-                this.endNote = new Note(this.scene, SpriteId.BOT_RUNNING, this.spawnX, this.spawnY, 
+                // this.endNote = new Note(this.scene, SpriteId.BOT_RUNNING, this.spawnX, this.spawnY, 
+                //     this.destX, this.destY, this.travelTime, this.down, NoteType.END, null, this);
+                
+                this.endNote = new Note(this.scene, SpriteId.VEHICLE1, this.spawnX, this.spawnY, 
                     this.destX, this.destY, this.travelTime, this.down, NoteType.END, null, this);
+                this.endNote.flipX = true;
                 this.endNoteSpawned = true;
             }
 
-            if(this.endNoteSpawned) {
+            if(this.endNoteSpawned) { // The end note spawned, update the line with the end note position
                 const distance = this.endNote.x - this.x; // Get the distance of the end note to the position of the note
                 this.line.setTo(0, 0, distance, 0); // Change the distination x position of the line
             } else {
-                const distance = this.spawnX - this.x;
+                const distance = this.spawnX - this.x; // End note not spawn yet, update the line with the spawn position
                 this.line.setTo(0, 0, distance, 0);
             }
 
@@ -411,6 +441,7 @@ class Note extends Phaser.GameObjects.Sprite {
         if(this.endNote != null) {
             this.endNote.destroyNote();
         }
+        this.circle.destroy();
         this.destroy(); // Can safely remove it now
     }
 

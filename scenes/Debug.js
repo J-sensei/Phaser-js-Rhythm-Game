@@ -16,7 +16,7 @@ class Debug extends Phaser.Scene {
     create() {
         Note.Reset(this); // Reset the note
         this.noteCount = 0; // Reset the note count
-        this.travelTime = 800;
+        this.travelTime = 1500;
         this.beatmap = new Beatmap(this, testSong1); // Test
         this.beatmap.create();
         this.beatmap.drawBeatLine = false;
@@ -123,12 +123,17 @@ class Debug extends Phaser.Scene {
         this.missCollider = this.physics.add.sprite(this.player.x - 80, this.player.y);
         this.missCollider.setSize(20, 200);
         this.physics.add.overlap(this.missCollider, Note.Notes, function(missCollider, note) {
-            note.destroyNote();
-            this.score.add(NoteHitResult.MISS);
-            let t = new HitText(this, this.player.x - 80, this.player.y, "X", null, 64);
-            t.setColor("#eb3434");
-            t.destroyText();
+            if(!note.hitted) {
+                note.destroyNote();
+                this.score.add(NoteHitResult.MISS);
+                let t = new HitText(this, this.player.x - 80, this.player.y, "X", null, 64);
+                t.setColor("#eb3434");
+                t.destroyText();
+            }
         }, null, this);
+
+        this.physics.add.sprite(260, 500, SpriteId.VEHICLE1).play(AnimationId.VEHICLE1);
+        
     }
 
     togglePause() {
@@ -268,14 +273,17 @@ class Debug extends Phaser.Scene {
         }
 
         if(type == NoteType.HOLD) {
-            let n = Note.Instantiate(this, SpriteId.BOT_RUNNING, spawn.x, spawn.y, 
+            let n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
                 judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime);
+            // n.setOrigin(0.5);
+            // n.body.setSize(20, 20);
+            n.flipX = true;
         } else if(type == NoteType.NORMAL) {
             let n = Note.Instantiate(this, SpriteId.CONE, spawn.x, spawn.y, 
                 judgementPos.x, judgementPos.y, this.travelTime, down, type);
-            n.setOrigin(0.5);
+            //n.setOrigin(0.5);
             n.setScale(0.2);
-            n.body.setSize(200, 200);
+            //n.body.setSize(200, 200);
         }
     }
 }

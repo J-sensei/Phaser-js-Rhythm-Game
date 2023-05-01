@@ -8,9 +8,10 @@ const JudgeConfig = {
     circleAplha: 0.65, 
     circleColor: "#eb4034",
     rotateDuration: 3500,
-    perfectDistance: 35,
-    greatDistance: 60,
-    badDistance: 80,
+    perfectDistance: 40,
+    greatDistance: 80,
+    badDistance: 120,
+    missDistance: 160,
 }
 
 class JudgeCollider extends Phaser.GameObjects.Sprite {

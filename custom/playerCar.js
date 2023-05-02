@@ -27,6 +27,11 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         this.up2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
         this.down1 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.J);
         this.down2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K);
+
+        /** Time to allow player press two note at different lane, Only happen when the lane switching is true */
+        this.gracePeriod = 0.25; // 0.5seconds
+        this.currentGracePeriod = 0;
+        this.lastTime = 0;
     }
 
     update() {
@@ -43,6 +48,7 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         if(Phaser.Input.Keyboard.JustDown(this.up1) || Phaser.Input.Keyboard.JustDown(this.up2)) {
             this.swtichUp();
             this.beating = true;
+
         }
 
         if(Phaser.Input.Keyboard.JustDown(this.down1) || Phaser.Input.Keyboard.JustDown(this.down2)) {
@@ -55,14 +61,44 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         } else {
             this.holding = false;
         }
+
+        if(this.currentGracePeriod > 0) {
+            const t = new Date().getTime();
+            const deltaTime = (t * 0.001) - (this.lastTime * 0.001);
+            this.currentGracePeriod -= deltaTime;
+            this.lastTime = t;
+        }
+    }
+
+    /**
+     * Compare to check if the note is same with the player lane
+     * @param {bool} down Is the note up or down
+     * @returns Boolean
+     */
+    compareLane(down) {
+        if(this.currentGracePeriod > 0) {
+            return true;
+        } else {
+            return down === this.isDownLane;
+        }
     }
 
     switchDown() {
+        if(!this.isDownLane) {
+            this.currentGracePeriod = this.gracePeriod;
+            this.lastTime = new Date().getTime();
+        }
+
         this.y = this.initialPosition.y;
         this.isDownLane = true; // down lane
     }
 
     swtichUp() {
+        if(this.isDownLane) {
+            this.currentGracePeriod = this.gracePeriod;
+            this.lastTime = new Date().getTime();
+        }
+
         this.y = this.initialPosition.y - this.moveDistance;
         this.isDownLane = false; // up lane
     }
@@ -76,6 +112,6 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
     }
 
     getDebugString() {
-        return "IsDownLane: " + this.isDownLane + ", Beating: " + this.beating + '\n' + "Holding: " + this.holding;
+        return "IsDownLane: " + this.isDownLane + ", Beating: " + this.beating + '\n' + "Holding: " + this.holding + " GracePeriod: " + this.currentGracePeriod.toFixed(2);
     }
 }

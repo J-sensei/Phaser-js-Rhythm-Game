@@ -16,11 +16,11 @@ class Debug extends Phaser.Scene {
     create() {
         Note.Reset(this); // Reset the note
         this.noteCount = 0; // Reset the note count
-        this.travelTime = 1000;
+        this.travelTime = 900;
         this.beatmap = new Beatmap(this, testSong1); // Test
         this.beatmap.create();
-        this.beatmap.drawBeatLine = false;
-        this.beatmap.playMetronome = false;
+        //this.beatmap.drawBeatLine = false;
+        //this.beatmap.playMetronome = false;
 
         this.score = new Score();
 
@@ -123,9 +123,15 @@ class Debug extends Phaser.Scene {
         this.missCollider = this.physics.add.sprite(this.player.x - 80, this.player.y);
         this.missCollider.setSize(20, 200);
         this.physics.add.overlap(this.missCollider, Note.Notes, function(missCollider, note) {
-            if(!note.hitted && !note.type === NoteType.NO_HIT) {
+            if(!note.hitted && !(note.type === NoteType.NO_HIT)) {
+                console.log("YES");
                 note.destroyNote();
                 this.score.add(NoteHitResult.MISS);
+                // Double miss for hold note
+                if(note.type === NoteType.HOLD) {
+                    this.score.add(NoteHitResult.MISS);
+                }
+
                 let t = new HitText(this, this.player.x - 80, this.player.y, "X", null, 64);
                 t.setColor("#eb3434");
                 t.destroyText();
@@ -189,6 +195,7 @@ class Debug extends Phaser.Scene {
             if(this.playTime >= 0) {
                 console.log("Play Song!!!");
                 testSong1.play(0);
+                //this.beatmap.jumpTo(15);
             }
         }
 

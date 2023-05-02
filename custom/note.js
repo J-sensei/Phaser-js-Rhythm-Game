@@ -37,6 +37,7 @@ class Note extends Phaser.GameObjects.Sprite {
     static HoldHit;
     static MusicHit;
     static ComboBreak;
+    static MetalHit;
     /** Physic group for Notes */
     static Notes;
     /** Number of note spawned in the game */
@@ -61,7 +62,7 @@ class Note extends Phaser.GameObjects.Sprite {
         if(down == null) this.down = true; // if null then its lowest (down) lane
         else this.down = down;
         /** Note Active, only activated notes can be press */
-        this.active = false;
+        this.noteActive = false;
         /** Note Activate hold, only activated hold will check the holding logics */
         this.activeHold = false; // Start to check holding a note
         // Check type
@@ -196,6 +197,7 @@ class Note extends Phaser.GameObjects.Sprite {
         Note.HoldHit = scene.sound.add(SFXId.NOTE_HOLD_HIT);
         Note.MusicHit = scene.sound.add(SFXId.MUSIC_HIT);
         Note.ComboBreak = scene.sound.add(SFXId.COMBO_BREAK);
+        Note.MetalHit = scene.sound.add(SFXId.METAL_HIT);
     }
 
     /**
@@ -231,14 +233,18 @@ class Note extends Phaser.GameObjects.Sprite {
             }
 
             switch(note.type) {
-                case NoteType.NORMAL:
-                    Note.NormalHit.play();
+                case NoteType.NORMAL: case NoteType.BIG_NOTE:
+                    if(note.type === NoteType.NORMAL)
+                        Note.NormalHit.play();
+                    else
+                        Note.MetalHit.play();
+
                     note.destroyNormalNote();
                     //note.destroyNote();
                     break;
                 case NoteType.HOLD:
                     Note.HoldHit.play();
-                    note.active = false; // No need to check this note active or not anymore, as the note start to holding
+                    note.noteActive = false; // No need to check this note active or not anymore, as the note start to holding
                     note.activeHold = true; // Activate the holding note
                     note.scene.tweens.killTweensOf(note); // Stop the tween of the note
                     note.alpha = 0; // Make the note transparent (TEST)
@@ -347,7 +353,7 @@ class Note extends Phaser.GameObjects.Sprite {
      */
     static NoteOverlap(judgement, note) {
         // Note is not active and not holding
-        if(!note.active && !note.activeHold && note.type != NoteType.END && note.type != NoteType.NO_HIT) {
+        if(!note.noteActive && !note.activeHold && note.type != NoteType.END && note.type != NoteType.NO_HIT) {
             note.activate();
         }
     
@@ -395,6 +401,7 @@ class Note extends Phaser.GameObjects.Sprite {
                 
                 this.endNote = new Note(this.scene, SpriteId.VEHICLE1, this.spawnX, this.spawnY, 
                     this.destX, this.destY, this.travelTime, this.down, NoteType.END, null, this);
+                this.endNote.play(AnimationId.VEHICLE1);
                 this.endNote.flipX = true;
                 this.endNoteSpawned = true;
             }
@@ -499,12 +506,12 @@ class Note extends Phaser.GameObjects.Sprite {
 
     /** Activate the note, its ready to detect beat hit */
     activate() {
-        this.active = true;
+        this.noteActive = true;
     }
 
     /** Deactivate the note, its not ready to detect the beat anymore */
     deactivate() {
-        this.active = false;
+        this.noteActive = false;
     }
 
     /** Destroy the note */

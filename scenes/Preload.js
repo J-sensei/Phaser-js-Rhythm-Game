@@ -52,6 +52,7 @@ const SFXId = {
     METRONOME1: "Metronome1",
     METRONOME2: "Metronome2",
     COMBO_BREAK: "ComboBreak",
+    METAL_HIT: "MetalHit",
 }
 
 const LayerConfig = {
@@ -102,6 +103,7 @@ class Preload extends Phaser.Scene {
         this.load.audio(SFXId.NOTE_HOLD_HIT, "assets/sfx/holdHit.wav");
         this.load.audio(SFXId.MUSIC_HIT, "assets/sfx/music_hit.wav");
         this.load.audio(SFXId.COMBO_BREAK, "assets/sfx/combo_break.mp3");
+        this.load.audio(SFXId.METAL_HIT, "assets/sfx/metalHit.wav");
 
         this.load.audio(SFXId.METRONOME1, "assets/sfx/metronome1.mp3");
         this.load.audio(SFXId.METRONOME2, "assets/sfx/metronome2.mp3");
@@ -168,19 +170,19 @@ class Preload extends Phaser.Scene {
         this.anims.create({
             key: AnimationId.VEHICLE1,
             frames: this.anims.generateFrameNumbers(SpriteId.VEHICLE1),
-            frameRate: 20,
+            frameRate: 12,
             repeat: -1
         });
         this.anims.create({
             key: AnimationId.VEHICLE2,
             frames: this.anims.generateFrameNumbers(SpriteId.VEHICLE2),
-            frameRate: 8,
+            frameRate: 12,
             repeat: -1
         });
         this.anims.create({
             key: AnimationId.VEHICLE3,
             frames: this.anims.generateFrameNumbers(SpriteId.VEHICLE3),
-            frameRate: 8,
+            frameRate: 12,
             repeat: -1
         });
 

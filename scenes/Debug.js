@@ -14,11 +14,11 @@ class Debug extends Phaser.Scene {
     }
 
     create() {
-        this.skipTime = 65;
+        this.skipTime = 100;
         this.skip = false;
         Note.Reset(this); // Reset the note
         this.noteCount = 0; // Reset the note count
-        this.travelTime = 2500;
+        this.travelTime = 900;
         this.beatmap = new Beatmap(this, testSong1); // Test
         this.beatmap.create();
         this.beatmap.drawBeatLine = false;
@@ -289,7 +289,7 @@ class Debug extends Phaser.Scene {
         if(type == NoteType.HOLD) {
             let n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
                 judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime);
-            n.play(AnimationId.VEHICLE2);
+            n.play(AnimationId.VEHICLE1);
             n.flipX = true;
         } else if(type == NoteType.NORMAL) {
             let n = Note.Instantiate(this, SpriteId.CONE, spawn.x, spawn.y, 
@@ -298,9 +298,13 @@ class Debug extends Phaser.Scene {
         } else if(type === NoteType.NO_HIT) {
             let n = Note.Instantiate(this, SpriteId.MUSIC_NOTE, spawn.x, spawn.y, 
                 judgementPos.x, judgementPos.y, this.travelTime, down, type);
-                n.setScale(0.15);
+            n.setScale(0.15);
         } else if(type === NoteType.BIG_NOTE) {
-
+            let n = Note.Instantiate(this, SpriteId.VEHICLE2, spawn.x, spawn.y, 
+                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime);
+            n.play(AnimationId.VEHICLE2);
+            n.flipX = true;
+            n.setScale(0.8);
         }
     }
 }

@@ -4,8 +4,8 @@ let beatmapConfig = {
 }
 
 let audioConfig = {
-  music: 0.5,
-  sfx: 0.8,
+  music: 0.6,
+  sfx: 0.7,
 }
 
 /** Main game configuration */

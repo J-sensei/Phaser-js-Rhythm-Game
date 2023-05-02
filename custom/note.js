@@ -14,7 +14,9 @@ const NoteType = {
     END: "EndNote",
     OBSTACLE: "Obstacle",
     /** Note that does not required player to hit the beat key to hit it, just collide it with car */
-    NO_HIT: "No Hit"
+    NO_HIT: "No Hit",
+    /** Bigger normal to hit (Stronger hitsound - use to emphasis certain part of the sound) */
+    BIG_NOTE: "BigNote",
 }
 
 const NoteSize = 20;
@@ -34,13 +36,14 @@ class Note extends Phaser.GameObjects.Sprite {
     /** Hold note hit sound */
     static HoldHit;
     static MusicHit;
+    static ComboBreak;
     /** Physic group for Notes */
     static Notes;
     /** Number of note spawned in the game */
     static NoteCount = 0;
     static CurrentScene;
 
-    constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote, colliderX, colliderY, offsetX, offsetY) {
+    constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote) {
         super(scene, x, y, key); // Create sprite
         /** Scene reference */
         this.scene = scene;
@@ -93,8 +96,10 @@ class Note extends Phaser.GameObjects.Sprite {
 
         if(this.type === NoteType.HOLD) {
             this.holdTime = holdTime;
-            this.spawnEndNoteTime = this.holdTime; // Use this time to spawn end note
-            this.endNoteSpawnTime = this.scene.playTime + this.holdTime;
+            //this.spawnEndNoteTime = this.holdTime; // Use this time to spawn end note
+            //this.endNoteSpawnTime = this.scene.playTime + this.holdTime;
+            this.endNoteSpawnTime = this.holdTime;
+            this.updateEndNoteSpawnTime = false;
         }
 
         /** Last play time (seek) of the song */
@@ -190,6 +195,7 @@ class Note extends Phaser.GameObjects.Sprite {
         Note.NormalHit = scene.sound.add(SFXId.NOTE_HIT);
         Note.HoldHit = scene.sound.add(SFXId.NOTE_HOLD_HIT);
         Note.MusicHit = scene.sound.add(SFXId.MUSIC_HIT);
+        Note.ComboBreak = scene.sound.add(SFXId.COMBO_BREAK);
     }
 
     /**
@@ -276,11 +282,11 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {PlayerCar} player 
      * @returns Note array
      */
-    static UpdateHit(minimumDistance, player, judgeColliderDown, judgeColliderUp, scene) {
+    static UpdateHit(minimumDistance, player, judgeColliderDown, judgeColliderUp, scene, playTime) {
         let notesArray = []; // Empty note array
         for(let i = 0; i < Note.Notes.getChildren().length; i++) {
             let note = Note.Notes.getChildren()[i]; // Get the note
-            note.update(player, scene); // Update note here
+            note.update(player, scene, playTime); // Update note here
             let distance = 0; // Distance between note and the judgement colliders
 
             // Check which lane the note is to calculate the distance
@@ -340,8 +346,10 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {Note} note 
      */
     static NoteOverlap(judgement, note) {
-        if(!note.active && !note.activeHold && note.type != NoteType.END && note.type != NoteType.NO_HIT) // Note is not active and not holding
-        note.activate();
+        // Note is not active and not holding
+        if(!note.active && !note.activeHold && note.type != NoteType.END && note.type != NoteType.NO_HIT) {
+            note.activate();
+        }
     
         if(note.type == NoteType.END && note.parentNote.activeHold) {
             note.endNoteActive = true; // Ready to destroy end note
@@ -352,20 +360,7 @@ class Note extends Phaser.GameObjects.Sprite {
         }
     }
 
-    // setTexture(v) {
-    //     this.setTexture(v);
-    // }
-
-    // setOffset(x, y) {
-    //     this.body.offset.x = x;
-    //     this.body.offset.y = y;
-    // }
-
-    // setSize(x, y) {
-    //     this.body.setSize(x, y);
-    // }
-
-    update(player, scene) {
+    update(player, scene, playTime) {
         this.circle.x = this.x;
         this.circle.y = this.y;
 
@@ -375,6 +370,11 @@ class Note extends Phaser.GameObjects.Sprite {
             this.line.x = this.x;
             this.line.y = this.y;
 
+            if(!this.updateEndNoteSpawnTime) {
+                this.endNoteSpawnTime += playTime;
+                this.updateEndNoteSpawnTime = true;
+            }
+
             // // update normal delta time
             // const spawnT = new Date();
             // const currentTime = spawnT.getTime();
@@ -382,7 +382,8 @@ class Note extends Phaser.GameObjects.Sprite {
             // this.endNoteSpawnLastTime = currentTime;
 
             // Update playtime delta time
-            const t = testSong1.song.seek;
+            //const t = testSong1.song.seek;
+            const t = playTime;
             // this.deltaPlayTime = t - this.lastPlayTime;
             // this.lastPlayTime = t;
 
@@ -453,7 +454,7 @@ class Note extends Phaser.GameObjects.Sprite {
                             distance = this.endNote.x - scene.judgementPositions[1].x;
                         }
                     } else {
-                        distance = JudgeConfig.missDistance + 9999; // Miss distance
+                        distance = JudgeConfig.missDistance + 9999; // Confirm Miss distance
                     }
 
                     if(distance <= JudgeConfig.perfectDistance >= 0 && distance <= JudgeConfig.perfectDistance) {
@@ -481,7 +482,7 @@ class Note extends Phaser.GameObjects.Sprite {
                     }
 
                     text.destroyText();
-                    scene.score.add(NoteHitResult.MISS);
+                    scene.score.add(this.result);
                     this.destroyNote();
                 }
             }

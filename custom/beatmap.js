@@ -35,6 +35,9 @@ class Beatmap {
         /** Next timeline that will have the beat drop  */
         this.nextSongTempo = this.offset;
 
+        this.skip = false;
+        this.skipTime = 0;
+
         // Old data
         this.data = [new NoteData(0, 0, 1, 0),
                     new NoteData(0, 2, 1, 0),
@@ -122,57 +125,6 @@ class Beatmap {
                     new NoteData(13, 1, 4, 0),
                 ];
         this.data2 = [
-            // new NoteData(0, 0, 1, 0, 0, 0, 0, 0),
-            // new NoteData(1, 3, 1, 0, 1, 1, 7, 1),
-            // new NoteData(2, 3, 1, 0, 0, 0, 0, 1),
-            // new NoteData(3, 3, 1, 0, 0, 0, 0, 1),
-            // new NoteData(4, 3, 1, 0, 0, 0, 0, 1),
-            // new NoteData(3, 1, 1, 0, 1, 1, 2, 1),
-            // new NoteData(3, 3, 1, 0, 1, 1, 7, 0),
-            // new NoteData(0, 0, 1, 0, 1, 1, 4, 1),
-            // new NoteData(0, 1, 1, 0, 0, 0, 0, 1),
-            // new NoteData(0, 2, 1, 0, 0, 0, 0, 1),
-            // new NoteData(0, 3, 1, 0, 0, 0, 0, 1),
-
-            // new NoteData(1, 0, 1, 0, 0, 0, 0, 0),
-            // new NoteData(1, 1, 1, 0, 0, 0, 0, 0),
-            // new NoteData(1, 2, 1, 0, 0, 0, 0, 0),
-            // new NoteData(1, 3, 1, 0, 0, 0, 0, 0),
-
-            // new NoteData(2, 0, 1, 0, 0, 0, 0, 1),
-            // new NoteData(2, 1, 1, 0, 0, 0, 0, 0),
-            // new NoteData(2, 2, 1, 0, 0, 0, 0, 1),
-            // new NoteData(2, 3, 1, 0, 0, 0, 0, 0),
-
-            // new NoteData(3, 0, 1, 0, 0, 0, 0, 1),
-            // new NoteData(3, 1, 1, 0, 0, 0, 0, 0),
-            // new NoteData(3, 2, 1, 0, 0, 0, 0, 1),
-            // new NoteData(3, 3, 1, 0, 0, 0, 0, 0),
-
-            // new NoteData(4, 0, 1, 0, 1, 1, 1, 1),
-            // new NoteData(4, 2, 1, 0, 1, 1, 1, 0),
-
-            // new NoteData(5, 0, 1, 0, 0, 0, 0, 0),
-            // new NoteData(5, 1, 1, 0, 0, 0, 0, 0),
-            // new NoteData(5, 2, 1, 0, 0, 0, 0, 0),
-            // new NoteData(5, 3, 1, 0, 0, 0, 0, 0),
-
-            // new NoteData(6, 0, 1, 0, 0, 0, 0, 1),
-            // new NoteData(6, 1, 1, 0, 0, 0, 0, 1),
-            // new NoteData(6, 2, 1, 0, 0, 0, 0, 1),
-            // new NoteData(6, 3, 1, 0, 0, 0, 0, 1),
-
-            // new NoteData(7, 0, 1, 0, 2, 0, 0, 1),
-            // new NoteData(7, 1, 1, 0, 2, 0, 0, 1),
-            // new NoteData(7, 2, 1, 0, 2, 0, 0, 1),
-            // new NoteData(7, 3, 1, 0, 2, 0, 0, 1),
-            // new NoteData(8, 0, 1, 0, 2, 0, 0, 1),
-            // new NoteData(8, 1, 1, 0, 2, 0, 0, 1),
-            // new NoteData(8, 2, 1, 0, 2, 0, 0, 1),
-            // new NoteData(8, 3, 1, 0, 2, 0, 0, 1),
-            // new NoteData(0, 0, 1, 0, 1, 2, 11, 0),
-            // new NoteData(2, 0, 2, 0, 1, 2, 11, 1),
-
             new NoteData(0, 0, 1, 0, 1, 1, 8, 0),
             new NoteData(2, 0, 1, 0, 1, 1, 6, 1),
             new NoteData(3, 2, 1, 0, 1, 1, 2, 0),
@@ -228,13 +180,11 @@ class Beatmap {
             new NoteData(13, 3, 2, 0, 0, 0, 0, 1),
             new NoteData(13, 3, 2, 1, 0, 0, 0, 1),
 
-            //new NoteData(14, 0, 1, 0, 1, 1, 2, 0), // Hold
             new NoteData(14, 0, 2, 0, 0, 0, 0, 0),
             new NoteData(14, 0, 2, 1, 0, 0, 0, 0),
             new NoteData(14, 1, 2, 0, 0, 0, 0, 0),
             new NoteData(14, 1, 2, 1, 0, 0, 0, 0),
 
-            //new NoteData(14, 2, 1, 0, 1, 1, 2, 1), // Hold
             new NoteData(14, 2, 2, 0, 0, 0, 0, 1),
             new NoteData(14, 2, 2, 1, 0, 0, 0, 1),
             new NoteData(14, 3, 2, 0, 0, 0, 0, 1),
@@ -242,21 +192,289 @@ class Beatmap {
 
             new NoteData(15, 0, 1, 0, 0, 0, 0, 0), // Build up *Good
             new NoteData(15, 1, 1, 0, 0, 0, 0, 0), //*Bye
-            // Matane
             new NoteData(15, 2, 2, 0, 0, 0, 0, 1), // Ma
             new NoteData(15, 2, 2, 1, 0, 0, 0, 0),// Ta
             new NoteData(15, 3, 1, 0, 0, 0, 0, 1),// Ne
-            // new NoteData(15, 3, 1, 0, 1, 1, 0, 0), 
+            // Bass spam
+            new NoteData(16, 0, 4, 0, 1, 1, 3, 0),
 
-            // new NoteData(16, 0, 4, 3, 0, 0, 0, 0), // Bass spam
-            // new NoteData(16, 1, 4, 2, 1, 4, 2, 1),
-
-            // new NoteData(16, 2, 4, 3, 0, 0, 0, 0),
-            // new NoteData(16, 3, 1, 0, 1, 1, 1, 0),
             new NoteData(17, 0, 1, 0, 1, 1, 1, 1), // Hype
+            // Different rhytnm
             new NoteData(17, 2, 4, 0, 0, 0, 0, 0),
             new NoteData(17, 2, 4, 3, 0, 0, 0, 0),
             new NoteData(17, 3, 4, 2, 0, 0, 0, 0),
+
+            new NoteData(18, 0, 2, 0, 0, 0, 0, 1),
+            new NoteData(18, 0, 2, 1, 0, 0, 0, 0),
+            new NoteData(18, 1, 2, 0, 0, 0, 0, 1),
+            new NoteData(18, 1, 2, 1, 0, 0, 0, 0),
+            new NoteData(18, 2, 4, 0, 0, 0, 0, 1),
+            new NoteData(18, 2, 4, 3, 0, 0, 0, 0),
+            new NoteData(18, 3, 1, 0, 0, 0, 0, 0),
+            new NoteData(18, 3, 2, 1, 0, 0, 0, 0),
+
+            new NoteData(19, 0, 1, 0, 1, 2, 1, 0),
+            new NoteData(19, 1, 1, 0, 1, 2, 1, 1),
+            new NoteData(19, 2, 1, 0, 1, 2, 1, 0),
+
+            new NoteData(19, 2, 4, 3, 0, 0, 0, 1),
+            new NoteData(19, 3, 2, 0, 0, 0, 0, 1), 
+            new NoteData(19, 3, 2, 1, 0, 0, 0, 1), 
+            new NoteData(20, 0, 4, 0, 0, 0, 0, 1),
+            // Triple
+            new NoteData(20, 0, 4, 2, 0, 0, 0, 0), 
+            new NoteData(20, 0, 4, 3, 0, 0, 0, 0), 
+            new NoteData(20, 1, 2, 0, 0, 0, 0, 0), 
+
+            new NoteData(20, 1, 2, 1, 0, 0, 0, 0), 
+
+            new NoteData(20, 2, 2, 0, 1, 1, 1, 1), 
+            new NoteData(20, 3, 2, 1, 0, 0, 0, 0), 
+
+            new NoteData(21, 0, 1, 0, 1, 2, 1, 1),
+            new NoteData(21, 1, 1, 0, 1, 2, 1, 0),
+            new NoteData(21, 2, 1, 0, 1, 2, 1, 1),
+
+            new NoteData(21, 2, 4, 3, 0, 0, 0, 0),
+            new NoteData(21, 3, 2, 0, 0, 0, 0, 0), 
+            new NoteData(21, 3, 2, 1, 0, 0, 0, 0), 
+
+            new NoteData(22, 0, 2, 0, 0, 0, 0, 1),
+            new NoteData(22, 0, 2, 1, 0, 0, 0, 1),
+
+            new NoteData(22, 1, 2, 0, 0, 0, 0, 0),
+            new NoteData(22, 1, 2, 1, 0, 0, 0, 0),
+
+            new NoteData(22, 2, 2, 0, 0, 0, 0, 1),
+            new NoteData(22, 2, 2, 1, 0, 0, 0, 1),
+            new NoteData(22, 3, 2, 0, 0, 0, 0, 0),
+            new NoteData(22, 3, 2, 1, 0, 0, 0, 0),
+
+            new NoteData(23, 0, 1, 0, 1, 2, 1, 0),
+            new NoteData(23, 1, 1, 0, 1, 2, 1, 1),
+            new NoteData(23, 2, 1, 0, 1, 2, 1, 0),
+
+            new NoteData(23, 2, 4, 3, 0, 0, 0, 1),
+            new NoteData(23, 3, 2, 0, 0, 0, 0, 1), 
+            new NoteData(23, 3, 2, 1, 0, 0, 0, 1), 
+
+            new NoteData(24, 0, 1, 0, 0, 0, 0, 1), // Good
+            new NoteData(24, 1, 1, 0, 0, 0, 0, 1), // Bye
+
+            new NoteData(24, 2, 2, 0, 0, 0, 0, 0), // Ma
+            new NoteData(24, 2, 2, 1, 0, 0, 0, 0), // Ta
+            new NoteData(24, 3, 1, 0, 0, 0, 0, 0), // Ne
+
+            new NoteData(25, 0, 1, 0, 1, 1, 1, 1), // Hold for stop beat
+            // Need to recheck
+            // new NoteData(25, 0, 2, 1, 0, 0, 0, 0),
+            // new NoteData(25, 1, 1, 1, 0, 0, 0, 0),
+            new NoteData(25, 2, 4, 0, 0, 0, 0, 0),
+            new NoteData(25, 2, 4, 3, 0, 0, 0, 0),
+            new NoteData(25, 3, 2, 0, 0, 0, 0, 0),
+            new NoteData(25, 3, 2, 1, 0, 0, 0, 0),
+
+            new NoteData(26, 0, 2, 0, 0, 0, 0, 1),
+            new NoteData(26, 0, 2, 1, 0, 0, 0, 1),
+            new NoteData(26, 1, 2, 0, 0, 0, 0, 1),
+            new NoteData(26, 1, 2, 1, 0, 0, 0, 1),
+
+            new NoteData(26, 2, 4, 0, 0, 0, 0, 0),
+            new NoteData(26, 2, 4, 3, 0, 0, 0, 0),
+            new NoteData(26, 3, 2, 0, 0, 0, 0, 0),
+            new NoteData(26, 3, 2, 1, 0, 0, 0, 0),
+
+            new NoteData(27, 0, 1, 0, 1, 2, 1, 0),
+            new NoteData(27, 1, 1, 0, 1, 2, 1, 1),
+            new NoteData(27, 2, 1, 0, 1, 2, 1, 0),
+
+            new NoteData(27, 2, 4, 3, 0, 0, 0, 1),
+            new NoteData(27, 3, 2, 0, 0, 0, 0, 1),
+            new NoteData(27, 3, 2, 1, 0, 0, 0, 1),
+            new NoteData(28, 0, 4, 0, 0, 0, 0, 1),
+
+            // Triple
+            new NoteData(28, 0, 4, 2, 0, 0, 0, 0), 
+            new NoteData(28, 0, 4, 3, 0, 0, 0, 0), 
+            new NoteData(28, 1, 2, 0, 0, 0, 0, 0), 
+
+            new NoteData(28, 2, 4, 0, 0, 0, 0, 1), 
+            new NoteData(28, 2, 4, 3, 0, 0, 0, 1), 
+            new NoteData(28, 3, 2, 0, 0, 0, 0, 1),
+            new NoteData(28, 3, 2, 1, 0, 0, 0, 1), 
+
+            new NoteData(29, 0, 1, 0, 1, 2, 1, 0), 
+            new NoteData(29, 1, 1, 0, 1, 2, 1, 1), 
+            new NoteData(29, 2, 1, 0, 1, 2, 1, 0), 
+
+            new NoteData(29, 2, 4, 3, 0, 0, 0, 1), 
+            new NoteData(29, 3, 2, 0, 0, 0, 0, 1), 
+            new NoteData(29, 3, 2, 1, 0, 0, 0, 1), 
+            new NoteData(30, 0, 2, 0, 0, 0, 0, 0), 
+            new NoteData(30, 0, 2, 1, 0, 0, 0, 1),
+            new NoteData(30, 1, 4, 0, 0, 0, 0, 0),
+
+            // Triple
+            new NoteData(30, 1, 4, 2, 0, 0, 0, 1),
+            new NoteData(30, 1, 4, 3, 0, 0, 0, 1),
+            new NoteData(30, 2, 1, 0, 0, 0, 0, 1),
+
+            // new NoteData(30, 3, 2, 0, 1, 2, 1, 0),
+            // new NoteData(30, 3, 2, 1, 1, 2, 1, 1),
+            // new NoteData(31, 0, 1, 0, 1, 1, 1, 0), // Hold
+             new NoteData(30, 3, 2, 0, 0, 0, 0, 0),
+            new NoteData(30, 3, 2, 1, 0, 0, 0, 1),
+            new NoteData(31, 0, 1, 0, 1, 1, 1, 0), // Hold           
+
+            // Double distinguish beat
+            new NoteData(31, 1, 4, 3, 0, 0, 0, 1),
+            new NoteData(31, 2, 2, 1, 0, 0, 0, 1),
+
+            new NoteData(32, 0, 1, 0, 1, 1, 1, 1),
+            new NoteData(32, 1, 1, 0, 1, 1, 1, 0),
+            new NoteData(32, 2, 1, 0, 1, 1, 1, 1),
+            new NoteData(32, 3, 1, 0, 1, 1, 1, 0),
+            new NoteData(33, 0, 1, 0, 0, 0, 0, 1),
+            new NoteData(33, 1, 1, 0, 0, 0, 0, 1),
+            new NoteData(33, 2, 2, 0, 0, 0, 0, 0),
+            new NoteData(33, 3, 2, 0, 0, 0, 0, 0),
+            new NoteData(33, 3, 2, 1, 1, 1, 1, 1),
+
+            new NoteData(34, 1, 1, 0, 1, 1, 1, 0),
+
+            new NoteData(34, 2, 2, 1, 1, 1, 1, 1),
+            new NoteData(34, 3, 2, 1, 1, 1, 1, 0),
+
+            new NoteData(35, 1, 2, 0, 1, 1, 1, 1),
+            //new NoteData(35, 1, 2, 0, 0, 0, 0, 0),
+
+            new NoteData(35, 2, 2, 1, 0, 0, 0, 0),
+            //new NoteData(35, 3, 2, 0, 0, 0, 0, 0),
+            new NoteData(35, 3, 2, 1, 0, 0, 0, 0),
+
+            new NoteData(36, 0, 1, 0, 1, 1, 1, 1),
+            new NoteData(36, 1, 1, 0, 1, 1, 1, 0),
+            new NoteData(36, 2, 1, 0, 1, 1, 1, 1),
+            new NoteData(36, 3, 1, 0, 1, 1, 1, 0),
+            new NoteData(37, 0, 1, 0, 1, 1, 1, 1),
+            new NoteData(37, 1, 1, 0, 1, 1, 1, 0),
+
+            new NoteData(37, 2, 2, 1, 0, 0, 0, 1),
+            new NoteData(37, 3, 2, 0, 0, 0, 0, 1),
+            new NoteData(37, 3, 2, 1, 1, 1, 1, 0),
+            new NoteData(38, 1, 1, 0, 1, 1, 1, 1),
+            new NoteData(38, 2, 2, 1, 0, 0, 0, 1),
+
+            new NoteData(38, 3, 2, 1, 0, 0, 0, 0),
+            new NoteData(39, 0, 4, 1, 0, 0, 0, 0),
+
+            new NoteData(39, 1, 2, 1, 0, 0, 0, 0),
+            new NoteData(39, 2, 2, 0, 0, 0, 0, 0),
+            new NoteData(39, 2, 2, 1, 0, 0, 0, 0),
+            new NoteData(39, 3, 2, 0, 0, 0, 0, 0),
+            new NoteData(39, 3, 2, 1, 1, 1, 1, 1),
+
+            new NoteData(40, 1, 2, 0, 1, 1, 1, 0),
+            //new NoteData(40, 1, 2, 0, 0, 0, 0, 1),
+
+            new NoteData(40, 2, 2, 0, 1, 1, 1, 1),
+            new NoteData(40, 3, 2, 0, 1, 1, 1, 0),
+
+            // Second Verse
+            new NoteData(41, 0, 1, 0, 1, 1, 4, 1), 
+            new NoteData(41, 1, 1, 0, 2, 0, 0, 1), // No hit
+            new NoteData(41, 2, 1, 0, 2, 0, 0, 1), // No hit
+            new NoteData(41, 3, 1, 0, 2, 0, 0, 1), // No hit
+            new NoteData(42, 0, 1, 0, 1, 1, 4, 0), 
+            new NoteData(42, 1, 1, 0, 2, 0, 0, 0), // No hit
+            new NoteData(42, 2, 1, 0, 2, 0, 0, 0), // No hit
+            new NoteData(42, 3, 1, 0, 2, 0, 0, 0), // No hit
+
+            new NoteData(43, 0, 1, 0, 0, 0, 0, 1),
+            new NoteData(43, 1, 1, 0, 0, 0, 0, 1),
+            new NoteData(43, 2, 1, 0, 0, 0, 0, 1),
+            new NoteData(43, 3, 1, 0, 0, 0, 0, 1),
+
+            new NoteData(44, 0, 1, 0, 0, 0, 0, 0),
+            new NoteData(44, 1, 1, 0, 0, 0, 0, 0),
+            new NoteData(44, 2, 1, 0, 0, 0, 0, 1),
+            new NoteData(44, 3, 1, 0, 0, 0, 0, 1),
+
+            new NoteData(45, 0, 1, 0, 1, 1, 4, 0), 
+            new NoteData(45, 1, 1, 0, 2, 0, 0, 0), // No hit
+            new NoteData(45, 2, 1, 0, 2, 0, 0, 0), // No hit
+            new NoteData(45, 3, 1, 0, 2, 0, 0, 0), // No hit
+            new NoteData(46, 0, 1, 0, 1, 1, 4, 1), 
+            new NoteData(46, 1, 1, 0, 2, 0, 0, 1), // No hit
+            new NoteData(46, 2, 1, 0, 2, 0, 0, 1), // No hit
+            new NoteData(46, 3, 1, 0, 2, 0, 0, 1), // No hit
+
+            new NoteData(47, 0, 1, 0, 0, 0, 0, 0),
+            new NoteData(47, 1, 1, 0, 0, 0, 0, 0),
+            new NoteData(47, 2, 1, 0, 0, 0, 0, 0),
+            new NoteData(47, 3, 1, 0, 0, 0, 0, 0),
+
+            new NoteData(48, 0, 1, 0, 0, 0, 0, 1),
+            new NoteData(48, 1, 1, 0, 0, 0, 0, 1),
+            new NoteData(48, 2, 1, 0, 0, 0, 0, 0),
+            new NoteData(48, 3, 1, 0, 0, 0, 0, 0),
+
+            new NoteData(49, 1, 1, 0, 0, 0, 0, 1),
+            new NoteData(49, 2, 1, 0, 0, 0, 0, 1),
+            new NoteData(49, 2, 4, 3, 0, 0, 0, 1),
+            new NoteData(49, 3, 2, 0, 0, 0, 0, 1),
+            new NoteData(49, 3, 2, 1, 0, 0, 0, 1),
+
+            new NoteData(50, 0, 1, 0, 0, 0, 0, 0),
+            new NoteData(50, 1, 1, 0, 0, 0, 0, 0),
+            new NoteData(50, 2, 1, 0, 0, 0, 0, 0),
+            new NoteData(50, 2, 4, 3, 0, 0, 0, 0),
+            new NoteData(50, 3, 2, 0, 0, 0, 0, 0),
+            new NoteData(50, 3, 2, 1, 0, 0, 0, 1),
+
+            new NoteData(51, 0, 1, 0, 0, 0, 0, 1),
+            new NoteData(51, 1, 1, 0, 0, 0, 0, 1),
+            new NoteData(51, 2, 1, 0, 0, 0, 0, 1),
+            new NoteData(51, 2, 4, 3, 0, 0, 0, 1),
+            new NoteData(51, 3, 2, 0, 0, 0, 0, 1),
+            new NoteData(51, 3, 2, 1, 0, 0, 0, 0),
+
+            new NoteData(52, 0, 1, 0, 0, 0, 0, 0),
+            new NoteData(52, 1, 1, 0, 0, 0, 0, 0),
+            new NoteData(52, 2, 1, 0, 0, 0, 0, 0),
+            new NoteData(52, 2, 4, 3, 0, 0, 0, 0),
+            new NoteData(52, 3, 2, 0, 0, 0, 0, 0),
+            new NoteData(52, 3, 2, 1, 0, 0, 0, 1),
+
+            new NoteData(53, 0, 2, 0, 0, 0, 0, 0),
+            new NoteData(53, 0, 2, 1, 0, 0, 0, 0),
+            new NoteData(53, 1, 2, 0, 0, 0, 0, 0),
+            new NoteData(53, 1, 2, 1, 0, 0, 0, 0),
+
+            new NoteData(53, 2, 2, 0, 0, 0, 0, 1),
+            new NoteData(53, 2, 2, 1, 0, 0, 0, 1),
+            new NoteData(53, 3, 2, 0, 0, 0, 0, 1),
+            new NoteData(53, 3, 2, 1, 0, 0, 0, 1),
+
+            new NoteData(54, 0, 2, 0, 0, 0, 0, 0),
+            new NoteData(54, 0, 2, 1, 0, 0, 0, 0),
+            new NoteData(54, 1, 2, 0, 0, 0, 0, 0),
+            new NoteData(54, 1, 2, 1, 0, 0, 0, 0),
+
+            new NoteData(54, 2, 2, 0, 0, 0, 0, 1),
+            new NoteData(54, 2, 2, 1, 0, 0, 0, 1),
+            new NoteData(54, 3, 2, 0, 0, 0, 0, 1),
+            new NoteData(54, 3, 2, 1, 0, 0, 0, 1),
+
+            new NoteData(55, 0, 2, 0, 0, 0, 0, 0),
+            new NoteData(55, 0, 2, 1, 0, 0, 0, 1),
+            new NoteData(55, 1, 2, 0, 0, 0, 0, 0),
+            new NoteData(55, 1, 2, 1, 0, 0, 0, 1),
+            new NoteData(55, 2, 2, 0, 0, 0, 0, 0),
+            new NoteData(55, 2, 2, 1, 0, 0, 0, 1),
+            new NoteData(55, 3, 2, 0, 0, 0, 0, 0),
+            new NoteData(55, 3, 2, 1, 0, 0, 0, 1),
+            new NoteData(56, 0, 2, 0, 0, 0, 0, 1),
         ];
     }
 
@@ -341,6 +559,13 @@ class Beatmap {
      * @param {number} playTime Current seek value of the song
      */
     update(playTime) {
+        // Song Skip
+        if(this.skip) {
+            if(playTime >= this.skipTime) {
+                this.skip = false;
+            }
+            return;
+        }
         // Counting beat
         if(this.running && playTime >= this.offset) {
             //if(playTime > this.nextSongTempo) {
@@ -468,6 +693,10 @@ class Beatmap {
     }
 
     // TODO: instantly jump to certain progress of the song and the notes
+    setSkip(t) {
+        this.skip = true;
+        this.skipTime = t;
+    }
     jumpTo(t) {
         let removeCount = 0;
         // Removed pass notes
@@ -492,7 +721,7 @@ class Beatmap {
 
         removeCount = 0;
         for(let i = 0; i < this.noteSpawns; i++) {
-            if(this.noteSpawns[i].time <= t) {
+            if(this.noteSpawns[i].time - (this.scene.travelTime * 0.001) <= t) {
                 removeCount++;
             }
         }
@@ -580,6 +809,8 @@ class NoteData {
                 case 2:
                     this.type = NoteType.NO_HIT;
                     break;
+                case 3:
+                    this.type = NoteType.BIG_NOTE;
                 default:
                     this.type = NoteType.NORMAL;
                     break;

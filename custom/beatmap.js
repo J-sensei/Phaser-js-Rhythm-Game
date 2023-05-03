@@ -747,6 +747,11 @@ class Beatmap {
                 }
             }
         }
+
+        // Reverse arrays
+        this.beats.reverse();
+        this.noteSpawns.reverse();
+        this.accurateBeats.reverse();
     }
 
     /**
@@ -763,10 +768,10 @@ class Beatmap {
         }
         
         // Counting beat
-        if(this.running && playTime >= this.offset) {
+        if(this.playMetronome && this.running && playTime >= this.offset) {
             //if(playTime > this.nextSongTempo) {
             if(this.accurateBeats.length > 0) {
-                if(playTime >= this.accurateBeats[0].time) {
+                if(playTime >= this.accurateBeats[this.accurateBeats.length - 1].time) {
                     this.currentBeatCount.count(); // Count the beat
     
                     // Play metronome audio
@@ -777,7 +782,7 @@ class Beatmap {
                             Beatmap.Metronome1.play(); // Lower pitch metronome
                         }
                     }
-                    this.accurateBeats.shift(); // Removed the beat at the end
+                    this.accurateBeats.pop(); // Removed the beat at the end
                 }
             }
         }
@@ -790,7 +795,7 @@ class Beatmap {
             let removeIndex = [];
             let removeMultiple = false;
             let removeCount = 0;
-            for(let i = 0; i < this.noteSpawns.length; i++) {
+            for(let i = this.noteSpawns.length - 1; i >= 0; i--) {
                 // Spawn note if the time is matched
                 if(playTime >= this.noteSpawns[i].spawnTime) {
                     this.instantiateNote(this.noteSpawns[i]); // Instantiate the note
@@ -812,14 +817,14 @@ class Beatmap {
             if(remove) {
                 // Shift the array depends on how many note are required to remove
                 for(let i = 0; i < removeCount; i++) 
-                    this.noteSpawns.shift();
+                    this.noteSpawns.pop();
             }
 
             remove = false; // Reuse the variable for drawing beat line
             // Draw beat lines to visualize the beat
             if(this.drawBeatLine) {
                 // Loop all the beats
-                for(let i = 0; i < this.currentBeats.length; i++) {
+                for(let i = this.currentBeats.length - 1; i >= 0; i--) {
                     // If matched with the song playtime
                     if(playTime >= this.currentBeats[i].time) {
                         // Draw line
@@ -829,7 +834,7 @@ class Beatmap {
                     }
                 }
                 if(remove) {
-                    this.currentBeats.shift(); // Remove it from current beats
+                    this.currentBeats.pop(); // Remove it from current beats
                 }
             }
         }
@@ -847,14 +852,14 @@ class Beatmap {
         const lineHeight = 500; // Height of the line
         const lineWidth = 1;
         const lineColor = "#eb4034";
-        let line = this.scene.add.line(this.scene.noteSpawnPoint.x, game.config.height - lineHeight, 0,0, 0, lineHeight,  
+        let line = this.scene.add.line(NoteSpawnPoint[0].x, game.config.height - lineHeight, 0,0, 0, lineHeight,  
                                         Phaser.Display.Color.HexStringToColor(lineColor).color).setOrigin(0);
         line.setLineWidth(lineWidth, lineWidth); // Set line width
         this.scene.add.existing(line);
         // Move the line by tween
         let tween = this.scene.tweens.add({
             targets: line, // target the player
-            x: this.scene.judgementPositions[0].x,
+            x: JudgementPositions[0].x,
             duration: this.scene.travelTime,
             repeat: 0,
             onComplete: function() {

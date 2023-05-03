@@ -18,7 +18,7 @@ class JudgeCollider extends Phaser.GameObjects.Sprite {
     /** Physic group for judge colliders */
     static JudgeColliders;
 
-    constructor(scene, x, y) {
+    constructor(scene, x, y, color) {
         super(scene, x, y); // Cincai create a sprite
         this.alpha = 0; // Make it invisible
         this.setOrigin(JudgeConfig.origin);
@@ -32,7 +32,13 @@ class JudgeCollider extends Phaser.GameObjects.Sprite {
         JudgeCollider.JudgeColliders.add(this);
         this.body.setSize(JudgeConfig.colWidth, JudgeConfig.colHeight);
 
-        this.circle = scene.add.circle(x, y, JudgeConfig.circleRadius, Phaser.Display.Color.HexStringToColor(JudgeConfig.circleColor).color);
+        let circleColor;
+        if(color == null) {
+            circleColor = JudgeConfig.circleColor;
+        } else {
+            circleColor = color;
+        }
+        this.circle = scene.add.circle(x, y, JudgeConfig.circleRadius, Phaser.Display.Color.HexStringToColor(circleColor).color);
         this.circle.iterations = JudgeConfig.circleIteration;
         this.circle.alpha = JudgeConfig.circleAplha;
         let tween = scene.tweens.add({

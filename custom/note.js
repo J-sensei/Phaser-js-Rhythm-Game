@@ -5,6 +5,7 @@ ID and Name #1 : 1191100556 Liew Jiann Shen
 Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
+/** Note type keys to recognize different notes */
 const NoteType = {
     /** Normal note, player just need to press the button to beat it */
     NORMAL: "Normal",
@@ -19,8 +20,10 @@ const NoteType = {
     BIG_NOTE: "BigNote",
 }
 
-const NoteSize = 20;
+/** Size required for all note collider for consistency */
+const NoteColliderSize = 20;
 
+/** Results for the note hitting */
 const NoteHitResult = {
     PERFECT: "Perfect",
     GREAT: "Great",
@@ -29,22 +32,48 @@ const NoteHitResult = {
     NO_HIT: "NoHitResult",
 }
 
+/** Color decision for circle on the note */
+const NoteCircleColor = {
+    UP: "#3f81eb",
+    DOWN: "#eb3fda",
+}
+
+/**
+ * Music note to sync with the song
+ */
 class Note extends Phaser.GameObjects.Sprite {
     // Static variables
     /** Audio Normal note hit sound */
     static NormalHit;
     /** Hold note hit sound */
     static HoldHit;
+    /** Music note (Non hittable note) sound */
     static MusicHit;
+    /** Use when combo break (Use in Score class) */
     static ComboBreak;
+    /** Metal hit (Big note hit sound) */
     static MetalHit;
     /** Physic group for Notes */
     static Notes;
     /** Number of note spawned in the game */
     static NoteCount = 0;
-    static CurrentScene;
+    /** SFX Audio configuration for note */
     static SFXConfig;
 
+    /**
+     * 
+     * @param {Scene} scene Scene reference
+     * @param {string} key Key for the sprite
+     * @param {number} x Position x
+     * @param {number} y Position y
+     * @param {number} destX Destination x location
+     * @param {number} destY Destination y location
+     * @param {number} travelTime Time required to moved from spawn point to judgement point
+     * @param {bool} down Which lane the note belongs to
+     * @param {string} type Type of the note
+     * @param {number} holdTime Hold required to hold the note (Only use for hold note)
+     * @param {Note} parentNote Parent note to for the refenerece (Only use for end note)
+     */
     constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote) {
         super(scene, x, y, key); // Create sprite
         /** Scene reference */
@@ -145,16 +174,51 @@ class Note extends Phaser.GameObjects.Sprite {
             callbackScope: this
         });
 
+
+        // Different note type will have move in from above        
+        if(type === NoteType.HOLD || type === NoteType.BIG_NOTE) {
+            let moveInDuration;
+            if(type === NoteType.HOLD) moveInDuration = travelTime / 3;
+            else if(type === NoteType.BIG_NOTE) moveInDuration = travelTime / 2;
+            const moveInDist = 500;
+            this.y -= 500;
+            const moveInTween = scene.tweens.add({
+                targets: this,
+                y: this.y + moveInDist,
+                duration: moveInDuration,
+                repeat: 0,
+            });
+        }
+
+        // Create hit circle to let player see the perfect point
+        let circleColor;
+        if(down) {
+            circleColor = NoteCircleColor.DOWN;
+        } else {
+            circleColor = NoteCircleColor.UP;
+        }
+        this.circle = this.scene.add.circle(x, y, JudgeConfig.circleRadius + 10, Phaser.Display.Color.HexStringToColor(circleColor).color);
+        this.circle.iterations = JudgeConfig.circleIteration;
+        this.circle.alpha = 0.5;
+        let circleTween = scene.tweens.add({
+            targets: this.circle,
+            angle: this.circle.angle + 360,
+            duration: JudgeConfig.rotateDuration,
+            repeat: -1,
+            callbackScope: this,
+        });
+        scene.add.existing(this.circle);
+
         // Only apply this to hold note
         if(this.type === NoteType.HOLD) {
             const lineHeight = 18;
-            const lineColor = "#eb4034";
+            //let lineColor = "#eb4034";
             /*
                 x1, y1 - start position, x2, y2 - endposition
                 Put the end position to the spawn point first, later only update it when the end note is spawn
             */
             /** Line to link between the notes (For hold note only) */
-            this.line = this.scene.add.line(this.x, this.y, 0, 0, x, 0,  Phaser.Display.Color.HexStringToColor(lineColor).color).setOrigin(0);
+            this.line = this.scene.add.line(this.x, this.y, 0, 0, x, 0,  Phaser.Display.Color.HexStringToColor(circleColor).color).setOrigin(0);
             this.line.setLineWidth(lineHeight, lineHeight);
             this.line.alpha = 0.5; // Make it transparent
             this.scene.add.existing(this.line); // Add it to the current scene
@@ -171,22 +235,9 @@ class Note extends Phaser.GameObjects.Sprite {
         this.noHitActive = false;
         this.result = "None";
 
-        // Create hit circle to let player see the perfect point
-        this.circle = this.scene.add.circle(x, y, JudgeConfig.circleRadius + 10, Phaser.Display.Color.HexStringToColor("#d0ff61").color);
-        this.circle.iterations = JudgeConfig.circleIteration;
-        this.circle.alpha = 0.5;
-        let circleTween = scene.tweens.add({
-            targets: this.circle,
-            angle: this.circle.angle + 360,
-            duration: JudgeConfig.rotateDuration,
-            repeat: -1,
-            callbackScope: this,
-        });
-        scene.add.existing(this.circle);
-
         // Collision body configuration
         this.setOrigin(0.5);
-        this.body.setSize(NoteSize * this.scale, NoteSize * this.scale);
+        this.body.setSize(NoteColliderSize * this.scale, NoteColliderSize * this.scale);
     }
 
     /**
@@ -273,7 +324,6 @@ class Note extends Phaser.GameObjects.Sprite {
             // The note group is null, need to create it
             Note.Notes = scene.physics.add.group();
         }
-        Note.CurrentScene = scene;
         Note.UpdateSFXConfig();
     }
 
@@ -298,7 +348,7 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {PlayerCar} player 
      * @param {Scene} scene 
      * @param {number} playTime 
-     * @returns 
+     * @returns Note Array
      */
     static UpdateHit(minimumDistance, player, scene, playTime) {
         let notesArray = []; // Empty note array
@@ -359,7 +409,7 @@ class Note extends Phaser.GameObjects.Sprite {
 
     /**
      * Notes overlap with judgement colliders logic
-     * @param {*} judgement 
+     * @param {JudgeCollider} judgement 
      * @param {Note} note 
      */
     static NoteOverlap(judgement, note) {

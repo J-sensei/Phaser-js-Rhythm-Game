@@ -18,7 +18,7 @@ class Debug extends Phaser.Scene {
         this.skip = false;
         Note.Reset(this); // Reset the note
         this.noteCount = 0; // Reset the note count
-        this.travelTime = 900;
+        this.travelTime = 950;
         this.beatmap = new Beatmap(this, testSong1); // Test
         this.beatmap.create();
         this.beatmap.drawBeatLine = false;
@@ -100,8 +100,8 @@ class Debug extends Phaser.Scene {
 
         // Judgement objects
         JudgeCollider.Reset(this); // Reset judgement collider static variables
-        this.upJudge = new JudgeCollider(this, JudgementPositions[0].x, JudgementPositions[0].y);
-        this.downJudge = new JudgeCollider(this, JudgementPositions[1].x, JudgementPositions[1].y);
+        this.upJudge = new JudgeCollider(this, JudgementPositions[0].x, JudgementPositions[0].y, NoteCircleColor.UP);
+        this.downJudge = new JudgeCollider(this, JudgementPositions[1].x, JudgementPositions[1].y, NoteCircleColor.DOWN);
 
         // Setup overlap logic for judge colliders and notes
         this.physics.add.overlap(JudgeCollider.JudgeColliders, Note.Notes, Note.NoteOverlap, null, this);

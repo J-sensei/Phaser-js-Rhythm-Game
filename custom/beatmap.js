@@ -1,9 +1,17 @@
-const DefaultBeatmapConfig = {
-    x: 0
-}
+/********************************************
+Course : TGD2251 Game Physics
+Session: Trimester 2, 2022/23
+ID and Name #1 : 1191100556 Liew Jiann Shen
+Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
+********************************************/
 
+/**
+ * Spawn note sync with the song
+ */
 class Beatmap {
+    /** Debug metronome audio 1 */
     static Metronome1;
+    /** Debug metronome audio 2 */
     static Metronome2;
 
     /**
@@ -11,19 +19,23 @@ class Beatmap {
      * @param {Scene} scene Beatmap scene reference
      * @param {Song} song Song reference
      */
-    constructor(scene, song) {
+    constructor(scene, song, config) {
         this.scene = scene;
         this.drawBeatLine = true;
         this.playMetronome = true;
         this.song = song;
-
-        this.offsetCount = 0;
+        
         // Open your heart
         //this.offset = 0.222; // milisecond
         //this.bpm = 150; // test
         // Bye or not
-        this.offset = 0.874; // milisecond
-        this.bpm = 170; // test
+        if(config != null) {
+            this.offset = config.offset;
+            this.bpm = config.bpm;
+        } else {
+            this.offset = 0.874; // milisecond
+            this.bpm = 170; // test
+        }
 
         this.songDuration = song.duration(); 
         this.tempo = this.bpm / 60.0; // 2 beat per second
@@ -193,8 +205,8 @@ class Beatmap {
             new NoteData(15, 0, 1, 0, 0, 0, 0, 0), // Build up *Good
             new NoteData(15, 1, 1, 0, 0, 0, 0, 0), //*Bye
             new NoteData(15, 2, 2, 0, 0, 0, 0, 1), // Ma
-            new NoteData(15, 2, 2, 1, 0, 0, 0, 0),// Ta
-            new NoteData(15, 3, 1, 0, 0, 0, 0, 1),// Ne
+            new NoteData(15, 2, 2, 1, 0, 0, 0, 0), // Ta
+            new NoteData(15, 3, 1, 0, 0, 0, 0, 1), // Ne
             // Bass spam
             new NoteData(16, 0, 4, 0, 1, 1, 3, 0),
             new NoteData(16, 3, 1, 0, 3, 0, 0, 1),
@@ -643,7 +655,7 @@ class Beatmap {
             new NoteData(72, 0, 2, 0, 0, 0, 0, 0),
 
             // Kinda hard here
-            new NoteData(72, 1, 2, 0, 3, 0, 0, 1),
+            //new NoteData(72, 1, 2, 0, 3, 0, 0, 1),
             new NoteData(72, 1, 2, 0, 1, 1, 1, 0),
             new NoteData(72, 2, 2, 0, 1, 1, 1, 1),
             new NoteData(72, 3, 2, 0, 3, 0, 0, 0),
@@ -665,19 +677,25 @@ class Beatmap {
     }
 
     create() {
+        /** Define should the beatmap start to running with all the calculated bpm and notes */
         this.running = false;
-        this.bpmStart = false;
 
         let n = 0;
         //let nextTempo = this.offset;
         /** Updated tempo when looping the song */
         let nextTempo = 0;
-        const spawnEarlySec = this.scene.travelTime * 0.001; // Need to determine by the hit position and the spawn position to know how many sec needed 
+
+        /** Need to determine by the hit position and the spawn position to know how many sec needed  */
+        const spawnEarlySec = this.scene.travelTime * 0.001; 
+        /** Time adding in the loop */
         const timePrecision = 0.0001;
+
         /** All beats for the song */
         this.beats = []; 
+        /** Beat accurate to the song */
         this.accurateBeats = []; 
-        this.noteSpawns = []; //notes to spawn
+        /** Notes to spawn */
+        this.noteSpawns = [];
         /** Beat count when looping the song */
         let beatCounting = new BeatCount();
 
@@ -713,6 +731,7 @@ class Beatmap {
             // }
 
             // Test data instantiate
+            // Calculate the notes to spawn
             for(let j = 0; j < currentData.length; j++) {
                 //if(currentData[j].beat == this.beats[i].beat && currentData[j].subBeat == this.beats[i].subBeat) {
 
@@ -728,10 +747,6 @@ class Beatmap {
                 }
             }
         }
-        
-        // console.log(this.beats);
-        // console.log(this.accurateBeats);
-        // console.log(this.noteSpawns);
     }
 
     /**
@@ -746,6 +761,7 @@ class Beatmap {
             }
             return;
         }
+        
         // Counting beat
         if(this.running && playTime >= this.offset) {
             //if(playTime > this.nextSongTempo) {
@@ -792,20 +808,11 @@ class Beatmap {
                     break;
                 }
             }
-            // Remove first note if its true
-            // if(remove && removeMultiple) {
-            //     for(let i = 0; i < removeIndex.length; i++) {
-            //         this.noteSpawns.splice(i, 1);
-            //     }
-            // } else if(remove) {
-            //     this.noteSpawns.shift();
-            // }
+            
             if(remove) {
+                // Shift the array depends on how many note are required to remove
                 for(let i = 0; i < removeCount; i++) 
                     this.noteSpawns.shift();
-                // for(let i = 0; i < removeIndex.length; i++) {
-                //     this.noteSpawns.splice(i, 1);
-                // }
             }
 
             remove = false; // Reuse the variable for drawing beat line

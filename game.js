@@ -1,11 +1,13 @@
 /** Beatmap setting to play the note and music correctly */
-let beatmapConfig = {
+let BeatmapConfig = {
   bpm: 160,
+  offset: 0,
 }
 
-let audioConfig = {
-  music: 0.6,
-  sfx: 0.7,
+/** Audio configuration */
+let AudioConfig = {
+  music: 0.7,
+  sfx: 0.75,
 }
 
 /** Main game configuration */

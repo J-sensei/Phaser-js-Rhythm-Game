@@ -27,10 +27,8 @@ class Debug extends Phaser.Scene {
         if(this.skip)
             this.beatmap.setSkip(this.skipTime); // Skip song
 
+        /** Test score counter */
         this.score = new Score();
-
-        // Initial player position
-        const playerInitialPos = new Phaser.Math.Vector2(200, game.config.height - 60);
 
         // Background
         const {width, height} = this.scale; // Take the screen width and height
@@ -47,7 +45,7 @@ class Debug extends Phaser.Scene {
         this.background.setSpeed(1); // 1 is normal speed, higher number means faster
 
         // Player
-        this.player = new PlayerCar(this, playerInitialPos.x, playerInitialPos.y);
+        this.player = new PlayerCar(this, PlayerPosition.x, PlayerPosition.y);
         this.player.create(); // Initialize player
 
         // Set debug texts
@@ -85,14 +83,7 @@ class Debug extends Phaser.Scene {
             fontSize: 24
         }).setOrigin(0.5); 
 
-        // Test counting note hits
-        this.perfect = 0;
-        this.great = 0;
-        this.bad = 0;
-        this.miss = 0;
-
         // Song test
-        //testSong1.play(); // Test play
         this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE); // Add spacebar input
         this.playTime = 0;
         this.lastUpdateTime = this.time.now;
@@ -106,17 +97,11 @@ class Debug extends Phaser.Scene {
         this.game.events.on(Phaser.Core.Events.FOCUS, () => {
             this.togglePause();
         });
-        /** Where the notes should spawn at */
-        this.noteSpawnPoint = new Phaser.Math.Vector2(game.config.width + 100, game.config.height - 64 - 10);
 
         // Judgement objects
-        /** Both up and down judgement position, index 0 means up, 1 means down */
-        this.judgementPositions = [new Phaser.Math.Vector2(playerInitialPos.x + 200, playerInitialPos.y - 35),
-                                    new Phaser.Math.Vector2(playerInitialPos.x + 200, playerInitialPos.y + 35)];
-
         JudgeCollider.Reset(this); // Reset judgement collider static variables
-        this.upJudge = new JudgeCollider(this, this.judgementPositions[0].x, this.judgementPositions[0].y);
-        this.downJudge = new JudgeCollider(this, this.judgementPositions[1].x, this.judgementPositions[1].y);
+        this.upJudge = new JudgeCollider(this, JudgementPositions[0].x, JudgementPositions[0].y);
+        this.downJudge = new JudgeCollider(this, JudgementPositions[1].x, JudgementPositions[1].y);
 
         // Setup overlap logic for judge colliders and notes
         this.physics.add.overlap(JudgeCollider.JudgeColliders, Note.Notes, Note.NoteOverlap, null, this);
@@ -191,6 +176,7 @@ class Debug extends Phaser.Scene {
         }
 
         if(!this.pause && this.start && !testSong1.playing()) {
+            // Count down
             const t = new Date();
             const currentTime = t.getTime();
             this.deltaTime = (currentTime * 0.001) - (this.lastUpdateTime * 0.001);
@@ -219,34 +205,12 @@ class Debug extends Phaser.Scene {
         else
             this.playTimeLabel.text = testSong1.playTimeString();
 
-        const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this.downJudge, this.upJudge, this, this.playTime);
+        const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this, this.playTime);
         let n = Note.HitNotes(notesArray, this);
         if(n != null) {
             this.noteDestroyCount++;
             this.noteDestroyLabel.text = "Note Destroy: " + this.noteDestroyCount;
-            let text;
-
-            // TODO: Do not use scene.judgementPosition
-            if(n.down) {
-                text = new HitText(this, this.judgementPositions[1].x, this.judgementPositions[1].y, n.result, null, 32);
-            } else {
-                text = new HitText(this, this.judgementPositions[0].x, this.judgementPositions[0].y, n.result, null, 32);
-            }
-            switch(n.result) {
-                case NoteHitResult.PERFECT: 
-                    text.setColor("#f55d92");
-                    break;
-                case NoteHitResult.GREAT: 
-                    text.setColor("#cf69cf");
-                    break;
-                case NoteHitResult.BAD: 
-                    text.setColor("#8a668c");
-                    break;
-                case NoteHitResult.MISS: 
-                    text.setColor("#6c668c");
-                    break;
-            }
-            text.destroyText();
+            HitText.noteHitInstantiate(this, n); // Instantiate text to show hit result
             this.score.add(n.result); // Add the score
         }
 
@@ -265,10 +229,7 @@ class Debug extends Phaser.Scene {
 
         //if(true) {
         if(this.noteCount % 3 == 0 || this.noteCount % 1 == 0 ) {    
-            // y = new Note(this, SpriteId.BOT_RUNNING, this.noteSpawnPoint.x, this.noteSpawnPoint.y + 50, 
-            //     this.judgementPositions[0].x, this.judgementPositions[0].y, this.travelTime, true, x);
-            // y.setId(this.noteCount);
-            Note.Instantiate(this, SpriteId.BOT_RUNNING, this.noteSpawnPoint.x, this.noteSpawnPoint.y + 50, 
+            Note.Instantiate(this, SpriteId.BOT_RUNNING, NoteSpawnPoint[0].x, NoteSpawnPoint[0].y, 
                 this.judgementPositions[0].x, this.judgementPositions[0].y, this.travelTime, true, x);
         }
         this.noteCount++;
@@ -278,12 +239,12 @@ class Debug extends Phaser.Scene {
         let spawn;
         let judgementPos;
         if(down) {
-            spawn = new Phaser.Math.Vector2(this.noteSpawnPoint.x, this.noteSpawnPoint.y + 40);
-            judgementPos = new Phaser.Math.Vector2(this.judgementPositions[0].x, this.judgementPositions[0].y);
+            spawn = new Phaser.Math.Vector2(NoteSpawnPoint[0].x, NoteSpawnPoint[0].y);
+            judgementPos = new Phaser.Math.Vector2(JudgementPositions[0].x, JudgementPositions[0].y);
         }
         else {
-            spawn = new Phaser.Math.Vector2(this.noteSpawnPoint.x, this.noteSpawnPoint.y - 25);
-            judgementPos = new Phaser.Math.Vector2(this.judgementPositions[1].x, this.judgementPositions[1].y);
+            spawn = new Phaser.Math.Vector2(NoteSpawnPoint[1].x, NoteSpawnPoint[1].y);
+            judgementPos = new Phaser.Math.Vector2(JudgementPositions[1].x, JudgementPositions[1].y);
         }
 
         if(type == NoteType.HOLD) {

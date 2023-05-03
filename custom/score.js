@@ -58,7 +58,7 @@ class Score {
             case NoteHitResult.BAD:
                 this.bad++;
                 if(this.combo > 3) {
-                    Note.ComboBreak.play();
+                    Note.ComboBreak.play(Note.SFXConfig);
                 }
                 this.combo = 0; // Break the combo
                 accuracyWeight = AccuracyWeight.BAD;
@@ -67,7 +67,7 @@ class Score {
             case NoteHitResult.MISS:
                 this.miss++;
                 if(this.combo > 3) {
-                    Note.ComboBreak.play();
+                    Note.ComboBreak.play(Note.SFXConfig);
                 }
                 this.combo = 0; // Break the combo
                 accuracyWeight = AccuracyWeight.MISS;

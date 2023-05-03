@@ -55,7 +55,7 @@ class Song extends Phaser.GameObjects.Sprite {
     play(delay) {
         let config = {
             mute: false,
-            volume: audioConfig.music, // Get the current volume fonr the audio configuration
+            volume: AudioConfig.music, // Get the current volume fonr the audio configuration
             loop: false, // No looping for the song
             delay: delay
         }

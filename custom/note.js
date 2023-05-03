@@ -43,6 +43,7 @@ class Note extends Phaser.GameObjects.Sprite {
     /** Number of note spawned in the game */
     static NoteCount = 0;
     static CurrentScene;
+    static SFXConfig;
 
     constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote) {
         super(scene, x, y, key); // Create sprite
@@ -146,7 +147,7 @@ class Note extends Phaser.GameObjects.Sprite {
 
         // Only apply this to hold note
         if(this.type === NoteType.HOLD) {
-            const lineHeight = 10;
+            const lineHeight = 18;
             const lineColor = "#eb4034";
             /*
                 x1, y1 - start position, x2, y2 - endposition
@@ -235,15 +236,15 @@ class Note extends Phaser.GameObjects.Sprite {
             switch(note.type) {
                 case NoteType.NORMAL: case NoteType.BIG_NOTE:
                     if(note.type === NoteType.NORMAL)
-                        Note.NormalHit.play();
+                        Note.NormalHit.play(Note.SFXConfig);
                     else
-                        Note.MetalHit.play();
+                        Note.MetalHit.play(Note.SFXConfig);
 
                     note.destroyNormalNote();
                     //note.destroyNote();
                     break;
                 case NoteType.HOLD:
-                    Note.HoldHit.play();
+                    Note.HoldHit.play(Note.SFXConfig);
                     note.noteActive = false; // No need to check this note active or not anymore, as the note start to holding
                     note.activeHold = true; // Activate the holding note
                     note.scene.tweens.killTweensOf(note); // Stop the tween of the note
@@ -273,6 +274,15 @@ class Note extends Phaser.GameObjects.Sprite {
             Note.Notes = scene.physics.add.group();
         }
         Note.CurrentScene = scene;
+        Note.UpdateSFXConfig();
+    }
+
+    static UpdateSFXConfig() {
+        Note.SFXConfig = {
+            mute: false,
+            volume: AudioConfig.sfx, // Get the current volume fonr the audio configuration
+            loop: false, // No looping for the song
+        };
     }
 
     static Instantiate(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, colliderX, colliderY, offsetX, offsetY) {
@@ -284,11 +294,13 @@ class Note extends Phaser.GameObjects.Sprite {
 
     /**
      * 
-     * @param {int} minimumDistance 
+     * @param {number} minimumDistance 
      * @param {PlayerCar} player 
-     * @returns Note array
+     * @param {Scene} scene 
+     * @param {number} playTime 
+     * @returns 
      */
-    static UpdateHit(minimumDistance, player, judgeColliderDown, judgeColliderUp, scene, playTime) {
+    static UpdateHit(minimumDistance, player, scene, playTime) {
         let notesArray = []; // Empty note array
         for(let i = 0; i < Note.Notes.getChildren().length; i++) {
             let note = Note.Notes.getChildren()[i]; // Get the note
@@ -297,9 +309,9 @@ class Note extends Phaser.GameObjects.Sprite {
 
             // Check which lane the note is to calculate the distance
             if(note.down) {
-                distance = note.x - judgeColliderDown.x;
+                distance = note.x - JudgementPositions[0].x;
             } else {
-                distance = note.x - judgeColliderUp.x;
+                distance = note.x - JudgementPositions[1].x;
             }
             
             if(note.active && player.beating && !note.hitted &&
@@ -314,31 +326,30 @@ class Note extends Phaser.GameObjects.Sprite {
             if(note.type === NoteType.END && note.endNoteActive && distance <= 0) {
                 // Update score here
                 let text;
-                // TODO: Do not use scene.judgementPosition
+
                 if(note.down) {
-                    text = new HitText(scene, scene.judgementPositions[1].x, scene.judgementPositions[1].y, NoteHitResult.PERFECT, null, 32);
+                    text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, NoteHitResult.PERFECT, null, 32);
                 } else {
-                    text = new HitText(scene, scene.judgementPositions[0].x, scene.judgementPositions[0].y, NoteHitResult.PERFECT, null, 32);
+                    text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, NoteHitResult.PERFECT, null, 32);
                 }
                 text.destroyText();
                 scene.score.add(NoteHitResult.PERFECT);
 
-                Note.HoldHit.play();
+                Note.HoldHit.play(Note.SFXConfig);
                 note.parentNote.destroyNote(); // As end note parent note is the hold note
             }
 
             // None hittable note
             if(note.type === NoteType.NO_HIT && note.noHitActive && distance == 0 && player.isDownLane === note.down) {
                 let text;
-                // TODO: Do not use scene.judgementPosition
                 if(note.down) {
-                    text = new HitText(scene, scene.judgementPositions[1].x, scene.judgementPositions[1].y, "300", null, 32);
+                    text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, "300", null, 32);
                 } else {
-                    text = new HitText(scene, scene.judgementPositions[0].x, scene.judgementPositions[0].y, "300", null, 32);
+                    text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, "300", null, 32);
                 }
                 text.destroyText();
                 scene.score.add(NoteHitResult.NO_HIT);
-                Note.MusicHit.play();
+                Note.MusicHit.play(Note.SFXConfig);
                 note.destroyNote();
             }
         }
@@ -446,7 +457,7 @@ class Note extends Phaser.GameObjects.Sprite {
                     this.holdTime -= this.endNoteSpawnDeltaTime; // Minus the delta playtime
                     // Player successfully hold the note
                     if(this.holdTime <= 0) {
-                        Note.HoldHit.play();
+                        Note.HoldHit.play(Note.SFXConfig);
                         this.destroyNote();
                     }
                 } else { // Player failed to hold it while the active hold is still true
@@ -456,9 +467,9 @@ class Note extends Phaser.GameObjects.Sprite {
                     let distance;
                     if(this.endNote != null) {
                         if(this.down) {
-                            distance = this.endNote.x - scene.judgementPositions[0].x;
+                            distance = this.endNote.x - JudgementPositions[0].x;
                         } else {
-                            distance = this.endNote.x - scene.judgementPositions[1].x;
+                            distance = this.endNote.x - JudgementPositions[1].x;
                         }
                     } else {
                         distance = JudgeConfig.missDistance + 9999; // Confirm Miss distance
@@ -477,15 +488,14 @@ class Note extends Phaser.GameObjects.Sprite {
                     }
 
                     let text;
-                    // TODO: Do not use scene.judgementPosition
                     if(this.down) {
-                        text = new HitText(scene, scene.judgementPositions[1].x, scene.judgementPositions[1].y, this.result, null, 32);
+                        text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, this.result, null, 32);
                     } else {
-                        text = new HitText(scene, scene.judgementPositions[0].x, scene.judgementPositions[0].y, this.result, null, 32);
+                        text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, this.result, null, 32);
                     }
 
                     if(this.result != NoteHitResult.BAD && this.result != NoteHitResult.MISS) {
-                        Note.HoldHit.play();
+                        Note.HoldHit.play(Note.SFXConfig);
                     }
 
                     text.destroyText();

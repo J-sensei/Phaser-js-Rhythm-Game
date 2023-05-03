@@ -5,6 +5,7 @@ ID and Name #1 : 1191100556 Liew Jiann Shen
 Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
+/** Test Song Class */
 let testSong1 = null;
 const SceneKey = {
     PRELOAD: "Preload",
@@ -60,6 +61,13 @@ const LayerConfig = {
 
 }
 
+/** Fixed player position */
+let PlayerPosition;
+/** Fixed judgement positions */
+let JudgementPositions = [];
+/** Fxied positions for note spawn */
+let NoteSpawnPoint = [];
+
 /**
  * Scene to preload neccessary assets required for the game
  */
@@ -113,13 +121,26 @@ class Preload extends Phaser.Scene {
     }
 
     create() {
+        // Initialize SFX for neccessary class
         Note.LoadSFX(this);
         Beatmap.LoadSFX(this);
+
         // Set origin to center the text
         this.add.text(game.config.width / 2, game.config.height / 2, "Loading assets...", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
+
+        // Define Positions
+        PlayerPosition = new Phaser.Math.Vector2(200, game.config.height - 60);
+        JudgementPositions = [
+            new Phaser.Math.Vector2(PlayerPosition.x + 200, PlayerPosition.y - 35), // Down
+            new Phaser.Math.Vector2(PlayerPosition.x + 200, PlayerPosition.y + 35) // Up
+        ];
+        NoteSpawnPoint = [
+            new Phaser.Math.Vector2(game.config.width + 100, game.config.height - 64 - 10 + 40), // Down
+            new Phaser.Math.Vector2(game.config.width + 100, game.config.height - 64 - 10 - 25), // Up
+        ];
 
         // Test load music
         // let song = new Song(this, "Song1");

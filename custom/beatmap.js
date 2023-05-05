@@ -18,6 +18,7 @@ class Beatmap {
      * 
      * @param {Scene} scene Beatmap scene reference
      * @param {Song} song Song reference
+     * @param {BeatmapConfig} config Configuration of the beatmap
      */
     constructor(scene, song, config) {
         this.scene = scene;
@@ -687,8 +688,8 @@ class Beatmap {
 
         /** Need to determine by the hit position and the spawn position to know how many sec needed  */
         const spawnEarlySec = this.scene.travelTime * 0.001; 
-        /** Time adding in the loop */
-        const timePrecision = 0.0001;
+        /** Time adding in the loop when counting beat timing */
+        const timePrecision = 0.00001;
 
         /** All beats for the song */
         this.beats = []; 
@@ -719,28 +720,19 @@ class Beatmap {
             }
             n += timePrecision; // Move the time for the song
         }
-        const testBeatDivide = 1;
-        let currentData = this.data2; // Map data for the song
-        //console.log(this.beats);
-        //console.log(currentData)
+
+        // Note data instantiate
+        const currentData = this.data2; // Map data for the song
+        // Loop through all the beats available
         for(let i = 0; i < this.beats.length; i++) {
-
-            // Test Note Instantiate
-            // for(let j = 0; j < testBeatDivide; j++) {
-            //     this.noteSpawns.push(new NoteSpawnTest(this.beats[i].time, testBeatDivide, j, this.secondPerBeat));
-            // }
-
-            // Test data instantiate
             // Calculate the notes to spawn
             for(let j = 0; j < currentData.length; j++) {
-                //if(currentData[j].beat == this.beats[i].beat && currentData[j].subBeat == this.beats[i].subBeat) {
-
-                //console.log(this.beats[i].equal(currentData[j].beatCount) + " " + currentData[0]);
+                // If the beat is euqal
                 if(this.beats[i].equal(currentData[j].beatCount)) {
-                    //this.spawnTime.push(new NoteSpawn(this.beats[i].time, currentData[j].beatSnapDivisor, currentData[j].beatSnapDivisorPosition, this.secondPerBeat));
-                    const spawn = new NoteSpawn(this.beats[i].time, this.secondPerBeat, currentData[j]);
+                    const spawn = new NoteSpawn(this.beats[i].time, this.secondPerBeat, currentData[j]); // Create the note spawn object
                     this.noteSpawns.push(spawn);
 
+                    // Checking if any mistake is made in the note data
                     if(this.noteSpawns.length > 1 && spawn.equal(this.noteSpawns[this.noteSpawns.length - 2])) {
                         console.warn("[Beatmap] Duplicate note found at " + spawn.beatCount.getBeatCountString());
                     }
@@ -748,7 +740,7 @@ class Beatmap {
             }
         }
 
-        // Reverse arrays
+        // Reverse arrays as later can use pop instead of shift to increase the performance
         this.beats.reverse();
         this.noteSpawns.reverse();
         this.accurateBeats.reverse();
@@ -768,7 +760,7 @@ class Beatmap {
         }
         
         // Counting beat
-        if(this.playMetronome && this.running && playTime >= this.offset) {
+        if(this.running && playTime >= this.offset) {
             //if(playTime > this.nextSongTempo) {
             if(this.accurateBeats.length > 0) {
                 if(playTime >= this.accurateBeats[this.accurateBeats.length - 1].time) {
@@ -792,30 +784,21 @@ class Beatmap {
             // TODO: optimise the code here
             /** Determine wherether to remove first note in the noteSpawns array */
             let remove = false;
-            let removeIndex = [];
-            let removeMultiple = false;
+            /** How many note are needed to be remove */
             let removeCount = 0;
             for(let i = this.noteSpawns.length - 1; i >= 0; i--) {
-                // Spawn note if the time is matched
+                // Spawn note if the time is matched or more than the playtime
                 if(playTime >= this.noteSpawns[i].spawnTime) {
                     this.instantiateNote(this.noteSpawns[i]); // Instantiate the note
                     remove = true; // Note is instansiated, so remove it
-                    //console.log(this.noteSpawns[i].beatCount.getBeatCountString());
-                    removeIndex.push(i);
                     removeCount++;
-                    // if(i + 1 < this.noteSpawns.length && this.noteSpawns[i + 1] != null && 
-                    //     this.noteSpawns[i + 1].spawnTime <= playTime) {
-                    //     removeMultiple = true;
-                    // } else {
-                    //     break;
-                    // }
                 } else {
-                    break;
+                    break; // No matching time note are present, just break the loop
                 }
             }
             
             if(remove) {
-                // Shift the array depends on how many note are required to remove
+                // Pop the array depends on how many note are required to remove
                 for(let i = 0; i < removeCount; i++) 
                     this.noteSpawns.pop();
             }
@@ -840,6 +823,9 @@ class Beatmap {
         }
     }
 
+    /** Start to run the beatmap with note spawn logic, 
+     * should run earlier before the song is play (more than the offset + timeToSpawnEarly) 
+    */
     start() {
         this.running = true;
         this.nextSongTempo = this.offset;
@@ -848,6 +834,12 @@ class Beatmap {
         this.currentBeats = this.beats;
     }
 
+    /** Add a new note spawn (For End Note) */
+    addNoteSpawn() {
+
+    }
+
+    /** Debug to visualize the beat lines */
     drawBeatLineVisual() {
         const lineHeight = 500; // Height of the line
         const lineWidth = 1;
@@ -875,6 +867,7 @@ class Beatmap {
         return this.currentBeatCount.getBeatCountString();
     }
 
+    /** Spawn an note from the scene (Beatmap scene) */
     instantiateNote(note) {
         if(note.type == NoteType.HOLD) {
             this.scene.instantiateNote(note.type, note.down, note.holdTime); // Need hold time reference

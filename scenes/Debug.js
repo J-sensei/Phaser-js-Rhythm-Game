@@ -19,7 +19,7 @@ class Debug extends Phaser.Scene {
         Note.Reset(this); // Reset the note
         this.noteCount = 0; // Reset the note count
         this.travelTime = 950;
-        this.beatmap = new Beatmap(this, testSong1); // Test
+        this.beatmap = new Beatmap(this, currentSong); // Test
         this.beatmap.create();
         this.beatmap.drawBeatLine = false;
         this.beatmap.playMetronome = false;
@@ -150,7 +150,7 @@ class Debug extends Phaser.Scene {
     update() {
         //this.keyPress = Phaser.Input.Keyboard.JustDown(this.player.beatKey);
         // If the music finish playing
-        if(this.playTime >= testSong1.duration()) {
+        if(this.playTime >= currentSong.duration()) {
             this.pause = true;
             this.start = false;
             this.playTime = this.startTime;
@@ -165,7 +165,7 @@ class Debug extends Phaser.Scene {
         this.playerLabel.text = this.player.getDebugString();
 
         // Test song start
-        if(Phaser.Input.Keyboard.JustDown(this.spacebar) && !testSong1.song.isPlaying){
+        if(Phaser.Input.Keyboard.JustDown(this.spacebar) && !currentSong.song.isPlaying){
             this.playTime = this.startTime; // -3
             const t = new Date();
             this.lastUpdateTime = t.getTime();
@@ -175,7 +175,7 @@ class Debug extends Phaser.Scene {
             this.tweens.resumeAll();
         }
 
-        if(!this.pause && this.start && !testSong1.playing()) {
+        if(!this.pause && this.start && !currentSong.playing()) {
             // Count down
             const t = new Date();
             const currentTime = t.getTime();
@@ -185,29 +185,23 @@ class Debug extends Phaser.Scene {
 
             if(this.playTime >= 0) {
                 console.log("Play Song!!!");
-                testSong1.play(0);
+                currentSong.play(0);
                 if(this.skip)
                     this.beatmap.jumpTo(this.skipTime); // Skip song
             }
         }
 
-        if(testSong1.playing() && !this.sound.locked && !this.pause) {
-            this.playTime = testSong1.song.seek; // Get the accurate current time of the song
+        if(currentSong.playing() && !this.sound.locked && !this.pause) {
+            this.playTime = currentSong.song.seek; // Get the accurate current time of the song
         }
 
         if(!this.pause) {
             this.beatmap.update(this.playTime);
         }
 
-        // Song playtime label
-        if(!testSong1.playing())
-            this.playTimeLabel.text = this.playTime.toFixed(2) + "/" + testSong1.duration().toFixed(2); // Show playtime debug
-        else
-            this.playTimeLabel.text = testSong1.playTimeString();
-
         const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this, this.playTime);
         let n = Note.HitNotes(notesArray, this);
-        if(n != null) {
+        if(n != null) { // If note is not empty, meaning a note is hit and destroy by the player
             this.noteDestroyCount++;
             this.noteDestroyLabel.text = "Note Destroy: " + this.noteDestroyCount;
             HitText.noteHitInstantiate(this, n); // Instantiate text to show hit result
@@ -219,6 +213,12 @@ class Debug extends Phaser.Scene {
         this.accLabel.text = "Accuracy: " + (this.score.accuracy * 100).toFixed(2) + "% ";
         this.comboLabel.text = "Combo: " + this.score.combo;
         this.scoreLabel.text = "Score: " + this.score.score;
+
+        // Song playtime label
+        if(!currentSong.playing())
+            this.playTimeLabel.text = this.playTime.toFixed(2) + "/" + currentSong.duration().toFixed(2); // Show playtime debug
+        else
+            this.playTimeLabel.text = currentSong.playTimeString();
     }
 
     // Test note spawn

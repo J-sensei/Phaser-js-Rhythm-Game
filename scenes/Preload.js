@@ -6,7 +6,7 @@ Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
 /** Test Song Class */
-let testSong1 = null;
+let currentSong = null;
 const SceneKey = {
     PRELOAD: "Preload",
 }
@@ -147,7 +147,7 @@ class Preload extends Phaser.Scene {
         // song.play();
         this.testSong.create();
         //this.testSong.play();
-        testSong1 = this.testSong;
+        currentSong = this.testSong;
 
         const atkFrame = 20;
         const runFrame = 15;

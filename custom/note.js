@@ -59,6 +59,8 @@ class Note extends Phaser.GameObjects.Sprite {
     static NoteCount = 0;
     /** SFX Audio configuration for note */
     static SFXConfig;
+    /** Current scene reference */
+    static Scene;
 
     /**
      * 
@@ -264,20 +266,7 @@ class Note extends Phaser.GameObjects.Sprite {
             notes[0].hitted = true; // Note is hitted by the player
             note = notes[0];
 
-            const distance = Math.abs(note.hitDistance);
-            // Check not hit distance to determine the hit result
-            if(distance <= JudgeConfig.perfectDistance >= 0 && distance <= JudgeConfig.perfectDistance) {
-                note.result = NoteHitResult.PERFECT;
-            } else if(distance > JudgeConfig.perfectDistance && distance <= JudgeConfig.greatDistance) {
-                note.result = NoteHitResult.GREAT;
-            } else if(distance > JudgeConfig.greatDistance && distance <= JudgeConfig.badDistance) {
-                note.result = NoteHitResult.BAD;;
-            } else if(distance > JudgeConfig.badDistance && distance <= JudgeConfig.missDistance){ // Treat the rest as miss note
-                note.result = NoteHitResult.MISS;
-            } else {
-                // console.warn("[Note] Invalid distance: " + distance);
-                note.result = NoteHitResult.MISS;
-            }
+            Note.JudgeNote(note); // Judge the note
 
             if(note.result == NoteHitResult.BAD || note.result == NoteHitResult.MISS) {
                 note.destroyNote();
@@ -302,7 +291,7 @@ class Note extends Phaser.GameObjects.Sprite {
                     note.alpha = 0; // Make the note transparent (TEST)
 
                     // TODO: Use class to handle current song is playing
-                    this.lastPlayTime = testSong1.currentTime(); // Update the last play time for the song
+                    this.lastPlayTime = currentSong.currentTime(); // Update the last play time for the song
                     break;
                 default:
                     console.log("[Note] No hitting logic to handle this note: " + notes[0].type);
@@ -325,6 +314,7 @@ class Note extends Phaser.GameObjects.Sprite {
             Note.Notes = scene.physics.add.group();
         }
         Note.UpdateSFXConfig();
+        Note.Scene = scene;
     }
 
     static UpdateSFXConfig() {
@@ -427,6 +417,29 @@ class Note extends Phaser.GameObjects.Sprite {
         }
     }
 
+    /**
+     * Judge a note hit result, update the note result variable (this.result)
+     * @param {Note} note Note class reference
+     * @returns Note
+     */
+    static JudgeNote(note) {
+        const distance = Math.abs(note.hitDistance); // Get the hit distance of the note
+        if(distance <= JudgeConfig.perfectDistance >= 0 && distance <= JudgeConfig.perfectDistance) {
+            note.result = NoteHitResult.PERFECT;
+        } else if(distance > JudgeConfig.perfectDistance && distance <= JudgeConfig.greatDistance) {
+            note.result = NoteHitResult.GREAT;
+        } else if(distance > JudgeConfig.greatDistance && distance <= JudgeConfig.badDistance) {
+            note.result = NoteHitResult.BAD;;
+        } else if(distance > JudgeConfig.badDistance && distance <= JudgeConfig.missDistance){ // Treat the rest as miss note
+            note.result = NoteHitResult.MISS;
+        } else {
+            // console.warn("[Note] Invalid distance: " + distance);
+            note.result = NoteHitResult.MISS;
+        }
+
+        return note;
+    }
+
     update(player, scene, playTime) {
         this.circle.x = this.x;
         this.circle.y = this.y;
@@ -511,46 +524,42 @@ class Note extends Phaser.GameObjects.Sprite {
                         this.destroyNote();
                     }
                 } else { // Player failed to hold it while the active hold is still true
-                    // Failed 
-                    //this.destroyNote();
+                    // Update the end note hitDistance
                     // Determine if the distance if release early
-                    let distance;
                     if(this.endNote != null) {
                         if(this.down) {
-                            distance = this.endNote.x - JudgementPositions[0].x;
+                            this.endNote.hitDistance = this.endNote.x - JudgementPositions[0].x;
                         } else {
-                            distance = this.endNote.x - JudgementPositions[1].x;
+                            this.endNote.hitDistance = this.endNote.x - JudgementPositions[1].x;
                         }
-                    } else {
-                        distance = JudgeConfig.missDistance + 9999; // Confirm Miss distance
-                    }
 
-                    if(distance <= JudgeConfig.perfectDistance >= 0 && distance <= JudgeConfig.perfectDistance) {
-                        this.result = NoteHitResult.PERFECT;
-                    } else if(distance > JudgeConfig.perfectDistance && distance <= JudgeConfig.greatDistance) {
-                        this.result = NoteHitResult.GREAT;
-                    } else if(distance > JudgeConfig.greatDistance && distance <= JudgeConfig.badDistance) {
-                        this.result = NoteHitResult.BAD;
-                    } else if(distance > JudgeConfig.badDistance && distance <= JudgeConfig.missDistance){ // Treat the rest as miss note
-                        this.result = NoteHitResult.MISS;
-                    } else {
-                        this.result = NoteHitResult.MISS;
+                        Note.JudgeNote(this.endNote);
+                        let text;
+                        if(this.down) {
+                            text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, this.endNote.result, null, 32);
+                        } else {
+                            text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, this.endNote.result, null, 32);
+                        }
+    
+                        // If the result are not bad or miss
+                        if(this.endNote.result != NoteHitResult.BAD && this.endNote.result != NoteHitResult.MISS) {
+                            Note.HoldHit.play(Note.SFXConfig);
+                        }
+    
+                        text.destroyText();
+                        scene.score.add(this.endNote.result);
+                        this.destroyNote();
+                    } else { // Miss
+                        let text;
+                        if(this.down) {
+                            text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, NoteHitResult.MISS, null, 32);
+                        } else {
+                            text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, NoteHitResult.MISS, null, 32);
+                        }
+                        text.destroyText();
+                        scene.score.add(NoteHitResult.MISS);
+                        this.destroyNote();
                     }
-
-                    let text;
-                    if(this.down) {
-                        text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, this.result, null, 32);
-                    } else {
-                        text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, this.result, null, 32);
-                    }
-
-                    if(this.result != NoteHitResult.BAD && this.result != NoteHitResult.MISS) {
-                        Note.HoldHit.play(Note.SFXConfig);
-                    }
-
-                    text.destroyText();
-                    scene.score.add(this.result);
-                    this.destroyNote();
                 }
             }
         }
@@ -577,7 +586,7 @@ class Note extends Phaser.GameObjects.Sprite {
     /** Destroy the note */
     destroyNote() {
         // Delete
-        this.scene.tweens.killTweensOf(this); // Make sure to remove the tween before delete it, else will cause error
+        Note.Scene.tweens.killTweensOf(this); // Make sure to remove the tween before delete it, else will cause error
 
         // The note is holding type, delete the line too
         if(this.type === NoteType.HOLD)

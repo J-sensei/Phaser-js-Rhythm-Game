@@ -125,6 +125,10 @@ class Preload extends Phaser.Scene {
         Note.LoadSFX(this);
         Beatmap.LoadSFX(this);
 
+        // Initialize score
+        Score.SetSingleton(new Score());
+        Score.GetInstance().reset();
+
         // Set origin to center the text
         this.add.text(game.config.width / 2, game.config.height / 2, "Loading assets...", {
             fontFamily: 'Silkscreen', 

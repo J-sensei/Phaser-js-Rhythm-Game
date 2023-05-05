@@ -28,7 +28,7 @@ class Debug extends Phaser.Scene {
             this.beatmap.setSkip(this.skipTime); // Skip song
 
         /** Test score counter */
-        this.score = new Score();
+        this.score = new Score(); Score.GetInstance();
 
         // Background
         const {width, height} = this.scale; // Take the screen width and height
@@ -200,11 +200,11 @@ class Debug extends Phaser.Scene {
         }
 
         const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this, this.playTime);
-        let n = Note.HitNotes(notesArray, this);
+        let n = Note.HitNotes(notesArray);
         if(n != null) { // If note is not empty, meaning a note is hit and destroy by the player
             this.noteDestroyCount++;
             this.noteDestroyLabel.text = "Note Destroy: " + this.noteDestroyCount;
-            HitText.noteHitInstantiate(this, n); // Instantiate text to show hit result
+            HitText.NoteHitInstantiate(this, n); // Instantiate text to show hit result
             this.score.add(n.result); // Add the score
         }
 

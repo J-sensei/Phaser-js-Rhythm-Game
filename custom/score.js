@@ -13,6 +13,22 @@ const ScoreWeight = {
 }
 
 class Score {
+    // Singleton
+    static Instance;
+    static SetSingleton(score) {
+        if(Score.Instance == null)
+            Score.Instance = score;
+        else
+            console.warn("Score instance already exist");
+    }
+    static GetInstance() {
+        if(Score.Instance == null) {
+            Score.Instance = new Score();
+        }
+
+        return Score.Instance;
+    }
+
     // TODO: add total note parameter
     constructor() {
         // Note hit counter
@@ -37,6 +53,11 @@ class Score {
         this.bad = 0;
         this.miss = 0;
         this.combo = 0;
+
+        this.accuracySum = 0;
+        this.accuracy = 0;
+
+        this.score = 0;
     }
 
     add(noteType) {

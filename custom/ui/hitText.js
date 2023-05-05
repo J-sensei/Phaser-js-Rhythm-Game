@@ -48,7 +48,7 @@ class HitText extends Phaser.GameObjects.Text {
         });
     }
 
-    static noteHitInstantiate(scene, note) {
+    static NoteHitInstantiate(scene, note) {
         const perfectColor = "#f55d92";
         const greatColor = "#cf69cf";
         const badColor = "#8a668c";

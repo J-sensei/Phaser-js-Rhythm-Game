@@ -175,8 +175,7 @@ class Note extends Phaser.GameObjects.Sprite {
             },
             callbackScope: this
         });
-
-
+        
         // Different note type will have move in from above        
         if(type === NoteType.HOLD || type === NoteType.BIG_NOTE) {
             let moveInDuration;
@@ -259,7 +258,7 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {Note[]} notes Group of active notes
      * @returns Destroyed note if successfully hit a note, Null if there is no note is hit
      */
-    static HitNotes(notes, scene) {
+    static HitNotes(notes) {
         let note = null;
         if(notes.length > 0) { // Only execute when note array is more
             notes.sort((a,b) => (a.id > b.id) ? 1 : ((b.id > a.id) ? -1 : 0)); // Get the oldest note in the hit list
@@ -280,14 +279,14 @@ class Note extends Phaser.GameObjects.Sprite {
                     else
                         Note.MetalHit.play(Note.SFXConfig);
 
-                    note.destroyNormalNote();
-                    //note.destroyNote();
+                    note.destroyNormalNote(); // 
                     break;
                 case NoteType.HOLD:
                     Note.HoldHit.play(Note.SFXConfig);
                     note.noteActive = false; // No need to check this note active or not anymore, as the note start to holding
                     note.activeHold = true; // Activate the holding note
-                    note.scene.tweens.killTweensOf(note); // Stop the tween of the note
+                    //note.scene.tweens.killTweensOf(note); // Stop the tween of the note
+                    Note.Scene.tweens.killTweensOf(note);
                     note.alpha = 0; // Make the note transparent (TEST)
 
                     // TODO: Use class to handle current song is playing
@@ -365,16 +364,16 @@ class Note extends Phaser.GameObjects.Sprite {
             // If end note is active and ready to destroy when it touches the jugement collider precisely (distance 0)
             if(note.type === NoteType.END && note.endNoteActive && distance <= 0) {
                 // Update score here
-                let text;
-
-                if(note.down) {
-                    text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, NoteHitResult.PERFECT, null, 32);
-                } else {
-                    text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, NoteHitResult.PERFECT, null, 32);
-                }
-                text.destroyText();
-                scene.score.add(NoteHitResult.PERFECT);
-
+                this.result = NoteHitResult.PERFECT;
+                // let text;
+                // if(note.down) {
+                //     text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, NoteHitResult.PERFECT, null, 32);
+                // } else {
+                //     text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, NoteHitResult.PERFECT, null, 32);
+                // }
+                // text.destroyText();
+                HitText.NoteHitInstantiate(Note.Scene, this);
+                Score.GetInstance().add(NoteHitResult.PERFECT);
                 Note.HoldHit.play(Note.SFXConfig);
                 note.parentNote.destroyNote(); // As end note parent note is the hold note
             }
@@ -388,12 +387,11 @@ class Note extends Phaser.GameObjects.Sprite {
                     text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, "300", null, 32);
                 }
                 text.destroyText();
-                scene.score.add(NoteHitResult.NO_HIT);
+                Score.GetInstance().add(NoteHitResult.NO_HIT);
                 Note.MusicHit.play(Note.SFXConfig);
                 note.destroyNote();
             }
         }
-
         return notesArray;
     }
 
@@ -534,30 +532,33 @@ class Note extends Phaser.GameObjects.Sprite {
                         }
 
                         Note.JudgeNote(this.endNote);
-                        let text;
-                        if(this.down) {
-                            text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, this.endNote.result, null, 32);
-                        } else {
-                            text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, this.endNote.result, null, 32);
-                        }
-    
+                        HitText.NoteHitInstantiate(Note.Scene, this.endNote);
+                        // let text;
+                        // if(this.down) {
+                        //     text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, this.endNote.result, null, 32);
+                        // } else {
+                        //     text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, this.endNote.result, null, 32);
+                        // }
+                        
                         // If the result are not bad or miss
                         if(this.endNote.result != NoteHitResult.BAD && this.endNote.result != NoteHitResult.MISS) {
                             Note.HoldHit.play(Note.SFXConfig);
                         }
     
-                        text.destroyText();
-                        scene.score.add(this.endNote.result);
+                        //text.destroyText();
+                        Score.GetInstance().add(this.endNote.result);
                         this.destroyNote();
                     } else { // Miss
-                        let text;
-                        if(this.down) {
-                            text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, NoteHitResult.MISS, null, 32);
-                        } else {
-                            text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, NoteHitResult.MISS, null, 32);
-                        }
-                        text.destroyText();
-                        scene.score.add(NoteHitResult.MISS);
+                        // let text;
+                        // if(this.down) {
+                        //     text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, NoteHitResult.MISS, null, 32);
+                        // } else {
+                        //     text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, NoteHitResult.MISS, null, 32);
+                        // }
+                        this.result = NoteHitResult.MISS;
+                        HitText.NoteHitInstantiate(Note.Scene, this);
+                        //text.destroyText();
+                        Score.GetInstance().add(NoteHitResult.MISS);
                         this.destroyNote();
                     }
                 }

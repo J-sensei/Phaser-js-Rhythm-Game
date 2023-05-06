@@ -73,7 +73,7 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {number} travelTime Time required to moved from spawn point to judgement point
      * @param {bool} down Which lane the note belongs to
      * @param {string} type Type of the note
-     * @param {number} holdTime Hold required to hold the note (Only use for hold note)
+     * @param {number} holdTime Hold required to hold the note (Only use for hold note) (Deprecated)
      * @param {Note} parentNote Parent note to for the refenerece (Only use for end note)
      */
     constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote) {
@@ -127,14 +127,6 @@ class Note extends Phaser.GameObjects.Sprite {
         //scene.notes.add(this); // Add to notes group (Test) TODO: remove it when stable
         Note.Notes.add(this); // Add to notes group
 
-        if(this.type === NoteType.HOLD) {
-            this.holdTime = holdTime;
-            //this.spawnEndNoteTime = this.holdTime; // Use this time to spawn end note
-            //this.endNoteSpawnTime = this.scene.playTime + this.holdTime;
-            this.endNoteSpawnTime = this.holdTime;
-            this.updateEndNoteSpawnTime = false;
-        }
-
         /** Last play time (seek) of the song */
         this.lastPlayTime = 0;
         /** Last delta time seek of the song */
@@ -145,6 +137,7 @@ class Note extends Phaser.GameObjects.Sprite {
         const distance = x - destX;
         // Create tweens
         const tween = scene.tweens.add({
+            ease: 'Power0',
             targets: this, // Set to this note object
             x: destX, // Destination in x position
             duration: travelTime, // Time required travel to destination
@@ -156,13 +149,13 @@ class Note extends Phaser.GameObjects.Sprite {
                  * create another tween with same properties (to have constant speed) to move it to behind
                  */
                 scene.tweens.add({
+                    ease: 'Power0',
                     targets: this,
                     x: this.x - distance, // Apply the distance between calculated here to have constant speed
                     duration: travelTime,
                     repeat: 0,
                     onComplete: function() {
                         // If the tween is completed, destroy the note as it should out of screen
-                        //this.destroyNote();
                         this.reachedDestination = true;
                         if(this.type === NoteType.END) {
                             this.parentNote.destroyNote();
@@ -223,16 +216,8 @@ class Note extends Phaser.GameObjects.Sprite {
             this.line.setLineWidth(lineHeight, lineHeight);
             this.line.alpha = 0.5; // Make it transparent
             this.scene.add.existing(this.line); // Add it to the current scene
-
-            // TODO: Create a time class to handle delta time!
-            const spawnT = new Date();
-            const currentTime = spawnT.getTime();
-            this.endNoteSpawnLastTime = currentTime;
-            this.endNoteSpawnDeltaTime = 0;
         }
 
-        this.endNoteSpawned = false;
-        this.endNoteActive = false;
         this.noHitActive = false;
         this.result = "None";
 
@@ -269,7 +254,11 @@ class Note extends Phaser.GameObjects.Sprite {
 
             if(note.result == NoteHitResult.BAD || note.result == NoteHitResult.MISS) {
                 note.destroyNote();
-                return note;
+                if(note.type === NoteType.HOLD) {
+                    Score.GetInstance().add(NoteHitResult.MISS); // Miss for end note
+                }
+
+                return note; // No hit
             }
 
             switch(note.type) {
@@ -290,7 +279,7 @@ class Note extends Phaser.GameObjects.Sprite {
                     note.alpha = 0; // Make the note transparent (TEST)
 
                     // TODO: Use class to handle current song is playing
-                    this.lastPlayTime = currentSong.currentTime(); // Update the last play time for the song
+                    this.lastPlayTime = CurrentSong.currentTime(); // Update the last play time for the song
                     break;
                 default:
                     console.log("[Note] No hitting logic to handle this note: " + notes[0].type);
@@ -328,7 +317,6 @@ class Note extends Phaser.GameObjects.Sprite {
         let note;
         if(type === NoteType.END) {
             note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, null, parentNote);
-            console.log(parentNote);
             parentNote.endNote = note;
         } else {
             note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, holdTime);
@@ -455,45 +443,6 @@ class Note extends Phaser.GameObjects.Sprite {
             this.line.x = this.x;
             this.line.y = this.y;
 
-            if(!this.updateEndNoteSpawnTime) {
-                this.endNoteSpawnTime += playTime;
-                this.updateEndNoteSpawnTime = true;
-            }
-
-            // // update normal delta time
-            // const spawnT = new Date();
-            // const currentTime = spawnT.getTime();
-            // this.endNoteSpawnDeltaTime = (currentTime * 0.001) - (this.endNoteSpawnLastTime * 0.001);
-            // this.endNoteSpawnLastTime = currentTime;
-
-            // Update playtime delta time
-            //const t = testSong1.song.seek;
-            const t = playTime;
-            // this.deltaPlayTime = t - this.lastPlayTime;
-            // this.lastPlayTime = t;
-
-            // Update end note to spawn it in right timing
-            // Method 1
-            if(t >= this.endNoteSpawnTime && !this.endNoteSpawned) {
-                // this.endNote = new Note(this.scene, SpriteId.BOT_RUNNING, this.spawnX, this.spawnY, 
-                //     this.destX, this.destY, this.travelTime, this.down, NoteType.END, null, this);
-                
-                // Temp Closed
-                // this.endNote = new Note(this.scene, SpriteId.VEHICLE1, this.spawnX, this.spawnY, 
-                //     this.destX, this.destY, this.travelTime, this.down, NoteType.END, null, this);
-                // this.endNote.play(AnimationId.VEHICLE1);
-                // this.endNote.flipX = true;
-                // this.endNoteSpawned = true;
-            }
-
-            // if(this.endNoteSpawned) { // The end note spawned, update the line with the end note position
-            //     const distance = this.endNote.x - this.x; // Get the distance of the end note to the position of the note
-            //     this.line.setTo(0, 0, distance, 0); // Change the distination x position of the line
-            // } else {
-            //     const distance = this.spawnX - this.x; // End note not spawn yet, update the line with the spawn position
-            //     this.line.setTo(0, 0, distance, 0);
-            // }
-
             if(this.endNote != null) {
                 const distance = this.endNote.x - this.x; // Get the distance of the end note to the position of the note
                 this.line.setTo(0, 0, distance, 0); // Change the distination x position of the line
@@ -507,13 +456,7 @@ class Note extends Phaser.GameObjects.Sprite {
             if(this.activeHold) {
                 // Player still holding it
                 if(player.holding && player.compareLane(this.down)) {
-                    //this.holdTime -= this.deltaPlayTime; // Minus the delta playtime
-                    // this.holdTime -= this.endNoteSpawnDeltaTime; // Minus the delta playtime
-                    // // Player successfully hold the note
-                    // if(this.holdTime <= 0) {
-                    //     Note.HoldHit.play(Note.SFXConfig);
-                    //     this.destroyNote();
-                    // }
+
                 } else { // Player failed to hold it while the active hold is still true
                     // Update the end note hitDistance
                     // Determine if the distance if release early

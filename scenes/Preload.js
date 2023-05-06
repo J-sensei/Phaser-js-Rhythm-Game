@@ -5,13 +5,20 @@ ID and Name #1 : 1191100556 Liew Jiann Shen
 Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
-/** Test Song Class */
-let currentSong = null;
+// Global
+/** Current song for the player to play */
+let CurrentSong = null;
+/**
+ * Songs available in the game
+ */
+let SongList = [];
 
+/** Scene keys naming */
 const SceneKey = {
     PRELOAD: "Preload",
 }
 
+/** Sprite keys naming */
 const SpriteId = {
     PLAYER_RUN: "PlayerRun",
     PLAYER_ATTACK: "PlayerAttack",
@@ -24,9 +31,14 @@ const SpriteId = {
     VEHICLE1: "Vehicle1",
     VEHICLE2: "Vehicle2",
     VEHICLE3: "Vehicle3",
-    MUSIC_NOTE: "MusicNote"
+    MUSIC_NOTE: "MusicNote",
 }
 
+const ParticleKey = {
+    HIT_PARTICLE: "HitParticle",
+}
+
+/** Animation keys naming */
 const AnimationId = {
     PLAYER_RUN: "PlayerRunAnimation",
     PLAYER_ATTACK1: "PlayerAttackAnimation1",
@@ -39,6 +51,7 @@ const AnimationId = {
     VEHICLE3: "Vehicle3Animation",
 }
 
+/** Background keys naming */
 const BackgroundId = {
     SUNSET_BACK: "SunsetBack",
     SUNSET_BUILDINGS: "SunsetBuilding",
@@ -48,6 +61,7 @@ const BackgroundId = {
     SUNSET_SUN: "SunsetSun"
 }
 
+/** Sound effect audio keys naming */
 const SFXId = {
     NOTE_HIT: "NoteHit",
     NOTE_HOLD_HIT: "NoteHoldHit",
@@ -58,9 +72,9 @@ const SFXId = {
     METAL_HIT: "MetalHit",
 }
 
+/** Layer depth configuration */
 const LayerConfig = {
     NOTE: 10,
-
 }
 
 /** Fixed player position */
@@ -80,10 +94,20 @@ class Preload extends Phaser.Scene {
 
     preload() {
         // Load song
-        this.testSong = new Song(this, "Song1", "assets/songs/PSYQUI-bye or not");
+        //this.testSong = new Song(this, "Song1", "assets/songs/PSYQUI-bye or not");
         //this.testSong = new Song(this, "Song1", "assets/songs/rejection-open your heart");
         //this.testSong = new Song(this, "Song1", "assets/songs/shinjuku2258");
-        this.testSong.preload();
+        //this.testSong.preload();
+        const songPaths = [
+            "assets/songs/PSYQUI-bye or not",
+            "assets/songs/rejection-open your heart",
+            "assets/songs/shinjuku2258",
+        ];
+        for(let i = 0; i < songPaths.length; i++) {
+            const song = new Song(this, "Song" + i, songPaths[i]);
+            song.preload();
+            SongList.push(song);
+        }
 
         // Load player sprite
         this.load.spritesheet(SpriteId.PLAYER_RUN, "assets/player/run_sheet.png", {frameWidth: 80, frameHeight: 80});
@@ -106,6 +130,9 @@ class Preload extends Phaser.Scene {
         this.load.image(BackgroundId.SUNSET_PALMTREE, "assets/background/sunset/palm-tree.png");
         this.load.image(BackgroundId.SUNSET_PALMS, "assets/background/sunset/palms.png");
         this.load.image(BackgroundId.SUNSET_SUN, "assets/background/sunset/sun.png");
+        
+        // Particle
+        this.load.image(ParticleKey.HIT_PARTICLE, "assets/particle/star.png");
 
         this.load.audio(SFXId.NOTE_HIT, "assets/sfx/punch.wav");
         this.load.audio(SFXId.NOTE_HOLD_HIT, "assets/sfx/holdHit.wav");
@@ -149,9 +176,12 @@ class Preload extends Phaser.Scene {
         // Test load music
         // let song = new Song(this, "Song1");
         // song.play();
-        this.testSong.create();
-        //this.testSong.play();
-        currentSong = this.testSong;
+        //this.testSong.create();
+        for(let i = 0; i < SongList.length;  i++) {
+            SongList[i].create();
+        }
+
+        CurrentSong = SongList[0]; // Bye or Not
 
         const atkFrame = 20;
         const runFrame = 15;

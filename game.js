@@ -12,6 +12,8 @@ let AudioConfig = {
 
 /** Main game configuration */
 let config = {
+  type: Phaser.AUTO,
+  backgroundColor: "#000",
   width: 1280,
   height: 720,
   backgroundColor: 0x000000,
@@ -23,7 +25,7 @@ let config = {
         debug: true,
         gravity: { y: 0 }
     }
-  }
+  },
 }
 
 /** Main game reference object */

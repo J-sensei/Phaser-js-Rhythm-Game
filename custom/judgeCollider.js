@@ -48,6 +48,18 @@ class JudgeCollider extends Phaser.GameObjects.Sprite {
             repeat: -1,
         });
         scene.add.existing(this.circle);
+
+        this.emitter = scene.add.particles(x, y, ParticleKey.HIT_PARTICLE, {
+            lifespan: 500,
+            speed: { min: 300, max: 750 },
+            scale: { start: 0.08, end: 0 },
+            alpha: { start: 1, end: 0},
+            gravityY: 1000,
+            blendMode: 'ADD',
+            tint: 0xff0000,
+            emitting: false,
+        });
+        scene.add.existing(this.emitter);
     }
 
     static Reset(scene) {

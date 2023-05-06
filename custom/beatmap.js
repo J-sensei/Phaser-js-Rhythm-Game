@@ -412,8 +412,10 @@ class Beatmap {
 
             new NoteData(44, 0, 1, 0, 0, 0, 0, 0),
             new NoteData(44, 1, 1, 0, 0, 0, 0, 0),
-            new NoteData(44, 2, 1, 0, 0, 0, 0, 1),
-            new NoteData(44, 3, 1, 0, 0, 0, 0, 1),
+
+            new NoteData(44, 2, 2, 0, 0, 0, 0, 1), // Da
+            new NoteData(44, 2, 2, 1, 0, 0, 0, 1), // Ke
+            new NoteData(44, 3, 1, 0, 0, 0, 0, 1), // No
 
             new NoteData(45, 0, 1, 0, 1, 1, 4, 0), 
             new NoteData(45, 1, 1, 0, 2, 0, 0, 0), // No hit
@@ -481,14 +483,32 @@ class Beatmap {
             new NoteData(54, 3, 2, 0, 0, 0, 0, 1),
             new NoteData(54, 3, 2, 1, 0, 0, 0, 1),
 
-            new NoteData(55, 0, 2, 0, 0, 0, 0, 0),
-            new NoteData(55, 0, 2, 1, 0, 0, 0, 1),
-            new NoteData(55, 1, 2, 0, 0, 0, 0, 0),
-            new NoteData(55, 1, 2, 1, 0, 0, 0, 1),
-            new NoteData(55, 2, 2, 0, 0, 0, 0, 0),
-            new NoteData(55, 2, 2, 1, 0, 0, 0, 1),
-            new NoteData(55, 3, 2, 0, 0, 0, 0, 0),
-            new NoteData(55, 3, 2, 1, 0, 0, 0, 1),
+            // new NoteData(55, 0, 2, 0, 0, 0, 0, 0),
+            // new NoteData(55, 0, 2, 1, 0, 0, 0, 1),
+            // new NoteData(55, 1, 2, 0, 0, 0, 0, 0),
+            // new NoteData(55, 1, 2, 1, 0, 0, 0, 1),
+            new NoteData(55, 0, 4, 0, 0, 0, 0, 0),
+            new NoteData(55, 0, 4, 1, 0, 0, 0, 0),
+            new NoteData(55, 0, 4, 2, 0, 0, 0, 0),
+            new NoteData(55, 0, 4, 3, 0, 0, 0, 0),
+            new NoteData(55, 1, 4, 0, 0, 0, 0, 0),
+            new NoteData(55, 1, 4, 1, 0, 0, 0, 0),
+            new NoteData(55, 1, 4, 2, 0, 0, 0, 0),
+            new NoteData(55, 1, 4, 3, 0, 0, 0, 0),
+
+            // new NoteData(55, 2, 2, 0, 0, 0, 0, 0),
+            // new NoteData(55, 2, 2, 1, 0, 0, 0, 1),
+            // new NoteData(55, 3, 2, 0, 0, 0, 0, 0),
+            // new NoteData(55, 3, 2, 1, 0, 0, 0, 1),
+
+            new NoteData(55, 2, 4, 0, 0, 0, 0, 1),
+            new NoteData(55, 2, 4, 1, 0, 0, 0, 1),
+            new NoteData(55, 2, 4, 2, 0, 0, 0, 1),
+            new NoteData(55, 2, 4, 3, 0, 0, 0, 1),
+            new NoteData(55, 3, 4, 0, 0, 0, 0, 1),
+            new NoteData(55, 3, 4, 1, 0, 0, 0, 1),
+            new NoteData(55, 3, 4, 2, 0, 0, 0, 1),
+            new NoteData(55, 3, 4, 3, 0, 0, 0, 1),
 
             new NoteData(56, 0, 2, 0, 3, 0, 0, 1), // Second verse start * Good
             new NoteData(56, 1, 1, 0, 1, 2, 3, 0),// Bye
@@ -689,7 +709,7 @@ class Beatmap {
         /** Need to determine by the hit position and the spawn position to know how many sec needed  */
         const spawnEarlySec = this.scene.travelTime * 0.001; 
         /** Time adding in the loop when counting beat timing, more decimal places means more precise the timing calculate will be */
-        const timePrecision = 0.00001;
+        const timePrecision = 0.001;
 
         /** All beats for the song */
         this.beats = []; 
@@ -761,7 +781,6 @@ class Beatmap {
         this.noteSpawns.reverse();
         this.accurateBeats.reverse();
         this.endNoteSpawns.reverse();
-        console.log(this.endNoteSpawns);
     }
 
     /**
@@ -778,7 +797,8 @@ class Beatmap {
         }
         
         // Counting beat
-        if(this.running && playTime >= this.offset) {
+        if(this.running && playTime >= this.offset && this.accurateBeats.length > 0 && 
+            this.accurateBeats[this.accurateBeats.length - 1].time <= playTime) {
             //if(playTime > this.nextSongTempo) {
             if(this.accurateBeats.length > 0) {
                 if(playTime >= this.accurateBeats[this.accurateBeats.length - 1].time) {
@@ -798,7 +818,8 @@ class Beatmap {
         }
 
         // Spawn notes
-        if(this.running) {
+        if(this.running && (this.noteSpawns.length > 0 && this.noteSpawns[this.noteSpawns.length - 1].spawnTime <= playTime) || 
+            (this.endNoteSpawns.length > 0 && this.endNoteSpawns[this.endNoteSpawns.length - 1].noteSpawn.spawnTime <= playTime)) {
             // TODO: optimise the code here
             /** Determine wherether to remove first note in the noteSpawns array */
             let remove = false;
@@ -816,7 +837,6 @@ class Beatmap {
                         // End note spawn should be found as it is initialized properly in create method
                         const endNoteSpawn = this.endNoteSpawns.find((x) => x.noteSpawn.id == this.noteSpawns[i].id);
                         endNoteSpawn.parentNote = note;
-                        //console.log(endNoteSpawn);
                     }
                     remove = true; // Note is instansiated, so remove it
                     removeCount++;
@@ -837,7 +857,6 @@ class Beatmap {
             for(let i = this.endNoteSpawns.length - 1; i >= 0; i--) {
                 //console.log(this.endNoteSpawns[i].noteSpawn.spawnTime + " " + playTime);
                 if(playTime >= this.endNoteSpawns[i].noteSpawn.spawnTime) {
-                    console.log("End Note Spawned");
                     if(this.endNoteSpawns[i].parentNote != null) {
                         const note = this.instantiateNote(this.endNoteSpawns[i].noteSpawn, this.endNoteSpawns[i].parentNote);
                         remove = true; // Note is instansiated or the parent note is destroyed already, so remove it
@@ -852,23 +871,22 @@ class Beatmap {
                 for(let i = 0; i < removeCount; i++) 
                     this.endNoteSpawns.pop();
             }
+        }
 
-            remove = false; // Reuse the variable for drawing beat line
-            // Draw beat lines to visualize the beat
-            if(this.drawBeatLine) {
-                // Loop all the beats
-                for(let i = this.spawnBeats.length - 1; i >= 0; i--) {
-                    // If matched with the song playtime
-                    if(playTime >= this.spawnBeats[i].time) {
-                        // Draw line
-                        this.drawBeatLineVisual();
-                        remove = true;
-                        break;
-                    }
+        // Render beat line (Debug)
+        if(this.running && this.drawBeatLine) {
+            let remove = false;
+            for(let i = this.spawnBeats.length - 1; i >= 0; i--) {
+                // If matched with the song playtime
+                if(playTime >= this.spawnBeats[i].time) {
+                    // Draw line
+                    this.drawBeatLineVisual();
+                    remove = true;
+                    break;
                 }
-                if(remove) {
-                    this.spawnBeats.pop(); // Remove it from current beats
-                }
+            }
+            if(remove) {
+                this.spawnBeats.pop(); // Remove it from current beats
             }
         }
     }
@@ -934,51 +952,61 @@ class Beatmap {
     setSkip(t) {
         this.skip = true;
         this.skipTime = t;
-    }
-    jumpTo(t) {
+
         let removeCount = 0;
         // Removed pass notes
-        for(let i = 0; i < this.accurateBeats; i++) {
+        for(let i = this.accurateBeats.length - 1; i >= 0; i--) {
             if(this.accurateBeats[i].time <= t) {
+
                 removeCount++;
             }
         }
         for(let i = 0; i < removeCount; i++) {
-            this.accurateBeats.shift();
+            this.currentBeatCount.count();
+            this.accurateBeats.pop();
         }
 
         removeCount = 0;
-        for(let i = 0; i < this.spawnBeats; i++) {
+        for(let i = this.spawnBeats.length - 1; i >= 0; i--) {
             if(this.spawnBeats[i].time <= t) {
                 removeCount++;
             }
         }
         for(let i = 0; i < removeCount; i++) {
-            this.spawnBeats.shift();
+            this.spawnBeats.pop();
         }
 
         removeCount = 0;
-        for(let i = 0; i < this.noteSpawns; i++) {
-            if(this.noteSpawns[i].time - (this.scene.travelTime * 0.001) <= t) {
+        for(let i = this.noteSpawns.length - 1; i >= 0; i--) {
+            if(this.noteSpawns[i].spawnTime <= t) {
                 removeCount++;
             }
         }
         for(let i = 0; i < removeCount; i++) {
-            this.noteSpawns.shift();
+            this.noteSpawns.pop();
         }
 
-        this.song.song.setSeek(t);
+        removeCount = 0;
+        for(let i = this.endNoteSpawns.length - 1; i >= 0; i--) {
+            if(this.endNoteSpawns[i].noteSpawn.spawnTime <= t) {
+                removeCount++;
+            }  
+        }
+        for(let i = 0; i < removeCount; i++) {
+            this.endNoteSpawns.pop();
+        }
     }
 
-    /** Add a new note spawn (For End Note) */
-    addNoteSpawn() {
+    jumpTo(t) {
 
+        this.song.song.setSeek(t);
     }
 }
 
 class NoteSpawn {
     constructor(time, tempo, noteData, id) {
         this.spawnTime = time + ((tempo / noteData.beatSnapDivisor) * noteData.beatSnapDivisorPosition);
+        //this.spawnTime = this.spawnTime.toFixed(3);
         this.type = noteData.type;
         if(this.type == NoteType.HOLD) {
             this.holdTime = (tempo / noteData.holdSnapDivisor) * noteData.holdMultiplier;

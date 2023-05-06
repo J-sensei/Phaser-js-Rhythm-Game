@@ -6,7 +6,7 @@ let BeatmapConfig = {
 
 /** Audio configuration */
 let AudioConfig = {
-  music: 0.5,
+  music: 0.7,
   sfx: 0.8,
 }
 
@@ -17,7 +17,7 @@ let config = {
   width: 1280,
   height: 720,
   backgroundColor: 0x000000,
-  scene: [Preload, Debug],
+  scene: [Preload, Debug, SongSelectScene],
   pixelArt: true,
   physics: {
     default: "arcade",

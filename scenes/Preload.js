@@ -70,6 +70,7 @@ const SFXId = {
     METRONOME2: "Metronome2",
     COMBO_BREAK: "ComboBreak",
     METAL_HIT: "MetalHit",
+    SELECT: "SelectSound",
 }
 
 /** Layer depth configuration */
@@ -93,6 +94,11 @@ class Preload extends Phaser.Scene {
     }
 
     preload() {
+        // Plugins
+        // Audio fade in / out
+        this.load.plugin('rexsoundfadeplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexsoundfadeplugin.min.js', true);
+        // Circle image
+        this.load.plugin('rexcirclemaskimageplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexcirclemaskimageplugin.min.js', true);
         // Load song
         //this.testSong = new Song(this, "Song1", "assets/songs/PSYQUI-bye or not");
         //this.testSong = new Song(this, "Song1", "assets/songs/rejection-open your heart");
@@ -100,8 +106,8 @@ class Preload extends Phaser.Scene {
         //this.testSong.preload();
         const songPaths = [
             "assets/songs/PSYQUI-bye or not",
-            "assets/songs/rejection-open your heart",
-            "assets/songs/shinjuku2258",
+            "assets/songs/nini",
+            "assets/songs/cyaegha",
         ];
         for(let i = 0; i < songPaths.length; i++) {
             const song = new Song(this, "Song" + i, songPaths[i]);
@@ -143,6 +149,8 @@ class Preload extends Phaser.Scene {
 
         this.load.audio(SFXId.METRONOME1, "assets/sfx/metronome1.mp3");
         this.load.audio(SFXId.METRONOME2, "assets/sfx/metronome2.mp3");
+
+        this.load.audio(SFXId.SELECT, "assets/sfx/song_select.mp3");
 
         // UI
         this.load.spritesheet(SpriteId.BUTTON_DOWN, "assets/ui/ARROWDOWN.png", {frameWidth: 17, frameHeight: 16});
@@ -243,7 +251,8 @@ class Preload extends Phaser.Scene {
             repeat: -1
         });
 
-        this.scene.start("Debug"); // Test
+        //this.scene.start("Debug");
+        this.scene.start("SongSelectScene"); // Test
     }
 
     update() {

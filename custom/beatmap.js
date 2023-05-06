@@ -707,7 +707,13 @@ class Beatmap {
         let nextTempo = 0;
 
         /** Need to determine by the hit position and the spawn position to know how many sec needed  */
-        const spawnEarlySec = this.scene.travelTime * 0.001; 
+        let earlyTime;
+        if(this.scene.travelTime == null) {
+            earlyTime = 0;
+        } else {
+            earlyTime = this.scene.travelTime * 0.001;
+        }
+        const spawnEarlySec = earlyTime; 
         /** Time adding in the loop when counting beat timing, more decimal places means more precise the timing calculate will be */
         const timePrecision = 0.001;
 
@@ -756,7 +762,6 @@ class Beatmap {
                 if(this.beats[i].equal(currentData[j].beatCount)) {
                     const spawn = new NoteSpawn(this.beats[i].time, this.secondPerBeat, currentData[j], idCount); // Create the note spawn object
                     this.noteSpawns.push(spawn);
-
                     if(spawn.type === NoteType.HOLD) {
                         // End Note data
                         const d = new NoteData(currentData[j].beat, currentData[j].subBeat, currentData[j].holdSnapDivisor, 
@@ -781,7 +786,6 @@ class Beatmap {
         this.noteSpawns.reverse();
         this.accurateBeats.reverse();
         this.endNoteSpawns.reverse();
-
         // Debug variables
         this.lastNoteSpawnTime = -9999;
         this.deltaNoteTime = 0;
@@ -1023,6 +1027,31 @@ class Beatmap {
     jumpTo(t) {
 
         this.song.song.setSeek(t);
+    }
+
+    getPreviewBeats(t) {
+        let removeCount = 0;
+        // for(let i = this.noteSpawns.length - 1; i >= 0; i--) {
+        //     if(this.noteSpawns[i].spawnTime <= t) {
+        //         removeCount++;
+        //     }
+        // }
+        // for(let i = 0; i < removeCount; i++) {
+        //     this.noteSpawns.pop();
+        // }
+
+        // return Array.from(this.noteSpawns);
+
+        for(let i = this.accurateBeats.length - 1; i >= 0; i--) {
+            if(this.accurateBeats[i].time <= t) {
+                removeCount++;
+            }
+        }
+
+        for(let i = 0; i < removeCount; i++) {
+            this.accurateBeats.pop();
+        }
+        return Array.from(this.accurateBeats);
     }
 }
 

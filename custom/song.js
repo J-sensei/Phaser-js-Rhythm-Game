@@ -1,7 +1,7 @@
-const musicConfig = {
-    volume: 0.5,
-    loop: false,
-}
+// const musicConfig = {
+//     volume: 0.5,
+//     loop: false,
+// }
 
 /**
  * Song data, contains function use to play song and song data
@@ -22,7 +22,8 @@ class Song extends Phaser.GameObjects.Sprite {
         /** Unique ID for song asset */
         this.songId = this.id;
         /** Unique ID for song data asset */
-        this.dataId = this.id + ".data"
+        this.dataId = this.id + ".data";
+        this.imageId = this.id + ".image";
     }
 
     /**
@@ -31,6 +32,7 @@ class Song extends Phaser.GameObjects.Sprite {
     preload() {
         this.scene.load.json(this.dataId, this.path + "/data.json"); // Load the data
         this.scene.load.audio(this.songId, [this.path + "/song.mp3"]); // Load the song
+        this.scene.load.image(this.imageId, this.path + "/cover.png");
     }
 
     /**
@@ -39,6 +41,13 @@ class Song extends Phaser.GameObjects.Sprite {
     create() {
         /** Audio reference */
         this.song = this.scene.sound.add(this.id); // Crate the song
+        //this.image = this.scene.add.image(0, 0, this.imageId);
+        // this.image.width = 250;
+        // this.image.height = 250;
+        //console.log("Image width: " + this.image.width + " Image height: " + this.image.height);
+        // this.circleImage = new CircleImage(this.scene, 500, 350, this.image, 250/2);
+        // this.circleImage.setScale(0.5);
+
         /** Data of the song */
         let data = this.scene.cache.json.get(this.dataId); // Get json data
         // TODO: load map data here
@@ -49,7 +58,161 @@ class Song extends Phaser.GameObjects.Sprite {
         this.name = data.name;
         /** Artist Name */
         this.artist = data.artist;
+        /** Song BPM(Beat Per Minute) */
+        this.bpm = data.bpm;
+        /** Offset to start counting BPM */
+        this.offset = data.offset;
+        /** Source of the music (From other video game or album) */
+        this.source = data.source;
+
+        // Preview song
+        // Test Bye or Not
+        /** Preview start time */
+        this.previewStartTimeline = data.previewStart;
+        /** Preview end time */
+        this.previewEndTimeline = data.previewEnd;
         this.data = data;
+
+        // Create beatmap to get the beat!
+        this.beatmapConfig = {
+            bpm: this.bpm,
+            offset: this.offset
+        }
+        this.beatmap = new Beatmap(this, this, this.beatmapConfig);
+        this.beatmap.create();
+    }
+
+    createImage(scene, x, y) {
+        const size = 400;
+        this.image = scene.add.rexCircleMaskImage(x, y, this.imageId, null, null);
+        console.log("Image width: " + this.image.width + " Image height: " + this.image.height + " Scale: " + this.image.scale);
+
+        this.imageScaleX = size / this.image.width;
+        this.imageScaleY = size / this.image.height;
+
+        this.image.setScale(this.imageScaleX, this.imageScaleY);
+        console.log("Image width: " + this.image.width + " Image height: " + this.image.height + " Scale: " + this.image.scale);
+
+        const tween = scene.tweens.add({
+            ease: 'Linear',
+            targets: this.image, // Set to this note object
+            angle: this.image.angle + 360,
+            duration: 170 * 20,
+            repeat: -1,
+            callbackScope: this,
+        });
+        
+        // Create labels
+        this.sourceLabel = scene.add.text(x, y + 250, this.source, {
+            fontFamily: 'Silkscreen', 
+            fontSize: 32
+        }).setOrigin(0.5); 
+        this.songNameLabel = scene.add.text(x, y + 250 + 32 + 5, "Name: " + this.name, {
+            fontFamily: 'Silkscreen', 
+            fontSize: 32
+        }).setOrigin(0.5); 
+        this.artistLabel = scene.add.text(x, y + 250 + 32*2 + 5, "Artist: " + this.artist, {
+            fontFamily: 'Silkscreen', 
+            fontSize: 32
+        }).setOrigin(0.5); 
+        this.bpmLabel = scene.add.text(x, y + 250 + 32*3 + 5, "BPM: " + this.bpm, {
+            fontFamily: 'Silkscreen', 
+            fontSize: 32
+        }).setOrigin(0.5); 
+    }
+
+    preview(scene) {        
+        this.previewAudio = scene.plugins.get('rexsoundfadeplugin').fadeIn(this.song, 2000, AudioConfig.music, 0);
+        this.previewAudio.seek = this.previewStartTimeline;
+        this.previewStart = true;
+        this.noteBeats = this.beatmap.getPreviewBeats(this.previewStartTimeline);
+    }
+
+    switchOut() {
+        this.previewAudio.stop();
+        this.image.destroy();
+        this.sourceLabel.destroy();
+        this.songNameLabel.destroy();
+        this.artistLabel.destroy();
+        this.bpmLabel.destroy();
+    }
+
+    updatePreview(scene) {
+        if(this.previewAudio == null) return;
+        if(this.previewAudio.isPlaying && this.previewAudio.seek >= this.previewEndTimeline && this.previewStart) {
+            const seek = this.previewAudio.seek;
+            this.previewAudio.stop();
+            this.previewAudio = scene.plugins.get('rexsoundfadeplugin').fadeOut(this.previewAudio, 2000, false);
+            this.previewAudio.seek = seek;
+            this.previewStart = false;
+        }
+
+        if(!this.previewStart && !this.previewAudio.isPlaying) {
+            // this.previewAudio = scene.plugins.get('rexsoundfadeplugin').fadeIn(this.song, 2000, AudioConfig.music, 0);
+            // this.previewAudio.seek = this.previewStartTimeline;
+            // this.previewStart = true;
+            // this.noteBeats = this.beatmap.getPreviewBeats(this.previewStartTimeline);
+            this.preview(scene);
+        }
+
+        // Change the scale with the beat
+        if(this.previewAudio.isPlaying) {
+            // let remove = false;
+            // for(let i = this.noteBeats.length - 1; i >= 0; i--) {
+            //     if(this.previewAudio.seek >= this.noteBeats[i].spawnTime) {
+            //         console.log("Beat!!! " + this.noteBeats[i].type);
+            //         remove = true;
+
+            //         let scaleMultiplier = 1;
+            //         let duration = 100;
+            //         switch(this.noteBeats[i].type) {
+            //             case NoteType.NORMAL:
+            //                 scaleMultiplier = 1.08;
+            //             break;
+            //             case NoteType.HOLD:
+            //                 scaleMultiplier = 1.03;
+            //             break;
+            //             case NoteType.BIG_NOTE:
+            //                 scaleMultiplier = 1.2;
+            //             break;
+            //         }
+
+            //         // Tween the image scale
+            //         const tween = scene.tweens.add({
+            //             ease: 'Linear',
+            //             targets: this.image, // Set to this note object
+            //             scale: this.imageScaleX * scaleMultiplier,
+            //             duration: 150,
+            //             repeat: 0,
+            //             onComplete: function() {
+            //                 this.image.setScale(this.imageScaleX, this.imageScaleY);
+            //             },
+            //             callbackScope: this
+            //         });     
+            //     }
+            // }
+
+            // if(remove) {
+            //     this.noteBeats.pop();
+            // }
+
+            if(this.noteBeats.length > 0) {
+                if(this.previewAudio.seek >= this.noteBeats[this.noteBeats.length - 1].time) {
+                    const tween = scene.tweens.add({
+                        ease: 'Linear',
+                        targets: this.image, // Set to this note object
+                        scale: this.imageScaleX * 1.1,
+                        duration: 125,
+                        repeat: 0,
+                        onComplete: function() {
+                            this.image.setScale(this.imageScaleX, this.imageScaleY);
+                        },
+                        callbackScope: this
+                    });     
+                    this.noteBeats.pop(); // Removed the beat at the end
+                }
+            }
+        }
     }
 
     play(delay) {

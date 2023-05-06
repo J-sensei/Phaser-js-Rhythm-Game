@@ -148,7 +148,7 @@ class Note extends Phaser.GameObjects.Sprite {
         // Create tweens
         // Power0 == Linear
         const tween = scene.tweens.add({
-            ease: 'Power0',
+            ease: 'Linear',
             targets: this, // Set to this note object
             x: destX, // Destination in x position
             duration: travelTime - delayOffset, // Time required travel to destination (Subtract by the delay)
@@ -159,11 +159,11 @@ class Note extends Phaser.GameObjects.Sprite {
                  * If the note is still not destroy,
                  * create another tween with same properties (to have constant speed) to move it to behind
                  */
-                scene.tweens.add({
+                const tween2 = scene.tweens.add({
                     ease: 'Power0',
                     targets: this,
                     x: this.x - distance, // Apply the distance between calculated here to have constant speed
-                    duration: travelTime - delayOffset,
+                    duration: travelTime,
                     repeat: 0,
                     onComplete: function() {
                         // If the tween is completed, destroy the note as it should out of screen
@@ -178,7 +178,8 @@ class Note extends Phaser.GameObjects.Sprite {
                 });
             },
             callbackScope: this
-        });
+        });     
+        //tween.seek(0); 
         
         // Different note type will have move in from above        
         if(type === NoteType.HOLD || type === NoteType.BIG_NOTE) {
@@ -555,7 +556,7 @@ class Note extends Phaser.GameObjects.Sprite {
         });
 
         // Add tween to rotate the object
-        let tween = this.scene.tweens.add({
+        const rotateTween = this.scene.tweens.add({
             targets: this,
             angle: this.angle + 360,
             duration: 1000,

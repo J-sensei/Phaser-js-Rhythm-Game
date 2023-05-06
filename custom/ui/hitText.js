@@ -41,7 +41,7 @@ class HitText extends Phaser.GameObjects.Text {
             duration: d,
             repeat: 0,
             onComplete: function() {
-                console.log("Text destroy");
+                //console.log("Text destroy");
                 this.destroy();
             },
             callbackScope: this,

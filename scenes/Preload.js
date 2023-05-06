@@ -7,9 +7,11 @@ Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 
 /** Test Song Class */
 let currentSong = null;
+
 const SceneKey = {
     PRELOAD: "Preload",
 }
+
 const SpriteId = {
     PLAYER_RUN: "PlayerRun",
     PLAYER_ATTACK: "PlayerAttack",
@@ -77,8 +79,6 @@ class Preload extends Phaser.Scene {
     }
 
     preload() {
-        //this.load.audio("Song1", ["assets/songs/rejection-open your heart/song.mp3"]);
-        
         // Load song
         this.testSong = new Song(this, "Song1", "assets/songs/PSYQUI-bye or not");
         //this.testSong = new Song(this, "Song1", "assets/songs/rejection-open your heart");

@@ -324,8 +324,15 @@ class Note extends Phaser.GameObjects.Sprite {
         };
     }
 
-    static Instantiate(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, colliderX, colliderY, offsetX, offsetY) {
-        let note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, colliderX, colliderY, offsetX, offsetY);
+    static Instantiate(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote) {
+        let note;
+        if(type === NoteType.END) {
+            note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, null, parentNote);
+            console.log(parentNote);
+            parentNote.endNote = note;
+        } else {
+            note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, holdTime);
+        }
         note.setId(Note.NoteCount);
         Note.NoteCount++;
         return note;
@@ -343,7 +350,7 @@ class Note extends Phaser.GameObjects.Sprite {
         let notesArray = []; // Empty note array
         for(let i = 0; i < Note.Notes.getChildren().length; i++) {
             let note = Note.Notes.getChildren()[i]; // Get the note
-            note.update(player, scene, playTime); // Update note here
+            note.update(player, playTime); // Update note here
             let distance = 0; // Distance between note and the judgement colliders
 
             // Check which lane the note is to calculate the distance
@@ -438,7 +445,7 @@ class Note extends Phaser.GameObjects.Sprite {
         return note;
     }
 
-    update(player, scene, playTime) {
+    update(player, playTime) {
         this.circle.x = this.x;
         this.circle.y = this.y;
 
@@ -471,14 +478,23 @@ class Note extends Phaser.GameObjects.Sprite {
                 // this.endNote = new Note(this.scene, SpriteId.BOT_RUNNING, this.spawnX, this.spawnY, 
                 //     this.destX, this.destY, this.travelTime, this.down, NoteType.END, null, this);
                 
-                this.endNote = new Note(this.scene, SpriteId.VEHICLE1, this.spawnX, this.spawnY, 
-                    this.destX, this.destY, this.travelTime, this.down, NoteType.END, null, this);
-                this.endNote.play(AnimationId.VEHICLE1);
-                this.endNote.flipX = true;
-                this.endNoteSpawned = true;
+                // Temp Closed
+                // this.endNote = new Note(this.scene, SpriteId.VEHICLE1, this.spawnX, this.spawnY, 
+                //     this.destX, this.destY, this.travelTime, this.down, NoteType.END, null, this);
+                // this.endNote.play(AnimationId.VEHICLE1);
+                // this.endNote.flipX = true;
+                // this.endNoteSpawned = true;
             }
 
-            if(this.endNoteSpawned) { // The end note spawned, update the line with the end note position
+            // if(this.endNoteSpawned) { // The end note spawned, update the line with the end note position
+            //     const distance = this.endNote.x - this.x; // Get the distance of the end note to the position of the note
+            //     this.line.setTo(0, 0, distance, 0); // Change the distination x position of the line
+            // } else {
+            //     const distance = this.spawnX - this.x; // End note not spawn yet, update the line with the spawn position
+            //     this.line.setTo(0, 0, distance, 0);
+            // }
+
+            if(this.endNote != null) {
                 const distance = this.endNote.x - this.x; // Get the distance of the end note to the position of the note
                 this.line.setTo(0, 0, distance, 0); // Change the distination x position of the line
             } else {
@@ -486,41 +502,18 @@ class Note extends Phaser.GameObjects.Sprite {
                 this.line.setTo(0, 0, distance, 0);
             }
 
-            // Method 2
-            // if(this.spawnEndNoteTime > 0) { // Update when spawn note is not spawn yet
-                    
-            //         // if(testSong1.currentTime() > this.spawnEndNoteTime) {
-            //         //     this.spawnEndNoteTime -= this.deltaPlayTime; // Minus time
-            //         // } else {
-            //         //     this.spawnEndNoteTime -= this.endNoteSpawnDeltaTime; // Minus time
-            //         // }
-            //         this.spawnEndNoteTime -= this.endNoteSpawnDeltaTime; // Minus delta time
-            //         // Spawn end note
-            //         if(this.spawnEndNoteTime <= 0) {
-            //             // Same position, destination, travel time and land but its END note
-            //             this.endNote = new Note(this.scene, SpriteId.BOT_RUNNING, this.spawnX, this.spawnY, 
-            //                 this.destX, this.destY, this.travelTime, this.down, NoteType.END);
-            //         }
-                    
-            // }
-            // else { 
-            //         // End note is spawned
-            //         const distance = this.endNote.x - this.x; // Get the distance of the end note to the position of the note
-            //         this.line.setTo(0, 0, distance, 0); // Change the distination x position of the line
-            // }
-
             // Check holding note until the end
             // When the note is ready to hold
             if(this.activeHold) {
                 // Player still holding it
                 if(player.holding && player.compareLane(this.down)) {
                     //this.holdTime -= this.deltaPlayTime; // Minus the delta playtime
-                    this.holdTime -= this.endNoteSpawnDeltaTime; // Minus the delta playtime
-                    // Player successfully hold the note
-                    if(this.holdTime <= 0) {
-                        Note.HoldHit.play(Note.SFXConfig);
-                        this.destroyNote();
-                    }
+                    // this.holdTime -= this.endNoteSpawnDeltaTime; // Minus the delta playtime
+                    // // Player successfully hold the note
+                    // if(this.holdTime <= 0) {
+                    //     Note.HoldHit.play(Note.SFXConfig);
+                    //     this.destroyNote();
+                    // }
                 } else { // Player failed to hold it while the active hold is still true
                     // Update the end note hitDistance
                     // Determine if the distance if release early
@@ -533,12 +526,6 @@ class Note extends Phaser.GameObjects.Sprite {
 
                         Note.JudgeNote(this.endNote);
                         HitText.NoteHitInstantiate(Note.Scene, this.endNote);
-                        // let text;
-                        // if(this.down) {
-                        //     text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, this.endNote.result, null, 32);
-                        // } else {
-                        //     text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, this.endNote.result, null, 32);
-                        // }
                         
                         // If the result are not bad or miss
                         if(this.endNote.result != NoteHitResult.BAD && this.endNote.result != NoteHitResult.MISS) {
@@ -548,18 +535,11 @@ class Note extends Phaser.GameObjects.Sprite {
                         //text.destroyText();
                         Score.GetInstance().add(this.endNote.result);
                         this.destroyNote();
-                    } else { // Miss
-                        // let text;
-                        // if(this.down) {
-                        //     text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, NoteHitResult.MISS, null, 32);
-                        // } else {
-                        //     text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, NoteHitResult.MISS, null, 32);
-                        // }
-                        this.result = NoteHitResult.MISS;
+                    } else { // Miss as end note note even spawn yet (Miss very early)
+                        this.result = NoteHitResult.MISS; // Manually put the result as miss
                         HitText.NoteHitInstantiate(Note.Scene, this);
-                        //text.destroyText();
                         Score.GetInstance().add(NoteHitResult.MISS);
-                        this.destroyNote();
+                        this.destroyNote(); // Can safely destroy the note right away
                     }
                 }
             }

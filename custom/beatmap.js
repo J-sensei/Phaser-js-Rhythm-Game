@@ -688,7 +688,7 @@ class Beatmap {
 
         /** Need to determine by the hit position and the spawn position to know how many sec needed  */
         const spawnEarlySec = this.scene.travelTime * 0.001; 
-        /** Time adding in the loop when counting beat timing */
+        /** Time adding in the loop when counting beat timing, more decimal places means more precise the timing calculate will be */
         const timePrecision = 0.00001;
 
         /** All beats for the song */
@@ -699,6 +699,10 @@ class Beatmap {
         this.noteSpawns = [];
         /** Beat count when looping the song */
         let beatCounting = new BeatCount();
+
+        // TODO: upgrade end note logic
+        /** End Notes queue to spawn */
+        this.endNoteSpawns = [];
 
         // Loop the whole song in miliseconds precision
         while(n < this.songDuration - this.offset) {
@@ -723,19 +727,31 @@ class Beatmap {
 
         // Note data instantiate
         const currentData = this.data2; // Map data for the song
+        let idCount = 0;
         // Loop through all the beats available
         for(let i = 0; i < this.beats.length; i++) {
             // Calculate the notes to spawn
             for(let j = 0; j < currentData.length; j++) {
                 // If the beat is euqal
                 if(this.beats[i].equal(currentData[j].beatCount)) {
-                    const spawn = new NoteSpawn(this.beats[i].time, this.secondPerBeat, currentData[j]); // Create the note spawn object
+                    const spawn = new NoteSpawn(this.beats[i].time, this.secondPerBeat, currentData[j], idCount); // Create the note spawn object
                     this.noteSpawns.push(spawn);
+
+                    if(spawn.type === NoteType.HOLD) {
+                        // End Note data
+                        const d = new NoteData(currentData[j].beat, currentData[j].subBeat, currentData[j].holdSnapDivisor, 
+                            currentData[j].holdMultiplier, 4, 0, 0, currentData[j].down);
+                        // End note spawn
+                        const spawn = new NoteSpawn(this.beats[i].time, this.secondPerBeat, d, idCount);
+                        // End note spawns array
+                        this.endNoteSpawns.push(new EndNoteSpawn(spawn, null));
+                    }
 
                     // Checking if any mistake is made in the note data
                     if(this.noteSpawns.length > 1 && spawn.equal(this.noteSpawns[this.noteSpawns.length - 2])) {
                         console.warn("[Beatmap] Duplicate note found at " + spawn.beatCount.getBeatCountString());
                     }
+                    idCount++;
                 }
             }
         }
@@ -744,6 +760,8 @@ class Beatmap {
         this.beats.reverse();
         this.noteSpawns.reverse();
         this.accurateBeats.reverse();
+        this.endNoteSpawns.reverse();
+        console.log(this.endNoteSpawns);
     }
 
     /**
@@ -786,10 +804,20 @@ class Beatmap {
             let remove = false;
             /** How many note are needed to be remove */
             let removeCount = 0;
+
+            // Spawn note
             for(let i = this.noteSpawns.length - 1; i >= 0; i--) {
                 // Spawn note if the time is matched or more than the playtime
                 if(playTime >= this.noteSpawns[i].spawnTime) {
-                    this.instantiateNote(this.noteSpawns[i]); // Instantiate the note
+                    const note = this.instantiateNote(this.noteSpawns[i]); // Instantiate the note
+
+                    // If the note spawned is hold, add the end note spawn
+                    if(this.noteSpawns[i].type === NoteType.HOLD) {
+                        // End note spawn should be found as it is initialized properly in create method
+                        const endNoteSpawn = this.endNoteSpawns.find((x) => x.noteSpawn.id == this.noteSpawns[i].id);
+                        endNoteSpawn.parentNote = note;
+                        //console.log(endNoteSpawn);
+                    }
                     remove = true; // Note is instansiated, so remove it
                     removeCount++;
                 } else {
@@ -804,12 +832,34 @@ class Beatmap {
             }
 
             remove = false; // Reuse the variable for drawing beat line
+            removeCount = 0;
+            // Spawn End Note
+            for(let i = this.endNoteSpawns.length - 1; i >= 0; i--) {
+                //console.log(this.endNoteSpawns[i].noteSpawn.spawnTime + " " + playTime);
+                if(playTime >= this.endNoteSpawns[i].noteSpawn.spawnTime) {
+                    console.log("End Note Spawned");
+                    if(this.endNoteSpawns[i].parentNote != null) {
+                        const note = this.instantiateNote(this.endNoteSpawns[i].noteSpawn, this.endNoteSpawns[i].parentNote);
+                        remove = true; // Note is instansiated or the parent note is destroyed already, so remove it
+                        removeCount++;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            if(remove) {
+                for(let i = 0; i < removeCount; i++) 
+                    this.endNoteSpawns.pop();
+            }
+
+            remove = false; // Reuse the variable for drawing beat line
             // Draw beat lines to visualize the beat
             if(this.drawBeatLine) {
                 // Loop all the beats
-                for(let i = this.currentBeats.length - 1; i >= 0; i--) {
+                for(let i = this.spawnBeats.length - 1; i >= 0; i--) {
                     // If matched with the song playtime
-                    if(playTime >= this.currentBeats[i].time) {
+                    if(playTime >= this.spawnBeats[i].time) {
                         // Draw line
                         this.drawBeatLineVisual();
                         remove = true;
@@ -817,7 +867,7 @@ class Beatmap {
                     }
                 }
                 if(remove) {
-                    this.currentBeats.pop(); // Remove it from current beats
+                    this.spawnBeats.pop(); // Remove it from current beats
                 }
             }
         }
@@ -831,12 +881,7 @@ class Beatmap {
         this.nextSongTempo = this.offset;
 
         /** An array to reference the beats, as do not want to change the orginal beats array */
-        this.currentBeats = this.beats;
-    }
-
-    /** Add a new note spawn (For End Note) */
-    addNoteSpawn() {
-
+        this.spawnBeats = Array.from(this.beats);
     }
 
     /** Debug to visualize the beat lines */
@@ -867,14 +912,22 @@ class Beatmap {
         return this.currentBeatCount.getBeatCountString();
     }
 
-    /** Spawn an note from the scene (Beatmap scene) */
-    instantiateNote(note) {
-        if(note.type == NoteType.HOLD) {
-            this.scene.instantiateNote(note.type, note.down, note.holdTime); // Need hold time reference
+    /**
+     * Spawn an note from the scene (Beatmap scene)
+     * @param {Note} note 
+     * @returns Note
+     */
+    instantiateNote(note, parentNote) {
+        let n = null;
+        if(note.type === NoteType.HOLD) {
+            n = this.scene.instantiateNote(note.type, note.down, note.holdTime); // Need hold time reference
+        } else if(note.type === NoteType.END) {
+            n = this.scene.instantiateNote(note.type, note.down, null, parentNote);
         } else {
-            this.scene.instantiateNote(note.type, note.down);
+            n = this.scene.instantiateNote(note.type, note.down);
         }
-
+        
+        return n;
     }
 
     // TODO: instantly jump to certain progress of the song and the notes
@@ -895,13 +948,13 @@ class Beatmap {
         }
 
         removeCount = 0;
-        for(let i = 0; i < this.currentBeats; i++) {
-            if(this.currentBeats[i].time <= t) {
+        for(let i = 0; i < this.spawnBeats; i++) {
+            if(this.spawnBeats[i].time <= t) {
                 removeCount++;
             }
         }
         for(let i = 0; i < removeCount; i++) {
-            this.currentBeats.shift();
+            this.spawnBeats.shift();
         }
 
         removeCount = 0;
@@ -916,10 +969,15 @@ class Beatmap {
 
         this.song.song.setSeek(t);
     }
+
+    /** Add a new note spawn (For End Note) */
+    addNoteSpawn() {
+
+    }
 }
 
 class NoteSpawn {
-    constructor(time, tempo, noteData) {
+    constructor(time, tempo, noteData, id) {
         this.spawnTime = time + ((tempo / noteData.beatSnapDivisor) * noteData.beatSnapDivisorPosition);
         this.type = noteData.type;
         if(this.type == NoteType.HOLD) {
@@ -933,6 +991,7 @@ class NoteSpawn {
         this.time = time;
         this.down = noteData.down;
         this.data = noteData;
+        this.id = id;
     }
 
     equal(noteSpawn) {
@@ -941,6 +1000,14 @@ class NoteSpawn {
         } else {
             return false;
         }
+    }
+}
+
+/** Responsible to add the end note spawn logic */
+class EndNoteSpawn {
+    constructor(noteSpawn, parentNote) {
+        this.noteSpawn = noteSpawn;
+        this.parentNote = parentNote;
     }
 }
 
@@ -960,7 +1027,7 @@ class NoteData {
      * @param {int} subBeat 
      * @param {int} beatSnapDivisor 
      * @param {int} beatSnapDivisorPosition 
-     * @param {int} type Note Type 0 - Normal, 1 - Hold, 2 - No Hit
+     * @param {int} type Note Type 0 - Normal, 1 - Hold, 2 - No Hit, 3 - Big Note, 4 - End Note
      * @param {int} down Note 0 - false, 1 - true
      */
     constructor(beat, subBeat, beatSnapDivisor, beatSnapDivisorPosition, type, holdSnapDivisor, holdMultiplier, down) {
@@ -996,6 +1063,9 @@ class NoteData {
                     break;
                 case 3:
                     this.type = NoteType.BIG_NOTE;
+                    break;
+                case 4:
+                    this.type = NoteType.END;
                     break;
                 default:
                     this.type = NoteType.NORMAL;

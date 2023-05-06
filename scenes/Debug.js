@@ -16,7 +16,6 @@ class Debug extends Phaser.Scene {
     create() {
         this.skipTime = 100;
         this.skip = false;
-        Note.Reset(this); // Reset the note
         this.noteCount = 0; // Reset the note count
         this.travelTime = 950;
         this.beatmap = new Beatmap(this, currentSong); // Test
@@ -27,8 +26,9 @@ class Debug extends Phaser.Scene {
         if(this.skip)
             this.beatmap.setSkip(this.skipTime); // Skip song
 
-        /** Test score counter */
-        this.score = new Score(); Score.GetInstance();
+        Note.Reset(this); // Reset the note
+        /** Reference to score class */
+        this.score = Score.GetInstance();
 
         // Background
         const {width, height} = this.scale; // Take the screen width and height
@@ -235,9 +235,17 @@ class Debug extends Phaser.Scene {
         this.noteCount++;
     }
 
-    instantiateNote(type, down, holdTime) {
+    /**
+     * Instantiate note to the current scene
+     * @param {string} type 
+     * @param {bool} down 
+     * @param {number} holdTime 
+     * @returns Note
+     */
+    instantiateNote(type, down, holdTime, parentNote) {
         let spawn;
         let judgementPos;
+        let n = null; // Note
         if(down) {
             spawn = new Phaser.Math.Vector2(NoteSpawnPoint[0].x, NoteSpawnPoint[0].y);
             judgementPos = new Phaser.Math.Vector2(JudgementPositions[0].x, JudgementPositions[0].y);
@@ -248,24 +256,31 @@ class Debug extends Phaser.Scene {
         }
 
         if(type == NoteType.HOLD) {
-            let n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
+            n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
                 judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime);
             n.play(AnimationId.VEHICLE1);
             n.flipX = true;
         } else if(type == NoteType.NORMAL) {
-            let n = Note.Instantiate(this, SpriteId.CONE, spawn.x, spawn.y, 
+            n = Note.Instantiate(this, SpriteId.CONE, spawn.x, spawn.y, 
                 judgementPos.x, judgementPos.y, this.travelTime, down, type);
             n.setScale(0.2);
         } else if(type === NoteType.NO_HIT) {
-            let n = Note.Instantiate(this, SpriteId.MUSIC_NOTE, spawn.x, spawn.y, 
+            n = Note.Instantiate(this, SpriteId.MUSIC_NOTE, spawn.x, spawn.y, 
                 judgementPos.x, judgementPos.y, this.travelTime, down, type);
             n.setScale(0.15);
         } else if(type === NoteType.BIG_NOTE) {
-            let n = Note.Instantiate(this, SpriteId.VEHICLE2, spawn.x, spawn.y, 
+            n = Note.Instantiate(this, SpriteId.VEHICLE2, spawn.x, spawn.y, 
                 judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime);
             n.play(AnimationId.VEHICLE2);
             n.flipX = true;
             n.setScale(0.8);
+        } else if(type === NoteType.END) {
+            n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
+                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, parentNote);
+            n.play(AnimationId.VEHICLE1);
+            n.flipX = true;
         }
+
+        return n;
     }
 }

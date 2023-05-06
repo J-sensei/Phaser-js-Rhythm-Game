@@ -781,6 +781,12 @@ class Beatmap {
         this.noteSpawns.reverse();
         this.accurateBeats.reverse();
         this.endNoteSpawns.reverse();
+
+        // Debug variables
+        this.lastNoteSpawnTime = -9999;
+        this.deltaNoteTime = 0;
+        /** Determine how many delay the note is spawn than the expected time */
+        this.noteSpawnDelay = 0;
     }
 
     /**
@@ -788,6 +794,7 @@ class Beatmap {
      * @param {number} playTime Current seek value of the song
      */
     update(playTime) {
+        this.noteSpawnDelay = 0; // Assume no delay at first
         // Song Skip
         if(this.skip) {
             if(playTime >= this.skipTime) {
@@ -828,9 +835,11 @@ class Beatmap {
 
             // Spawn note
             for(let i = this.noteSpawns.length - 1; i >= 0; i--) {
-                // Spawn note if the time is matched or more than the playtime
-                if(playTime >= this.noteSpawns[i].spawnTime) {
-                    const note = this.instantiateNote(this.noteSpawns[i]); // Instantiate the note
+                // Spawn note if the time is matched or more than the playtime 
+                let spawnTime = this.noteSpawns[i].spawnTime;
+                if(playTime >= spawnTime) {
+                    this.calculateNoteDelay(playTime, this.noteSpawns[i].spawnTime); // Calculate the delay
+                    const note = this.instantiateNote(this.noteSpawns[i], null, this.noteSpawnDelay * 1000); // Instantiate the note
 
                     // If the note spawned is hold, add the end note spawn
                     if(this.noteSpawns[i].type === NoteType.HOLD) {
@@ -846,10 +855,18 @@ class Beatmap {
             }
             
             if(remove) {
+                // Calculate delta spawn time
+                const t = new Date().getTime();
+                if(this.lastNoteSpawnTime > -999) {
+                    this.deltaNoteTime = (t * 0.001) - (this.lastNoteSpawnTime * 0.001);
+                }
+                this.lastNoteSpawnTime = t;
+
                 // Pop the array depends on how many note are required to remove
                 for(let i = 0; i < removeCount; i++) 
                     this.noteSpawns.pop();
             }
+            //console.log(this.deltaNoteTime);
 
             remove = false; // Reuse the variable for drawing beat line
             removeCount = 0;
@@ -858,7 +875,8 @@ class Beatmap {
                 //console.log(this.endNoteSpawns[i].noteSpawn.spawnTime + " " + playTime);
                 if(playTime >= this.endNoteSpawns[i].noteSpawn.spawnTime) {
                     if(this.endNoteSpawns[i].parentNote != null) {
-                        const note = this.instantiateNote(this.endNoteSpawns[i].noteSpawn, this.endNoteSpawns[i].parentNote);
+                        this.calculateNoteDelay(playTime, this.endNoteSpawns[i].noteSpawn.spawnTime);
+                        const note = this.instantiateNote(this.endNoteSpawns[i].noteSpawn, this.endNoteSpawns[i].parentNote, this.noteSpawnDelay * 1000);
                         remove = true; // Note is instansiated or the parent note is destroyed already, so remove it
                         removeCount++;
                     }
@@ -935,17 +953,22 @@ class Beatmap {
      * @param {Note} note 
      * @returns Note
      */
-    instantiateNote(note, parentNote) {
+    instantiateNote(note, parentNote, delay) {
         let n = null;
         if(note.type === NoteType.HOLD) {
-            n = this.scene.instantiateNote(note.type, note.down, note.holdTime); // Need hold time reference
+            n = this.scene.instantiateNote(note.type, note.down, note.holdTime, null, delay); // Need hold time reference
         } else if(note.type === NoteType.END) {
-            n = this.scene.instantiateNote(note.type, note.down, null, parentNote);
+            n = this.scene.instantiateNote(note.type, note.down, null, parentNote, delay);
         } else {
-            n = this.scene.instantiateNote(note.type, note.down);
+            n = this.scene.instantiateNote(note.type, note.down, null, null, delay);
         }
         
         return n;
+    }
+
+    calculateNoteDelay(actualTime, expectedTime) {
+        this.noteSpawnDelay = actualTime - expectedTime;
+        //console.log("Note Spawned Delay: " + this.noteSpawnDelay + "s :: " + (this.noteSpawnDelay * 1000) + "ms");
     }
 
     // TODO: instantly jump to certain progress of the song and the notes

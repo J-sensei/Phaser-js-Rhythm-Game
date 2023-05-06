@@ -134,6 +134,7 @@ class Preload extends Phaser.Scene {
         // Particle
         this.load.image(ParticleKey.HIT_PARTICLE, "assets/particle/star.png");
 
+        // Sound Effect
         this.load.audio(SFXId.NOTE_HIT, "assets/sfx/punch.wav");
         this.load.audio(SFXId.NOTE_HOLD_HIT, "assets/sfx/holdHit.wav");
         this.load.audio(SFXId.MUSIC_HIT, "assets/sfx/music_hit.wav");
@@ -143,6 +144,7 @@ class Preload extends Phaser.Scene {
         this.load.audio(SFXId.METRONOME1, "assets/sfx/metronome1.mp3");
         this.load.audio(SFXId.METRONOME2, "assets/sfx/metronome2.mp3");
 
+        // UI
         this.load.spritesheet(SpriteId.BUTTON_DOWN, "assets/ui/ARROWDOWN.png", {frameWidth: 17, frameHeight: 16});
         this.load.spritesheet(SpriteId.BUTTON_UP, "assets/ui/ARROWUP.png", {frameWidth: 17, frameHeight: 16});
     }

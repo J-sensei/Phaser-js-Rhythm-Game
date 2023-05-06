@@ -76,7 +76,7 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {number} holdTime Hold required to hold the note (Only use for hold note) (Deprecated)
      * @param {Note} parentNote Parent note to for the refenerece (Only use for end note)
      */
-    constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote) {
+    constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote, delay) {
         super(scene, x, y, key); // Create sprite
         /** Scene reference */
         this.scene = scene;
@@ -135,12 +135,23 @@ class Note extends Phaser.GameObjects.Sprite {
         /** Note scrolling using tween */
         /** Distance between spawn and destination x position */
         const distance = x - destX;
+
+        // Offset delay
+        // **As every note will not spawn in perfect timing, 
+        // **need to subtract duration with the delay to deliver perfect timing to the judgement colliders
+        //console.log("This NOTE("+type+") spawned delay: " + delay + "ms");
+        /** A delay when the note is spawned (millisecond) */
+        let delayOffset = 0;
+        if(!isNaN(delay)) { // As long as the delay can be catch
+            delayOffset = delay;
+        }
         // Create tweens
+        // Power0 == Linear
         const tween = scene.tweens.add({
             ease: 'Power0',
             targets: this, // Set to this note object
             x: destX, // Destination in x position
-            duration: travelTime, // Time required travel to destination
+            duration: travelTime - delayOffset, // Time required travel to destination (Subtract by the delay)
             repeat: 0, // No repeat
             // When the tween is complete
             onComplete: function() {
@@ -152,7 +163,7 @@ class Note extends Phaser.GameObjects.Sprite {
                     ease: 'Power0',
                     targets: this,
                     x: this.x - distance, // Apply the distance between calculated here to have constant speed
-                    duration: travelTime,
+                    duration: travelTime - delayOffset,
                     repeat: 0,
                     onComplete: function() {
                         // If the tween is completed, destroy the note as it should out of screen
@@ -313,13 +324,13 @@ class Note extends Phaser.GameObjects.Sprite {
         };
     }
 
-    static Instantiate(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote) {
+    static Instantiate(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote, delay) {
         let note;
         if(type === NoteType.END) {
-            note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, null, parentNote);
+            note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, null, parentNote, delay);
             parentNote.endNote = note;
         } else {
-            note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, holdTime);
+            note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, null, delay);
         }
         note.setId(Note.NoteCount);
         Note.NoteCount++;

@@ -93,11 +93,14 @@ class Song extends Phaser.GameObjects.Sprite {
         this.image.setScale(this.imageScaleX, this.imageScaleY);
         console.log("Image width: " + this.image.width + " Image height: " + this.image.height + " Scale: " + this.image.scale);
 
+        //const easeList = ["Linear", "Sine.easeInOut", "Bounce.easeInOut"];
+        const easeList = ["Linear", "Sine.easeInOut"];
+        // Rotate the image
         const tween = scene.tweens.add({
-            ease: 'Linear',
-            targets: this.image, // Set to this note object
+            ease: easeList[Phaser.Math.Between(0, easeList.length)],
+            targets: this.image,
             angle: this.image.angle + 360,
-            duration: 170 * 20,
+            duration: this.bpm * 40,
             repeat: -1,
             callbackScope: this,
         });
@@ -119,6 +122,21 @@ class Song extends Phaser.GameObjects.Sprite {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0.5); 
+
+        const totalSeconds = this.song.totalDuration;
+        const totalMinutes = Math.floor(totalSeconds / 60);
+
+        const seconds = totalSeconds % 60;
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        const date = new Date(0);
+        date.setSeconds(totalSeconds - this.offset); // specify value for SECONDS here
+        const timeString = date.toISOString().substring(14, 19);
+        this.lengthLabel = scene.add.text(x, y + 250 + 32*4 + 5, "Length: " + timeString , {
+            fontFamily: 'Silkscreen', 
+            fontSize: 32
+        }).setOrigin(0.5); 
     }
 
     preview(scene) {        
@@ -128,6 +146,11 @@ class Song extends Phaser.GameObjects.Sprite {
         this.noteBeats = this.beatmap.getPreviewBeats(this.previewStartTimeline);
     }
 
+    setTitles(title, subTitle) {
+        this.titleLabel = title;
+        this.subTitleLabel = subTitle;
+    }
+
     switchOut() {
         this.previewAudio.stop();
         this.image.destroy();
@@ -135,6 +158,7 @@ class Song extends Phaser.GameObjects.Sprite {
         this.songNameLabel.destroy();
         this.artistLabel.destroy();
         this.bpmLabel.destroy();
+        this.lengthLabel.destroy();
     }
 
     updatePreview(scene) {
@@ -209,6 +233,23 @@ class Song extends Phaser.GameObjects.Sprite {
                         },
                         callbackScope: this
                     });     
+
+                    // Title
+                    if(this.titleLabel != null) {
+                        const titleTween = scene.tweens.add({
+                            ease: 'Linear',
+                            targets: this.titleLabel, // Set to this note object
+                            scale: 1.1,
+                            alpha: 0.5,
+                            duration: 125,
+                            repeat: 0,
+                            onComplete: function() {
+                                this.titleLabel.setScale(1);
+                                this.titleLabel.alpha = 1;
+                            },
+                            callbackScope: this
+                        });     
+                    }
                     this.noteBeats.pop(); // Removed the beat at the end
                 }
             }

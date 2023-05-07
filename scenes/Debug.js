@@ -21,7 +21,7 @@ class Debug extends Phaser.Scene {
         this.noteCount = 0; // Reset the note count
         /** Travel time (Milisecond) / Early time to spawn notes */
         this.travelTime = 950;
-        this.beatmap = new Beatmap(this, CurrentSong); // Test
+        this.beatmap = new Beatmap(this, CurrentSong, CurrentSong.beatmapConfig); // Test
         this.beatmap.create();
         this.beatmap.drawBeatLine = false;
         this.beatmap.playMetronome = false;
@@ -136,7 +136,17 @@ class Debug extends Phaser.Scene {
             }
         }, null, this);
 
-        this.physics.add.sprite(260, 500, SpriteId.VEHICLE1).setOrigin(0.5).play(AnimationId.VEHICLE1);
+        // this.testV = this.physics.add.sprite(400, 400, SpriteId.VEHICLE1).setOrigin(0.5).play(AnimationId.VEHICLE1);
+        // const tween = this.tweens.add({
+        //     ease: 'Linear',
+        //     targets: this.testV, // Set to this note object
+        //     x: 1380, // Destination in x position
+        //     duration: 1000, // Time required travel to destination (Subtract by the delay)
+        //     repeat: -1, // No repeat
+        //     callbackScope: this
+        // });    
+        // tween.seek(500);
+        //tween.seek(0.5);
     }
 
     togglePause() {
@@ -206,7 +216,7 @@ class Debug extends Phaser.Scene {
 
         if(this.pause) return; // If pausing don't bother to check the note hitting logic
 
-        const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this, this.playTime);
+        const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this);
         let n = Note.HitNotes(notesArray);
         if(n != null) { // If note is not empty, meaning a note is hit and destroy by the player
             this.noteDestroyCount++;

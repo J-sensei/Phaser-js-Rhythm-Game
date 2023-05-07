@@ -20,12 +20,14 @@ class SongSelectScene extends Phaser.Scene {
 
         this.titleLabel = this.add.text(10, 10, "Song Selection", {
             fontFamily: 'Silkscreen', 
-            fontSize: 48
+            fontSize: 52
         }).setOrigin(0); 
-        this.songsLabel = this.add.text(10, 48 + 10, "Song: " + (this.currentIndex + 1) + " / " + SongList.length, {
+        this.songsLabel = this.add.text(10, 48 + 20, "Song: " + (this.currentIndex + 1) + " / " + SongList.length, {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0); 
+
+        this.selectedSong.setTitles(this.titleLabel, this.songsLabel);
     }
 
     update() {
@@ -38,12 +40,7 @@ class SongSelectScene extends Phaser.Scene {
                 this.currentIndex = SongList.length - 1;
             }
 
-            this.selectAudio.play();
-            this.selectedSong.switchOut();
-            this.selectedSong = SongList[this.currentIndex];
-            this.selectedSong.createImage(this, game.config.width / 2, 270);
-            this.selectedSong.preview(this);
-            this.songsLabel.text = "Song: " + (this.currentIndex + 1) + " / " + SongList.length;
+            this.updateSelectedSong(this.currentIndex);
 
         } else if(Phaser.Input.Keyboard.JustDown(this.rightKey) || (Phaser.Input.Keyboard.JustDown(this.rightKey2))) {
             this.currentIndex++;
@@ -51,18 +48,24 @@ class SongSelectScene extends Phaser.Scene {
                 this.currentIndex = 0;
             }
 
-            this.selectAudio.play();
-            this.selectedSong.switchOut();
-            this.selectedSong = SongList[this.currentIndex];
-            this.selectedSong.createImage(this, game.config.width / 2, 270);
-            this.selectedSong.preview(this);
-            this.songsLabel.text = "Song: " + (this.currentIndex + 1) + " / " + SongList.length;
+            this.updateSelectedSong(this.currentIndex);
         }
 
         if(Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+            this.selectAudio.play();
             console.log("ENTER BEATMAP!");
             this.selectedSong.switchOut();
             this.scene.start("Debug"); // Test
         }
+    }
+
+    updateSelectedSong(index) {
+        this.selectAudio.play();
+        this.selectedSong.switchOut();
+        this.selectedSong = SongList[index];
+        this.selectedSong.createImage(this, game.config.width / 2, 270);
+        this.selectedSong.preview(this);
+        this.songsLabel.text = "Song: " + (index + 1) + " / " + SongList.length;
+        this.selectedSong.setTitles(this.titleLabel, this.songsLabel);
     }
 }

@@ -75,6 +75,7 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {string} type Type of the note
      * @param {number} holdTime Hold required to hold the note (Only use for hold note) (Deprecated)
      * @param {Note} parentNote Parent note to for the refenerece (Only use for end note)
+     * @param {number} delay Delay happen when spawn the note (ms)
      */
     constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote, delay) {
         super(scene, x, y, key); // Create sprite
@@ -145,13 +146,20 @@ class Note extends Phaser.GameObjects.Sprite {
         if(!isNaN(delay)) { // As long as the delay can be catch
             delayOffset = delay;
         }
+
+        let initialValue = x; // Initial value of the not
+        let targetValue = destX; // Target value of the detination
+        /** Get the exact spawn position with the delay offset */
+        let exactSpawnX = initialValue + (targetValue - initialValue) * (delayOffset / travelTime); // 0 delay offset will give the orignal x position
+        this.x = exactSpawnX; // Skip some x position to align with the beat (Solve slight delay)
+
         // Create tweens
         // Power0 == Linear
         const tween = scene.tweens.add({
             ease: 'Linear',
             targets: this, // Set to this note object
             x: destX, // Destination in x position
-            duration: travelTime - delayOffset, // Time required travel to destination (Subtract by the delay)
+            duration: travelTime, // Time required travel to destination (Subtract by the delay)
             repeat: 0, // No repeat
             // When the tween is complete
             onComplete: function() {
@@ -179,7 +187,6 @@ class Note extends Phaser.GameObjects.Sprite {
             },
             callbackScope: this
         });     
-        //tween.seek(0); 
         
         // Different note type will have move in from above        
         if(type === NoteType.HOLD || type === NoteType.BIG_NOTE) {
@@ -346,11 +353,11 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {number} playTime 
      * @returns Note Array
      */
-    static UpdateHit(minimumDistance, player, scene, playTime) {
+    static UpdateHit(minimumDistance, player, scene) {
         let notesArray = []; // Empty note array
         for(let i = 0; i < Note.Notes.getChildren().length; i++) {
             let note = Note.Notes.getChildren()[i]; // Get the note
-            note.update(player, playTime); // Update note here
+            note.update(player); // Update note here
             let distance = 0; // Distance between note and the judgement colliders
 
             // Check which lane the note is to calculate the distance
@@ -445,7 +452,7 @@ class Note extends Phaser.GameObjects.Sprite {
         return note;
     }
 
-    update(player, playTime) {
+    update(player) {
         this.circle.x = this.x;
         this.circle.y = this.y;
 

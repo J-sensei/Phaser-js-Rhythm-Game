@@ -366,6 +366,23 @@ class Note extends Phaser.GameObjects.Sprite {
             } else {
                 distance = note.x - JudgementPositions[1].x;
             }
+
+            // None hittable note
+            if(note.type === NoteType.NO_HIT && note.noHitActive && distance == 0 && player.isDownLane === note.down) {
+                let text;
+                if(note.down) {
+                    text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, "300", null, 32);
+                } else {
+                    text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, "300", null, 32);
+                }
+                text.destroyText();
+                Score.GetInstance().add(NoteHitResult.NO_HIT);
+                Note.MusicHit.play(Note.SFXConfig);
+                note.destroyNote();
+                continue;
+            }
+
+            if(note.type === NoteType.NO_HIT) continue;
             
             if(note.active && player.beating && !note.hitted &&
                 (distance > -minimumDistance && distance < minimumDistance) && 
@@ -390,20 +407,6 @@ class Note extends Phaser.GameObjects.Sprite {
                 Score.GetInstance().add(NoteHitResult.PERFECT);
                 Note.HoldHit.play(Note.SFXConfig);
                 note.parentNote.destroyNote(); // As end note parent note is the hold note
-            }
-
-            // None hittable note
-            if(note.type === NoteType.NO_HIT && note.noHitActive && distance == 0 && player.isDownLane === note.down) {
-                let text;
-                if(note.down) {
-                    text = new HitText(scene, JudgementPositions[1].x, JudgementPositions[1].y, "300", null, 32);
-                } else {
-                    text = new HitText(scene, JudgementPositions[0].x, JudgementPositions[0].y, "300", null, 32);
-                }
-                text.destroyText();
-                Score.GetInstance().add(NoteHitResult.NO_HIT);
-                Note.MusicHit.play(Note.SFXConfig);
-                note.destroyNote();
             }
         }
         return notesArray;

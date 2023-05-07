@@ -15,7 +15,7 @@ class Debug extends Phaser.Scene {
 
     create() {
         // Song Skip config
-        this.skipTime = 100;
+        this.skipTime = 60;
         this.skip = false;
 
         this.noteCount = 0; // Reset the note count

@@ -106,7 +106,7 @@ class Song extends Phaser.GameObjects.Sprite {
         });
         
         // Create labels
-        this.sourceLabel = scene.add.text(x, y + 250, this.source, {
+        this.sourceLabel = scene.add.text(x, y + 250, "Source: " + this.source, {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0.5); 
@@ -144,6 +144,7 @@ class Song extends Phaser.GameObjects.Sprite {
         this.previewAudio.seek = this.previewStartTimeline;
         this.previewStart = true;
         this.noteBeats = this.beatmap.getPreviewBeats(this.previewStartTimeline);
+        this.fadeOutStart = false;
     }
 
     setTitles(title, subTitle) {
@@ -163,12 +164,14 @@ class Song extends Phaser.GameObjects.Sprite {
 
     updatePreview(scene) {
         if(this.previewAudio == null) return;
+        // Fade out start
         if(this.previewAudio.isPlaying && this.previewAudio.seek >= this.previewEndTimeline && this.previewStart) {
             const seek = this.previewAudio.seek;
             this.previewAudio.stop();
             this.previewAudio = scene.plugins.get('rexsoundfadeplugin').fadeOut(this.previewAudio, 2000, false);
             this.previewAudio.seek = seek;
             this.previewStart = false;
+            this.fadeOutStart = true;
         }
 
         if(!this.previewStart && !this.previewAudio.isPlaying) {
@@ -221,11 +224,25 @@ class Song extends Phaser.GameObjects.Sprite {
             // }
 
             if(this.noteBeats.length > 0) {
+                let scaleMultiplier = 1.12;
+                if(this.previewAudio.seek - this.previewStartTimeline <= 1) {
+                    scaleMultiplier = 1.04;
+                } else if(this.previewAudio.seek - this.previewStartTimeline <= 2) {
+                    scaleMultiplier = 1.07;
+                }
+                
+                if(this.previewEndTimeline - this.previewAudio.seek <= 0.5) {
+                    scaleMultiplier = 1.04;
+                } else if (this.previewEndTimeline - this.previewAudio.seek <= 1) {
+                    scaleMultiplier = 1.07;
+                }
+
+
                 if(this.previewAudio.seek >= this.noteBeats[this.noteBeats.length - 1].time) {
                     const tween = scene.tweens.add({
                         ease: 'Linear',
                         targets: this.image, // Set to this note object
-                        scale: this.imageScaleX * 1.1,
+                        scale: this.imageScaleX * scaleMultiplier,
                         duration: 125,
                         repeat: 0,
                         onComplete: function() {
@@ -239,7 +256,7 @@ class Song extends Phaser.GameObjects.Sprite {
                         const titleTween = scene.tweens.add({
                             ease: 'Linear',
                             targets: this.titleLabel, // Set to this note object
-                            scale: 1.1,
+                            scale: scaleMultiplier,
                             alpha: 0.5,
                             duration: 125,
                             repeat: 0,

@@ -251,8 +251,8 @@ class Preload extends Phaser.Scene {
             repeat: -1
         });
 
-        //this.scene.start("Debug");
-        this.scene.start("SongSelectScene"); // Test
+        this.scene.start("Debug");
+        //this.scene.start("SongSelectScene"); // Test
     }
 
     update() {

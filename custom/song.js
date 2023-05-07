@@ -257,7 +257,7 @@ class Song extends Phaser.GameObjects.Sprite {
                             ease: 'Linear',
                             targets: this.titleLabel, // Set to this note object
                             scale: scaleMultiplier,
-                            alpha: 0.5,
+                            alpha: 0.55,
                             duration: 125,
                             repeat: 0,
                             onComplete: function() {

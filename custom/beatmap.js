@@ -668,7 +668,7 @@ class Beatmap {
         }
 
         // Note data instantiate
-        const currentData = ByeOrNotHardMap; // Map data for the song
+        const currentData = ByeOrNotEasyMap; // Map data for the song
         let idCount = 0;
         // Loop through all the beats available
         for(let i = 0; i < this.beats.length; i++) {

@@ -15,12 +15,13 @@ class Debug extends Phaser.Scene {
 
     create() {
         // Song Skip config
-        this.skipTime = 60;
+        this.skipTime = 100;
         this.skip = false;
 
         this.noteCount = 0; // Reset the note count
         /** Travel time (Milisecond) / Early time to spawn notes */
-        this.travelTime = 950;
+        //this.travelTime = 950;
+        this.travelTime = 1250;
         this.beatmap = new Beatmap(this, CurrentSong, CurrentSong.beatmapConfig); // Test
         this.beatmap.create();
         this.beatmap.drawBeatLine = false;

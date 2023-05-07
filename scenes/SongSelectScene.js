@@ -18,11 +18,11 @@ class SongSelectScene extends Phaser.Scene {
         this.selectedSong.createImage(this, game.config.width / 2, 270);
         this.selectedSong.preview(this);
 
-        this.titleLabel = this.add.text(10, 10, "Song Selection", {
+        this.titleLabel = this.add.text(240 + 30, 35, "Song Selection", {
             fontFamily: 'Silkscreen', 
             fontSize: 52
-        }).setOrigin(0); 
-        this.songsLabel = this.add.text(10, 48 + 20, "Song: " + (this.currentIndex + 1) + " / " + SongList.length, {
+        }).setOrigin(0.5); 
+        this.songsLabel = this.add.text(35, 48 + 30, "Song: " + (this.currentIndex + 1) + " / " + SongList.length, {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0); 

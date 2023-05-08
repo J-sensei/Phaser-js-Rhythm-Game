@@ -1,4 +1,4 @@
-/** Beatmap setting to play the note and music correctly */
+/** Sample Beatmap setting to play the note and music correctly */
 let BeatmapConfig = {
   bpm: 160,
   offset: 0,

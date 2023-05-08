@@ -8,6 +8,8 @@ Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 // Global
 /** Current song for the player to play */
 let CurrentSong = null;
+/** Current Difficulty selected for the song */
+let CurrentDifficulty = Difficulty.HARD
 /**
  * Songs available in the game
  */
@@ -71,6 +73,9 @@ const SFXId = {
     COMBO_BREAK: "ComboBreak",
     METAL_HIT: "MetalHit",
     SELECT: "SelectSound",
+    CLICK: "ClickSound",
+    BACK: "BackSound",
+    NOTE_HOLDING: "NoteHoldingSound",
 }
 
 /** Layer depth configuration */
@@ -146,11 +151,14 @@ class Preload extends Phaser.Scene {
         this.load.audio(SFXId.MUSIC_HIT, "assets/sfx/music_hit.wav");
         this.load.audio(SFXId.COMBO_BREAK, "assets/sfx/combo_break.mp3");
         this.load.audio(SFXId.METAL_HIT, "assets/sfx/metalHit.wav");
+        this.load.audio(SFXId.NOTE_HOLDING, "assets/sfx/note_holding.wav");
 
         this.load.audio(SFXId.METRONOME1, "assets/sfx/metronome1.mp3");
         this.load.audio(SFXId.METRONOME2, "assets/sfx/metronome2.mp3");
 
         this.load.audio(SFXId.SELECT, "assets/sfx/song_select.mp3");
+        this.load.audio(SFXId.BACK, "assets/sfx/song_back.mp3");
+        this.load.audio(SFXId.CLICK, "assets/sfx/song_click.mp3");
 
         // UI
         this.load.spritesheet(SpriteId.BUTTON_DOWN, "assets/ui/ARROWDOWN.png", {frameWidth: 17, frameHeight: 16});
@@ -251,8 +259,8 @@ class Preload extends Phaser.Scene {
             repeat: -1
         });
 
-        this.scene.start("Debug");
-        //this.scene.start("SongSelectScene"); // Test
+        //this.scene.start("Debug");
+        this.scene.start("SongSelectScene"); // Test
     }
 
     update() {

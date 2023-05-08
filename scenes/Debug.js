@@ -15,16 +15,19 @@ class Debug extends Phaser.Scene {
 
     create() {
         // Song Skip config
-        this.skipTime = 100;
+        this.skipTime = 110;
         this.skip = false;
+        this.autoStart  = true;
 
         this.noteCount = 0; // Reset the note count
+
         /** Travel time (Milisecond) / Early time to spawn notes */
-        //this.travelTime = 950;
-        this.travelTime = 1250;
+        this.travelTime = CurrentSong.getLaneSpeed(CurrentDifficulty);
+        //this.travelTime = 850;
+        //this.travelTime = 1250;
         this.beatmap = new Beatmap(this, CurrentSong, CurrentSong.beatmapConfig); // Test
         this.beatmap.create();
-        this.beatmap.drawBeatLine = false;
+        this.beatmap.drawBeatLine = true;
         this.beatmap.playMetronome = false;
 
         Note.Reset(this); // Reset the note
@@ -67,7 +70,7 @@ class Debug extends Phaser.Scene {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
-        this.noteLabel = this.add.text(game.config.width / 5, 150, "Perfect: 0, Great: 0, Bad: 0, Miss: 0", {
+        this.noteLabel = this.add.text(game.config.width / 4.5, 150, "Perfect: 0, Great: 0, Bad: 0, Miss: 0", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
@@ -167,6 +170,9 @@ class Debug extends Phaser.Scene {
     }
 
     update() {
+        // Display FPS
+        this.fpsLabel.text = "FPS: " + game.loop.actualFps.toFixed(2);
+        
         if(CurrentSong.playing() && !this.sound.locked && !this.pause) {
             this.playTime = CurrentSong.song.seek; // Get the accurate current time of the song
         }
@@ -181,7 +187,7 @@ class Debug extends Phaser.Scene {
         this.player.update();
 
         // Start the song only if the song is not playing
-        if(Phaser.Input.Keyboard.JustDown(this.spacebar) && !CurrentSong.song.isPlaying){
+        if((Phaser.Input.Keyboard.JustDown(this.spacebar) || this.autoStart) && !CurrentSong.song.isPlaying){
             this.playTime = this.startTime; // Initialize the playtime
             const t = new Date();
             this.lastUpdateTime = t.getTime();
@@ -193,6 +199,7 @@ class Debug extends Phaser.Scene {
 
             this.start = true;
             this.tweens.resumeAll();
+            this.autoStart = false;
         }
             
         // Play the song if its already started
@@ -252,7 +259,6 @@ class Debug extends Phaser.Scene {
         this.accLabel.text = "Accuracy: " + (this.score.accuracy * 100).toFixed(2) + "% ";
         this.comboLabel.text = "Combo: " + this.score.combo;
         this.scoreLabel.text = "Score: " + this.score.score;
-        this.fpsLabel.text = "FPS: " + game.loop.actualFps;
 
         // Song playtime label
         if(!CurrentSong.playing())

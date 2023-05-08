@@ -80,9 +80,32 @@ class Song extends Phaser.GameObjects.Sprite {
         }
         this.beatmap = new Beatmap(this, this, this.beatmapConfig);
         this.beatmap.create();
+
+        if(data.easyLaneSpeed != null)
+            this.easyLaneSpeed = data.easyLaneSpeed;
+        else
+            this.easyLaneSpeed = 1.0;
+
+        if(data.hardLaneSpeed != null)
+            this.hardLaneSpeed = data.hardLaneSpeed;
+        else
+            this.hardLaneSpeed = 1.0;
+    }
+
+    getLaneSpeed(difficulty) {
+        const baseDuration = 1800;
+        switch(difficulty) {
+            case Difficulty.EASY:
+                return baseDuration - (this.easyLaneSpeed / 0.01);
+                break;
+            case Difficulty.HARD:
+                return baseDuration - (this.hardLaneSpeed / 0.01);
+                break;
+        }
     }
 
     createImage(scene, x, y) {
+
         const size = 400;
         this.image = scene.add.rexCircleMaskImage(x, y, this.imageId, null, null);
         console.log("Image width: " + this.image.width + " Image height: " + this.image.height + " Scale: " + this.image.scale);
@@ -92,6 +115,9 @@ class Song extends Phaser.GameObjects.Sprite {
 
         this.image.setScale(this.imageScaleX, this.imageScaleY);
         console.log("Image width: " + this.image.width + " Image height: " + this.image.height + " Scale: " + this.image.scale);
+
+        this.originalX = this.image.x;
+        this.originalY = this.image.y;
 
         //const easeList = ["Linear", "Sine.easeInOut", "Bounce.easeInOut"];
         const easeList = ["Linear", "Sine.easeInOut"];
@@ -137,6 +163,35 @@ class Song extends Phaser.GameObjects.Sprite {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0.5); 
+    }
+
+    moveImage(x, y) {
+
+        if(x == null)
+            this.image.x = this.originalX;
+        else
+            this.image.x += x;
+        if(y == null)
+            this.image.y = this.originalY;
+        else
+            this.image.y += y;
+        // this.sourceLabel.x += x;
+        // this.sourceLabel.y += y;
+        // this.songNameLabel.x += x;
+        // this.songNameLabel.y += y;
+        // this.artistLabel.x += x;
+        // this.artistLabel.y += y;
+        // this.bpmLabel.x += x;
+        // this.bpmLabel.y += y;
+
+        let alpha = 0;
+        if(x == null || y == null) alpha = 1;
+
+        this.sourceLabel.alpha = alpha;
+        this.songNameLabel.alpha = alpha;
+        this.artistLabel.alpha = alpha;
+        this.bpmLabel.alpha = alpha;
+        this.lengthLabel.alpha = alpha;
     }
 
     preview(scene) {        
@@ -271,6 +326,30 @@ class Song extends Phaser.GameObjects.Sprite {
                 }
             }
         }
+    }
+
+
+    /**
+     * Get array of note datas
+     * @returns Note Data[]
+     */
+    getNoteData() {
+        // TODO: load the data from json file instead!!
+        //console.log(this.id);
+        if(this.id === "Song0") {
+            if(CurrentDifficulty === Difficulty.EASY)
+                return ByeOrNotEasyMap;
+            else if(CurrentDifficulty === Difficulty.HARD)
+                return ByeOrNotHardMap;
+        } else if(this.id === "Song1") {
+            if(CurrentDifficulty === Difficulty.EASY)
+            return [];
+        else if(CurrentDifficulty === Difficulty.HARD)
+            return NiniHardMap;
+        } else {
+            return [];
+        }
+        return [];
     }
 
     play(delay) {

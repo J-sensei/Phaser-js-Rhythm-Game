@@ -5,6 +5,12 @@ ID and Name #1 : 1191100556 Liew Jiann Shen
 Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
+/** Difficulties constants */
+const Difficulty = {
+    EASY: "EasyDifficulty",
+    HARD: "HardDifficulty"
+}
+
 /**
  * Spawn note sync with the song
  */
@@ -645,6 +651,8 @@ class Beatmap {
         // TODO: upgrade end note logic
         /** End Notes queue to spawn */
         this.endNoteSpawns = [];
+        
+        const currentData = this.song.getNoteData(); // Map data for the song
 
         // Loop the whole song in miliseconds precision
         while(n < this.songDuration - this.offset) {
@@ -668,7 +676,6 @@ class Beatmap {
         }
 
         // Note data instantiate
-        const currentData = ByeOrNotEasyMap; // Map data for the song
         let idCount = 0;
         // Loop through all the beats available
         for(let i = 0; i < this.beats.length; i++) {

@@ -47,6 +47,8 @@ class Note extends Phaser.GameObjects.Sprite {
     static NormalHit;
     /** Hold note hit sound */
     static HoldHit;
+    /** Sound to play repeatly while holding a note */
+    static NoteHolding;
     /** Music note (Non hittable note) sound */
     static MusicHit;
     /** Use when combo break (Use in Score class) */
@@ -59,6 +61,8 @@ class Note extends Phaser.GameObjects.Sprite {
     static NoteCount = 0;
     /** SFX Audio configuration for note */
     static SFXConfig;
+    /** SFX AUdio configutation for looping audio */
+    static SFXConfigLooping;
     /** Current scene reference */
     static Scene;
 
@@ -151,7 +155,6 @@ class Note extends Phaser.GameObjects.Sprite {
         let targetValue = destX; // Target value of the detination
         /** Get the exact spawn position with the delay offset */
         let exactSpawnX = initialValue + (targetValue - initialValue) * (delayOffset / travelTime); // 0 delay offset will give the orignal x position
-        this.x = exactSpawnX; // Skip some x position to align with the beat (Solve slight delay)
 
         // Create tweens
         // Power0 == Linear
@@ -187,7 +190,8 @@ class Note extends Phaser.GameObjects.Sprite {
             },
             callbackScope: this
         });     
-        
+        this.x = exactSpawnX; // Skip some x position to align with the beat (Solve slight delay)
+
         // Different note type will have move in from above        
         if(type === NoteType.HOLD || type === NoteType.BIG_NOTE) {
             let moveInDuration;
@@ -255,6 +259,8 @@ class Note extends Phaser.GameObjects.Sprite {
         Note.MusicHit = scene.sound.add(SFXId.MUSIC_HIT);
         Note.ComboBreak = scene.sound.add(SFXId.COMBO_BREAK);
         Note.MetalHit = scene.sound.add(SFXId.METAL_HIT);
+        Note.NoteHolding = scene.sound.add(SFXId.NOTE_HOLDING);
+        Note.UpdateSFXConfig();
     }
 
     /**
@@ -329,6 +335,12 @@ class Note extends Phaser.GameObjects.Sprite {
             mute: false,
             volume: AudioConfig.sfx, // Get the current volume fonr the audio configuration
             loop: false, // No looping for the song
+        };
+
+        Note.SFXConfigLooping = {
+            mute: false,
+            volume: AudioConfig.sfx * 0.8, // Get the current volume fonr the audio configuration
+            loop: true, // Looping the sfx
         };
     }
 
@@ -478,8 +490,14 @@ class Note extends Phaser.GameObjects.Sprite {
             if(this.activeHold) {
                 // Player still holding it
                 if(player.holding && player.compareLane(this.down)) {
-
+                    if(!Note.NoteHolding.isPlaying) {
+                        Note.NoteHolding.play(Note.SFXConfigLooping);
+                    }
                 } else { // Player failed to hold it while the active hold is still true
+                    // Stop holding audio
+                    if(Note.NoteHolding.isPlaying) {
+                        Note.NoteHolding.stop();
+                    }
                     // Update the end note hitDistance
                     // Determine if the distance if release early
                     if(this.endNote != null) {
@@ -538,10 +556,17 @@ class Note extends Phaser.GameObjects.Sprite {
         if(this.type === NoteType.HOLD)
             this.line.destroy();
 
+        if(this.type === NoteType.END) {
+            if(Note.NoteHolding.isPlaying) {
+                Note.NoteHolding.stop();
+            }
+        }
+
         // If end note is present, delete it
         if(this.endNote != null) {
             this.endNote.destroyNote();
         }
+
         this.circle.destroy();
         this.destroy(); // Can safely remove it now
     }

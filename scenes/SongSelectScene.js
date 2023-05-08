@@ -38,12 +38,12 @@ class SongSelectScene extends Phaser.Scene {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0); 
-        this.add.text(35, 48 + 70, "(ENTER) - select\n(ESC) - back\n", {
+        this.add.text(35, 48 + 70, "(Q) - How to play\n(ENTER) - select\n(ESC) - back", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0); 
 
-        this.difficultyLabel = this.add.text(game.config.width / 1.8, game.config.height / 3, "Select Difficulty", {
+        this.difficultyLabel = this.add.text(game.config.width / 1.8, game.config.height / 3, "Select Difficulty\n*Lane Speed (0 - 10)", {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0); 

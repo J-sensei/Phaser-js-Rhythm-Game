@@ -6,7 +6,7 @@
     "offset": 1.033,
     "previewStart": 76.695,
     "previewEnd": 101.737,
-    "easyLaneSpeed": 5.0,
+    "easyLaneSpeed": 6.0,
     "hardLaneSpeed": 9.5,
     "_comment1": "Notes contains (beat, subBeat, beatSnapDivider, beatSnapDividerPosition)",
     "notes":   [[1, 2, 3, 0], 

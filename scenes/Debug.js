@@ -15,7 +15,7 @@ class Debug extends Phaser.Scene {
 
     create() {
         // Song Skip config
-        this.skipTime = 110;
+        this.skipTime = 40;
         this.skip = false;
         this.autoStart  = true;
 
@@ -27,9 +27,10 @@ class Debug extends Phaser.Scene {
         //this.travelTime = 1250;
         this.beatmap = new Beatmap(this, CurrentSong, CurrentSong.beatmapConfig); // Test
         this.beatmap.create();
-        this.beatmap.drawBeatLine = true;
+        this.beatmap.drawBeatLine = false;
         this.beatmap.playMetronome = false;
 
+        Score.GetInstance().reset();
         Note.Reset(this); // Reset the note
         /** Reference to score class */
         this.score = Score.GetInstance();

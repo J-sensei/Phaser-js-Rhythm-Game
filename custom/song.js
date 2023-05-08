@@ -391,6 +391,7 @@ class Song extends Phaser.GameObjects.Sprite {
      * @returns Note Data[]
      */
     getNoteData() {
+        //return NiniEasyMap; // Testing Code
         // TODO: load the data from json file instead!!
         //console.log(this.id);
         if(this.id === "Song0") {
@@ -400,7 +401,7 @@ class Song extends Phaser.GameObjects.Sprite {
                 return ByeOrNotHardMap;
         } else if(this.id === "Song1") {
             if(CurrentDifficulty === Difficulty.EASY)
-            return [];
+            return NiniEasyMap;
         else if(CurrentDifficulty === Difficulty.HARD)
             return NiniHardMap;
         } else {

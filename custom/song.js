@@ -10,13 +10,14 @@
  * @param { string } path Location of the song resources 
  */
 class Song extends Phaser.GameObjects.Sprite {
-    constructor(scene, id, path) {
+    constructor(scene, id, path, indexId) {
         super(scene, 0, 0, "Test"); // Test
 
         // Set class variables
         this.id = id;
         this.path = path;
         this.scene = scene;
+        this.index = indexId;
 
         // Define the id
         /** Unique ID for song asset */
@@ -104,20 +105,28 @@ class Song extends Phaser.GameObjects.Sprite {
         }
     }
 
+    /** Song UI */
     createImage(scene, x, y) {
 
         const size = 400;
         this.image = scene.add.rexCircleMaskImage(x, y, this.imageId, null, null);
-        console.log("Image width: " + this.image.width + " Image height: " + this.image.height + " Scale: " + this.image.scale);
 
         this.imageScaleX = size / this.image.width;
         this.imageScaleY = size / this.image.height;
 
         this.image.setScale(this.imageScaleX, this.imageScaleY);
-        console.log("Image width: " + this.image.width + " Image height: " + this.image.height + " Scale: " + this.image.scale);
 
         this.originalX = this.image.x;
         this.originalY = this.image.y;
+        this.image.alpha = 0;
+        scene.tweens.add({
+            ease: "Linear",
+            targets: this.image,
+            alpha: 1,
+            duration: 300,
+            repeat: 0,
+            callbackScope: this,
+        });
 
         //const easeList = ["Linear", "Sine.easeInOut", "Bounce.easeInOut"];
         const easeList = ["Linear", "Sine.easeInOut"];
@@ -165,33 +174,46 @@ class Song extends Phaser.GameObjects.Sprite {
         }).setOrigin(0.5); 
     }
 
-    moveImage(x, y) {
+    moveImage(scene, x, y) {
 
-        if(x == null)
-            this.image.x = this.originalX;
-        else
-            this.image.x += x;
-        if(y == null)
-            this.image.y = this.originalY;
-        else
-            this.image.y += y;
-        // this.sourceLabel.x += x;
-        // this.sourceLabel.y += y;
-        // this.songNameLabel.x += x;
-        // this.songNameLabel.y += y;
-        // this.artistLabel.x += x;
-        // this.artistLabel.y += y;
-        // this.bpmLabel.x += x;
-        // this.bpmLabel.y += y;
+        let targetX = this.originalX;
+        let targetY = this.originalY;
+        if(x != null)
+            targetX= x;
+        if(y != null)
+            targetY= y;
+
+        scene.tweens.add({
+            ease: "Linear",
+            targets: this.image,
+            x: targetX,
+            y: targetY,
+            duration: 150,
+            repeat: 0,
+            callbackScope: this,
+        });
 
         let alpha = 0;
         if(x == null || y == null) alpha = 1;
 
-        this.sourceLabel.alpha = alpha;
-        this.songNameLabel.alpha = alpha;
-        this.artistLabel.alpha = alpha;
-        this.bpmLabel.alpha = alpha;
-        this.lengthLabel.alpha = alpha;
+        const textTweenList = [this.sourceLabel, this.songNameLabel, this.artistLabel, this.bpmLabel, this.lengthLabel];
+
+        // this.sourceLabel.alpha = alpha;
+        // this.songNameLabel.alpha = alpha;
+        // this.artistLabel.alpha = alpha;
+        // this.bpmLabel.alpha = alpha;
+        // this.lengthLabel.alpha = alpha;
+
+        for(let i = 0; i < textTweenList.length; i++) {
+            scene.tweens.add({
+                ease: "Linear",
+                targets: textTweenList[i],
+                alpha: alpha,
+                duration: 150,
+                repeat: 0,
+                callbackScope: this,
+            });      
+        }
     }
 
     preview(scene) {        
@@ -207,14 +229,49 @@ class Song extends Phaser.GameObjects.Sprite {
         this.subTitleLabel = subTitle;
     }
 
-    switchOut() {
+    switchOut(scene, isLeft) {
         this.previewAudio.stop();
-        this.image.destroy();
-        this.sourceLabel.destroy();
-        this.songNameLabel.destroy();
-        this.artistLabel.destroy();
-        this.bpmLabel.destroy();
-        this.lengthLabel.destroy();
+        //this.image.destroy();
+        // this.sourceLabel.destroy();
+        // this.songNameLabel.destroy();
+        // this.artistLabel.destroy();
+        // this.bpmLabel.destroy();
+        // this.lengthLabel.destroy();
+
+        const moveDistance = 250;
+        let moveX = 0;
+        if(isLeft) moveX = this.image.x - moveDistance;
+        else moveX = this.image.x + moveDistance;
+
+        scene.tweens.add({
+            ease: "Linear",
+            targets: this.image,
+            x: moveX,
+            alpha: 0,
+            duration: 150,
+            repeat: 0,
+            callbackScope: this,
+            onComplete: function() {
+                this.image.destroy();
+            }
+        });    
+
+        const textTweenList = [this.sourceLabel, this.songNameLabel, this.artistLabel, this.bpmLabel, this.lengthLabel];
+        for(let i = 0; i < textTweenList.length; i++) {
+            scene.tweens.add({
+                ease: "Linear",
+                targets: textTweenList[i],
+                x: moveX,
+                alpha: 0,
+                duration: 150,
+                repeat: 0,
+                callbackScope: this,
+                onComplete: function() {
+                    textTweenList[i].destroy();
+                }
+            });      
+        }
+
     }
 
     updatePreview(scene) {

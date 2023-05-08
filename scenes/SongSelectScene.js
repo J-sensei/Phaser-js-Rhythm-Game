@@ -25,8 +25,8 @@ class SongSelectScene extends Phaser.Scene {
 
         this.selectingDifficulty = false;
         this.selectedDifficulty = Difficulty.EASY;
-        this.currentIndex = 0;
         this.selectedSong = CurrentSong;
+        this.currentIndex = this.selectedSong.index;
         this.selectedSong.createImage(this, this.imageX, this.imageY);
         this.selectedSong.preview(this);
 
@@ -38,14 +38,27 @@ class SongSelectScene extends Phaser.Scene {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0); 
+        this.add.text(35, 48 + 70, "(ENTER) - select\n(ESC) - back\n", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 24
+        }).setOrigin(0); 
 
-        this.difficultyLabel = this.add.text(game.config.width / 1.7, game.config.height / 3, "Select Difficulty", {
+        this.difficultyLabel = this.add.text(game.config.width / 1.8, game.config.height / 3, "Select Difficulty", {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0); 
-        this.difficultySelectLabel = this.add.text(game.config.width / 1.7, game.config.height / 2, "> Easy\nHard", {
+        this.difficultySelectLabel = this.add.text(game.config.width / 1.8, game.config.height / 2.2, "> Easy\nHard", {
             fontFamily: 'Silkscreen', 
             fontSize: 32
+        }).setOrigin(0); 
+
+        this.leftSelectLabel = this.add.text(50, game.config.height / 2 - 50, "<", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 54
+        }).setOrigin(0); 
+        this.rightSelectLabel = this.add.text(game.config.width - 100, game.config.height / 2 - 50, ">", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 54
         }).setOrigin(0); 
         this.difficultyLabel.alpha = 0;
         this.difficultySelectLabel.alpha = 0;
@@ -63,7 +76,7 @@ class SongSelectScene extends Phaser.Scene {
                     this.currentIndex = SongList.length - 1;
                 }
     
-                this.updateSelectedSong(this.currentIndex);
+                this.updateSelectedSong(this.currentIndex, false);
     
             } else if(Phaser.Input.Keyboard.JustDown(this.rightKey) || (Phaser.Input.Keyboard.JustDown(this.rightKey2))) {
                 this.currentIndex++;
@@ -71,7 +84,7 @@ class SongSelectScene extends Phaser.Scene {
                     this.currentIndex = 0;
                 }
     
-                this.updateSelectedSong(this.currentIndex);
+                this.updateSelectedSong(this.currentIndex, true);
             }
 
             if(Phaser.Input.Keyboard.JustDown(this.enterKey)) {
@@ -81,10 +94,12 @@ class SongSelectScene extends Phaser.Scene {
     
                 // Select Difficulty
                 this.selectingDifficulty = true;
-                this.selectedSong.moveImage(-200, 100);        
-                this.difficultyLabel.alpha = 1;
-                this.difficultySelectLabel.alpha = 1;
-                this.selectAudio.play(Note.SFXConfig);
+                this.selectedSong.moveImage(this, 450, this.imageY + 80);        
+                // this.difficultyLabel.alpha = 1;
+                // this.difficultySelectLabel.alpha = 1;
+                this.updateDifficultyLabel(1);
+                this.clickAudio.play(Note.SFXConfig);
+                this.updateDifficulty();
             }
         }
 
@@ -92,9 +107,10 @@ class SongSelectScene extends Phaser.Scene {
             if(Phaser.Input.Keyboard.JustDown(this.escapeKey)) {    
                 // Select Difficulty
                 this.selectingDifficulty = false;
-                this.selectedSong.moveImage();        
-                this.difficultyLabel.alpha = 0;
-                this.difficultySelectLabel.alpha = 0;
+                this.selectedSong.moveImage(this);        
+                // this.difficultyLabel.alpha = 0;
+                // this.difficultySelectLabel.alpha = 0;
+                this.updateDifficultyLabel(0);
                 this.backAudio.play(Note.SFXConfig);
             }
 
@@ -106,33 +122,75 @@ class SongSelectScene extends Phaser.Scene {
                 } else {
                     this.selectedDifficulty = Difficulty.EASY;
                 }
-
-                "> Easy\nHard"
-                let easyString = "Easy";
-                let hardString = "Hard";
-                if(this.selectedDifficulty === Difficulty.EASY) {
-                    easyString = "> Easy";
-                } else if(this.selectedDifficulty === Difficulty.HARD) {
-                    hardString = "> Hard";
-                }
-
-                const diffString = easyString + "\n" + hardString;
-                this.difficultySelectLabel.text = diffString;
+                this.updateDifficulty();
             }
 
             if(Phaser.Input.Keyboard.JustDown(this.enterKey)) {
-                this.clickAudio.play(Note.SFXConfig);
+                this.selectAudio.play(Note.SFXConfig);
                 CurrentSong = this.selectedSong;
                 CurrentDifficulty = this.selectedDifficulty;
-                this.selectedSong.switchOut();
+                this.selectedSong.switchOut(this);
                 this.scene.start("Debug"); // Test
             }
         }
     }
 
-    updateSelectedSong(index) {
+    updateDifficultyLabel(alpha) {
+        this.tweens.add({
+            ease: "Linear",
+            targets: this.difficultySelectLabel,
+            alpha: alpha,
+            duration: 150,
+            repeat: 0,
+            callbackScope: this,
+        });      
+    
+        this.tweens.add({
+            ease: "Linear",
+            targets: this.difficultyLabel,
+            alpha: alpha,
+            duration: 150,
+            repeat: 0,
+            callbackScope: this,
+        });    
+
+        this.tweens.add({
+            ease: "Linear",
+            targets: this.leftSelectLabel,
+            alpha: 1 - alpha,
+            duration: 150,
+            repeat: 0,
+            callbackScope: this,
+        });    
+
+        this.tweens.add({
+            ease: "Linear",
+            targets: this.rightSelectLabel,
+            alpha: 1 - alpha,
+            duration: 150,
+            repeat: 0,
+            callbackScope: this,
+        });    
+    }
+
+    updateDifficulty() {
+        let easyLaneSpeed = " (Lane Speed: "+this.selectedSong.easyLaneSpeed+")";
+        let hardLaneSpeed = " (Lane Speed: "+this.selectedSong.hardLaneSpeed+")";
+        let easyString = "Easy" + easyLaneSpeed;
+        let hardString = "Hard" + hardLaneSpeed;
+        if(this.selectedDifficulty === Difficulty.EASY) {
+            easyString = "> Easy" + easyLaneSpeed;
+        } else if(this.selectedDifficulty === Difficulty.HARD) {
+            hardString = "> Hard" + hardLaneSpeed;
+        }
+
+        const diffString = easyString + "\n" + hardString;
+        this.difficultySelectLabel.text = diffString;
+    }
+
+    updateSelectedSong(index, isLeft) {
         this.selectAudio.play(Note.SFXConfig);
-        this.selectedSong.switchOut();
+        this.selectedSong.switchOut(this, isLeft);
         this.selectedSong = SongList[index];
         this.selectedSong.createImage(this, this.imageX, this.imageY);
         this.selectedSong.preview(this);

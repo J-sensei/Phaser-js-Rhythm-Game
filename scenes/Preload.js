@@ -101,9 +101,9 @@ class Preload extends Phaser.Scene {
     preload() {
         // Plugins
         // Audio fade in / out
-        this.load.plugin('rexsoundfadeplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexsoundfadeplugin.min.js', true);
+        this.load.plugin('rexsoundfadeplugin', 'library/rexsoundfadeplugin.min.js', true);
         // Circle image
-        this.load.plugin('rexcirclemaskimageplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexcirclemaskimageplugin.min.js', true);
+        this.load.plugin('rexcirclemaskimageplugin', 'library/rexcirclemaskimageplugin.min.js', true);
         // Load song
         //this.testSong = new Song(this, "Song1", "assets/songs/PSYQUI-bye or not");
         //this.testSong = new Song(this, "Song1", "assets/songs/rejection-open your heart");
@@ -115,7 +115,7 @@ class Preload extends Phaser.Scene {
             "assets/songs/cyaegha",
         ];
         for(let i = 0; i < songPaths.length; i++) {
-            const song = new Song(this, "Song" + i, songPaths[i]);
+            const song = new Song(this, "Song" + i, songPaths[i], i);
             song.preload();
             SongList.push(song);
         }

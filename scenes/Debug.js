@@ -120,6 +120,8 @@ class Debug extends Phaser.Scene {
         this.pause = true;
         /** Is the song started */
         this.start = false;
+        /** Is the song has started since the scene loaded */
+        this.startOnce = false;
 
         this.missCollider = this.physics.add.sprite(this.player.x - 80, this.player.y);
         this.missCollider.setSize(20, 200);
@@ -139,18 +141,6 @@ class Debug extends Phaser.Scene {
                 note.destroyNote();
             }
         }, null, this);
-
-        // this.testV = this.physics.add.sprite(400, 400, SpriteId.VEHICLE1).setOrigin(0.5).play(AnimationId.VEHICLE1);
-        // const tween = this.tweens.add({
-        //     ease: 'Linear',
-        //     targets: this.testV, // Set to this note object
-        //     x: 1380, // Destination in x position
-        //     duration: 1000, // Time required travel to destination (Subtract by the delay)
-        //     repeat: -1, // No repeat
-        //     callbackScope: this
-        // });    
-        // tween.seek(500);
-        //tween.seek(0.5);
     }
 
     togglePause() {
@@ -173,7 +163,7 @@ class Debug extends Phaser.Scene {
         // Display FPS
         this.fpsLabel.text = "FPS: " + game.loop.actualFps.toFixed(2);
         
-        if(CurrentSong.playing() && !this.sound.locked && !this.pause) {
+        if(CurrentSong.song.isPlaying) {
             this.playTime = CurrentSong.song.seek; // Get the accurate current time of the song
         }
 
@@ -219,7 +209,12 @@ class Debug extends Phaser.Scene {
                 if(this.skip)
                     this.beatmap.jumpTo(this.skipTime); // Skip song
                 this.start = false;
+                this.startOnce = true;
             }
+        }
+
+        if(this.startOnce && !CurrentSong.song.isPlaying) {
+            this.scene.start("SongSelectScene");
         }
 
         if(this.pause) return; // If pausing don't bother to check the note hitting logic
@@ -268,10 +263,6 @@ class Debug extends Phaser.Scene {
 
         if(CurrentSong.playing() && !this.sound.locked && !this.pause) {
             this.playTime = CurrentSong.song.seek; // Get the accurate current time of the song
-        }
-
-        if(!this.pause) {
-            this.beatmap.update(this.playTime);
         }
     }
 

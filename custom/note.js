@@ -320,12 +320,14 @@ class Note extends Phaser.GameObjects.Sprite {
      */
     static Reset(scene) {
         Note.NoteCount = 0; // Reset note count to 0
-        if(Note.Notes != null) {
-            Note.Notes.clear(); // Clear the note physic group
-        } else {
-            // The note group is null, need to create it
-            Note.Notes = scene.physics.add.group();
-        }
+        // if(Note.Notes != null) {
+        //     Note.Notes.clear(); // Clear the note physic group
+        // } else {
+        //     // The note group is null, need to create it
+        //     Note.Notes = scene.physics.add.group();
+        // }
+        // Create new group for note using the current scene
+        Note.Notes = scene.physics.add.group();
         Note.UpdateSFXConfig();
         Note.Scene = scene;
     }

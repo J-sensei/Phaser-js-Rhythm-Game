@@ -64,11 +64,13 @@ class JudgeCollider extends Phaser.GameObjects.Sprite {
     }
 
     static Reset(scene) {
-        if(JudgeCollider.JudgeColliders != null) {
-            JudgeCollider.JudgeColliders.clear(); // Clear the judgement colliders physic group
-        } else {
-            // The collider group is null, need to create it
-            JudgeCollider.JudgeColliders = scene.physics.add.group();
-        }
+        // if(JudgeCollider.JudgeColliders != null) {
+        //     JudgeCollider.JudgeColliders.clear(); // Clear the judgement colliders physic group
+        // } else {
+        //     // The collider group is null, need to create it
+        //     JudgeCollider.JudgeColliders = scene.physics.add.group();
+        // }
+
+        JudgeCollider.JudgeColliders = scene.physics.add.group();
     }
 }

@@ -149,12 +149,14 @@ class Note extends Phaser.GameObjects.Sprite {
         let delayOffset = 0;
         if(!isNaN(delay)) { // As long as the delay can be catch
             delayOffset = delay;
+            const initialValue = x; // Initial value of the not
+            const targetValue = destX; // Target value of the detination
+            /** Get the exact spawn position with the delay offset */
+            this.exactSpawnX = initialValue + (targetValue - initialValue) * ((delayOffset) / travelTime); // 0 delay offset will give the orignal x position
+        } else {
+            this.exactSpawnX = x;
         }
-
-        let initialValue = x; // Initial value of the not
-        let targetValue = destX; // Target value of the detination
-        /** Get the exact spawn position with the delay offset */
-        let exactSpawnX = initialValue + (targetValue - initialValue) * (delayOffset / travelTime); // 0 delay offset will give the orignal x position
+        this.startTime = new Date().getTime();
 
         // Create tweens
         // Power0 == Linear
@@ -164,6 +166,31 @@ class Note extends Phaser.GameObjects.Sprite {
             x: destX, // Destination in x position
             duration: travelTime, // Time required travel to destination (Subtract by the delay)
             repeat: 0, // No repeat
+            // When the tween is start
+            onStart: function() {
+                // const currentTime = new Date().getTime();
+                // const delta = (currentTime*0.001 - this.startTime*0.001);
+                // console.log("Before X: " + this.exactSpawnX);
+                // if(!isNaN(delay)) { // As long as the delay can be catch
+                //     delayOffset = delay;
+                //     const initialValue = x; // Initial value of the not
+                //     const targetValue = destX; // Target value of the detination
+                //     /** Get the exact spawn position with the delay offset */
+                //     this.exactSpawnX = initialValue + (targetValue - initialValue) * ((delayOffset) / travelTime); // 0 delay offset will give the orignal x position
+                // } else {
+                //     this.exactSpawnX = x;
+                // }
+                //tween.seek(-delayOffset);
+                const xBefore = this.x;
+                //tween.updateTo('x', this.exactSpawnX, true);
+
+
+                // this.x = this.exactSpawnX;
+                // console.log("After X: " + this.exactSpawnX);
+                const xAfter = this.x;
+                console.log("Bfore: " + xBefore + " XAfter: " + xAfter);
+                //console.log("Delay Offset: " + delayOffset + "ms" + ", " + delta +"ms. " + "Total: " + (delayOffset + delta) + "ms");
+            },
             // When the tween is complete
             onComplete: function() {
                 /** 
@@ -190,7 +217,8 @@ class Note extends Phaser.GameObjects.Sprite {
             },
             callbackScope: this
         });     
-        this.x = exactSpawnX; // Skip some x position to align with the beat (Solve slight delay)
+        this.x = this.exactSpawnX; // Skip some x position to align with the beat (Solve slight delay)
+        //tween.updateTo('x', this.exactSpawnX, true);
 
         // Different note type will have move in from above        
         if(type === NoteType.HOLD || type === NoteType.BIG_NOTE) {

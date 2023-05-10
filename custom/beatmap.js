@@ -766,7 +766,7 @@ class Beatmap {
                 let spawnTime = this.noteSpawns[i].spawnTime;
                 if(playTime >= spawnTime) {
                     this.calculateNoteDelay(playTime, this.noteSpawns[i].spawnTime); // Calculate the delay
-                    const note = this.instantiateNote(this.noteSpawns[i], null, this.noteSpawnDelay * 1000); // Instantiate the note
+                    const note = this.instantiateNote(this.noteSpawns[i], null, this.noteSpawnDelay * 1000.00); // Instantiate the note
 
                     // If the note spawned is hold, add the end note spawn
                     if(this.noteSpawns[i].type === NoteType.HOLD) {
@@ -788,6 +788,7 @@ class Beatmap {
                     this.deltaNoteTime = (t * 0.001) - (this.lastNoteSpawnTime * 0.001);
                 }
                 this.lastNoteSpawnTime = t;
+                console.log("Remove Count: " + removeCount);
 
                 // Pop the array depends on how many note are required to remove
                 for(let i = 0; i < removeCount; i++) 

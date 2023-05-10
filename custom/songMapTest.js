@@ -1979,3 +1979,102 @@ const NiniEasyMap = [
 
     new NoteData(99, 0, 1, 0, 3, 0, 0, 0),
 ];
+
+const CyaeghaHardMap = [
+    new NoteData(0, 0, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(0, 3, 1, 0, 0, 0, 0, 1),
+    new NoteData(1, 0, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(1, 3, 1, 0, 0, 0, 0, 1),
+    new NoteData(2, 0, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(2, 3, 1, 0, 0, 0, 0, 1),
+    new NoteData(3, 0, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(3, 3, 1, 0, 0, 0, 0, 1),
+    new NoteData(4, 0, 1, 0, 3, 0, 0, 1),
+
+    new NoteData(4, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(4, 3, 1, 0, 0, 0, 0, 1),
+    new NoteData(5, 0, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(5, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(5, 3, 1, 0, 0, 0, 0, 1),
+    new NoteData(6, 0, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(6, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(6, 3, 1, 0, 0, 0, 0, 1),
+    new NoteData(7, 0, 1, 0, 1, 1, 3, 1),
+
+    new NoteData(8, 0, 1, 0, 3, 0, 0, 1),
+
+    new NoteData(8, 1, 2, 1, 0, 0, 0, 0),
+    new NoteData(8, 2, 4, 0, 0, 0, 0, 0),
+    new NoteData(8, 2, 4, 1, 0, 0, 0, 0),
+    new NoteData(8, 2, 4, 2, 0, 0, 0, 0),
+    new NoteData(8, 3, 2, 0, 0, 0, 0, 1),
+    new NoteData(8, 3, 2, 1, 0, 0, 0, 1),
+    new NoteData(9, 0, 2, 0, 3, 0, 0, 0),
+
+    new NoteData(9, 1, 2, 1, 0, 0, 0, 1),
+    new NoteData(9, 2, 4, 0, 0, 0, 0, 1),
+    new NoteData(9, 2, 4, 1, 0, 0, 0, 1),
+    new NoteData(9, 2, 4, 2, 0, 0, 0, 1),
+    new NoteData(9, 3, 2, 0, 0, 0, 0, 0),
+    new NoteData(9, 3, 2, 1, 0, 0, 0, 0),
+    new NoteData(10, 0, 2, 0, 3, 0, 0, 1),
+
+    new NoteData(10, 1, 2, 1, 0, 0, 0, 0),
+    new NoteData(10, 2, 4, 0, 0, 0, 0, 0),
+    new NoteData(10, 2, 4, 1, 0, 0, 0, 0),
+    new NoteData(10, 2, 4, 2, 0, 0, 0, 0),
+    new NoteData(10, 3, 2, 0, 0, 0, 0, 1),
+    new NoteData(10, 3, 2, 1, 0, 0, 0, 1),
+
+    new NoteData(11, 0, 2, 0, 1, 1, 2, 0),
+    new NoteData(11, 2, 2, 0, 0, 0, 0, 1),
+    new NoteData(11, 3, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(12, 0, 2, 0, 0, 0, 0, 0),
+    new NoteData(12, 0, 2, 1, 0, 0, 0, 0),
+    new NoteData(12, 1, 2, 0, 0, 0, 0, 0),
+    new NoteData(12, 1, 2, 1, 0, 0, 0, 0),
+    new NoteData(12, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(12, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(12, 3, 2, 0, 0, 0, 0, 0),
+    new NoteData(12, 3, 2, 1, 0, 0, 0, 0),
+
+    new NoteData(13, 0, 2, 0, 0, 0, 0, 0),
+    new NoteData(13, 0, 2, 1, 0, 0, 0, 0),
+    new NoteData(13, 1, 2, 0, 0, 0, 0, 0),
+    new NoteData(13, 1, 2, 1, 0, 0, 0, 0),
+    new NoteData(13, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(13, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(13, 3, 2, 0, 0, 0, 0, 0),
+    new NoteData(13, 3, 2, 1, 0, 0, 0, 0),
+
+    new NoteData(14, 0, 2, 0, 0, 0, 0, 1),
+    new NoteData(14, 0, 2, 1, 0, 0, 0, 1),
+    new NoteData(14, 1, 2, 0, 0, 0, 0, 1),
+    new NoteData(14, 1, 2, 1, 0, 0, 0, 1),
+
+    new NoteData(14, 2, 4, 0, 0, 0, 0, 0),
+    new NoteData(14, 2, 4, 1, 0, 0, 0, 0),
+    new NoteData(14, 2, 4, 2, 0, 0, 0, 0),
+    new NoteData(14, 2, 4, 3, 0, 0, 0, 0),
+    new NoteData(14, 3, 4, 0, 0, 0, 0, 0),
+    new NoteData(14, 3, 4, 1, 0, 0, 0, 0),
+    new NoteData(14, 3, 4, 2, 0, 0, 0, 0),
+    new NoteData(14, 3, 4, 3, 0, 0, 0, 0),
+    new NoteData(15, 0, 1, 0, 3, 0, 0, 1),
+
+    new NoteData(15, 1, 2, 0, 0, 0, 0, 1),
+    new NoteData(15, 1, 2, 1, 0, 0, 0, 1),
+    new NoteData(15, 2, 2, 0, 0, 0, 0, 0),
+];
+
+
+const CyaeghaEasyMap = [
+
+];

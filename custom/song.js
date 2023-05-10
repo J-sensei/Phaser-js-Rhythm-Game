@@ -401,13 +401,18 @@ class Song extends Phaser.GameObjects.Sprite {
                 return ByeOrNotHardMap;
         } else if(this.id === "Song1") {
             if(CurrentDifficulty === Difficulty.EASY)
-            return NiniEasyMap;
-        else if(CurrentDifficulty === Difficulty.HARD)
-            return NiniHardMap;
-        } else {
+                return NiniEasyMap;
+            else if(CurrentDifficulty === Difficulty.HARD)
+                return NiniHardMap;
+        } else if(this.id === "Song2") {
+            if(CurrentDifficulty === Difficulty.EASY)
+                return CyaeghaEasyMap;
+            else if(CurrentDifficulty === Difficulty.HARD)
+                return CyaeghaHardMap;
+        }
+        else {
             return [];
         }
-        return [];
     }
 
     play(delay) {

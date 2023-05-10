@@ -167,7 +167,6 @@ class Debug extends Phaser.Scene {
         if(CurrentSong.song.isPlaying) {
             this.playTime = CurrentSong.song.seek; // Get the accurate current time of the song
         }
-
         if(!this.pause) {
             this.beatmap.update(this.playTime);
         }
@@ -262,8 +261,11 @@ class Debug extends Phaser.Scene {
         else
             this.playTimeLabel.text = CurrentSong.playTimeString();
 
-        if(CurrentSong.playing() && !this.sound.locked && !this.pause) {
+        if(CurrentSong.song.isPlaying) {
             this.playTime = CurrentSong.song.seek; // Get the accurate current time of the song
+        }
+        if(!this.pause) {
+            this.beatmap.update(this.playTime);
         }
     }
 

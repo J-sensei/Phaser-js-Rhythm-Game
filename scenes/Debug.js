@@ -15,7 +15,7 @@ class Debug extends Phaser.Scene {
 
     create() {
         // Song Skip config
-        this.skipTime = 40;
+        this.skipTime = 120;
         this.skip = false;
         this.autoStart  = true;
 
@@ -166,15 +166,24 @@ class Debug extends Phaser.Scene {
         
         if(CurrentSong.song.isPlaying) {
             this.playTime = CurrentSong.song.seek; // Get the accurate current time of the song
-        }
-        if(!this.pause) {
-            this.beatmap.update(this.playTime);
+            if(!this.pause) {
+                this.beatmap.update(this.playTime);
+            }
         }
 
         // Parallax background scrolling
         this.background.update();
         // Player update
         this.player.update();
+
+        // Test updating beatmap
+        if(CurrentSong.song.isPlaying) {
+            this.playTime = CurrentSong.song.seek; // Get the accurate current time of the song
+            if(!this.pause) {
+                this.beatmap.update(this.playTime);
+            }
+        }
+
 
         // Start the song only if the song is not playing
         if((Phaser.Input.Keyboard.JustDown(this.spacebar) || this.autoStart) && !CurrentSong.song.isPlaying){
@@ -219,7 +228,16 @@ class Debug extends Phaser.Scene {
 
         if(this.pause) return; // If pausing don't bother to check the note hitting logic
 
-        const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this);
+        // Test updating beatmap
+        if(CurrentSong.song.isPlaying) {
+            this.playTime = CurrentSong.song.seek; // Get the accurate current time of the song
+            if(!this.pause) {
+                this.beatmap.update(this.playTime);
+            }
+        }
+
+
+        const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this, this.playTime);
         let n = Note.HitNotes(notesArray);
         if(n != null) { // If note is not empty, meaning a note is hit and destroy by the player
             this.noteDestroyCount++;
@@ -261,6 +279,7 @@ class Debug extends Phaser.Scene {
         else
             this.playTimeLabel.text = CurrentSong.playTimeString();
 
+        // Test updating beatmap
         if(CurrentSong.song.isPlaying) {
             this.playTime = CurrentSong.song.seek; // Get the accurate current time of the song
         }
@@ -276,7 +295,7 @@ class Debug extends Phaser.Scene {
      * @param {number} holdTime 
      * @returns Note
      */
-    instantiateNote(type, down, holdTime, parentNote, delay) {
+    instantiateNote(type, down, holdTime, parentNote, delay, targetTime) {
         let spawn;
         let judgementPos;
         let n = null; // Note
@@ -291,26 +310,26 @@ class Debug extends Phaser.Scene {
 
         if(type == NoteType.HOLD) {
             n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
-                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, null, delay);
+                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, null, delay, targetTime);
             n.play(AnimationId.VEHICLE1);
             n.flipX = true;
         } else if(type == NoteType.NORMAL) {
             n = Note.Instantiate(this, SpriteId.CONE, spawn.x, spawn.y, 
-                judgementPos.x, judgementPos.y, this.travelTime, down, type, null, null, delay);
+                judgementPos.x, judgementPos.y, this.travelTime, down, type, null, null, delay, targetTime);
             n.setScale(0.2);
         } else if(type === NoteType.NO_HIT) {
             n = Note.Instantiate(this, SpriteId.MUSIC_NOTE, spawn.x, spawn.y, 
-                judgementPos.x, judgementPos.y, this.travelTime, down, type, null, null, delay);
+                judgementPos.x, judgementPos.y, this.travelTime, down, type, null, null, delay, targetTime);
             n.setScale(0.15);
         } else if(type === NoteType.BIG_NOTE) {
             n = Note.Instantiate(this, SpriteId.VEHICLE2, spawn.x, spawn.y, 
-                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, null, delay);
+                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, null, delay, targetTime);
             n.play(AnimationId.VEHICLE2);
             n.flipX = true;
             n.setScale(0.8);
         } else if(type === NoteType.END && parentNote.result != NoteHitResult.MISS && parentNote.result != NoteHitResult.BAD) {
             n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
-                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, parentNote, delay);
+                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, parentNote, delay, targetTime);
             n.play(AnimationId.VEHICLE1);
             n.flipX = true;
         }

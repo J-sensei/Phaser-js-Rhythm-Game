@@ -7,7 +7,7 @@
     "previewStart": 81.334,
     "previewEnd": 99.873,
     "easyLaneSpeed": 5.5,
-    "hardLaneSpeed": 9.5,
+    "hardLaneSpeed": 9.0,
     "_comment1": "Notes contains (beat, subBeat, beatSnapDivider, beatSnapDividerPosition)",
     "notes":   [[1, 2, 3, 0], 
                 [1, 4, 3, 0],

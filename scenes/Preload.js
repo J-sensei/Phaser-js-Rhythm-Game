@@ -199,7 +199,7 @@ class Preload extends Phaser.Scene {
             SongList[i].create();
         }
 
-        CurrentSong = SongList[0]; // Bye or Not
+        CurrentSong = SongList[2]; // Bye or Not
 
         const atkFrame = 20;
         const runFrame = 15;

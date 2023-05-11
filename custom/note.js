@@ -80,8 +80,9 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {number} holdTime Hold required to hold the note (Only use for hold note) (Deprecated)
      * @param {Note} parentNote Parent note to for the refenerece (Only use for end note)
      * @param {number} delay Delay happen when spawn the note (ms)
+     *  @param {number} targetTime Exact time of the note should be reached the judgment point (TEST)
      */
-    constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote, delay) {
+    constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote, delay, noteSpawn) {
         super(scene, x, y, key); // Create sprite
         /** Scene reference */
         this.scene = scene;
@@ -102,6 +103,7 @@ class Note extends Phaser.GameObjects.Sprite {
         this.noteActive = false;
         /** Note Activate hold, only activated hold will check the holding logics */
         this.activeHold = false; // Start to check holding a note
+
         // Check type
         /** Type of the note */
         this.type = null;
@@ -121,6 +123,8 @@ class Note extends Phaser.GameObjects.Sprite {
         this.reachedDestination = false;
         /** Distance between note and judgement collider when hitted */
         this.hitDistance = -99999;
+
+        this.noteSpawn = noteSpawn;
 
         // Incase the notes is null, initialize it
         if(Note.Notes == null) {
@@ -147,27 +151,49 @@ class Note extends Phaser.GameObjects.Sprite {
         //console.log("This NOTE("+type+") spawned delay: " + delay + "ms");
         /** A delay when the note is spawned (millisecond) */
         let delayOffset = 0;
+        this.initialValue = x;
+        this.targetValue = destX;
+
+        if(CurrentSong.song.isPlaying)
+            delay = (CurrentSong.song.seek - noteSpawn.spawnTime) * 1000;
+        
+        this.travelTime = travelTime - delay;
+        //console.log("Delay Calc: " + delay + "ms")
         if(!isNaN(delay)) { // As long as the delay can be catch
             delayOffset = delay;
-            const initialValue = x; // Initial value of the not
-            const targetValue = destX; // Target value of the detination
             /** Get the exact spawn position with the delay offset */
-            this.exactSpawnX = initialValue + (targetValue - initialValue) * ((delayOffset) / travelTime); // 0 delay offset will give the orignal x position
+            this.exactSpawnX = this.initialValue + (this.targetValue - this.initialValue) * ((delayOffset) / this.travelTime); // 0 delay offset will give the orignal x position
         } else {
             this.exactSpawnX = x;
         }
-        this.startTime = new Date().getTime();
+        //this.startTime = new Date().getTime();
+        this.startTime = game.loop.time;
 
+        this.updateDelayPosition = false;
+        this.x = this.exactSpawnX; // Skip some x position to align with the beat (Solve slight delay)
         // Create tweens
-        // Power0 == Linear
         const tween = scene.tweens.add({
             ease: 'Linear',
             targets: this, // Set to this note object
             x: destX, // Destination in x position
-            duration: travelTime, // Time required travel to destination (Subtract by the delay)
+            duration: this.travelTime, // Time required travel to destination (Subtract by the delay)
+            delay: 0,
             repeat: 0, // No repeat
+            onActive: function() {
+                //console.log("Active");
+            },
             // When the tween is start
             onStart: function() {
+                const currentTime = game.loop.time;
+                //console.log("Start Delay: " + (currentTime - this.startTime) + "ms");
+                const startDelay = currentTime - this.startTime;
+
+                const delayX = this.initialValue + (this.targetValue - this.initialValue) * (startDelay / this.travelTime);
+                const deltaX = this.initialValue - delayX;
+                //console.log("Delta x: " + deltaX);
+                //this.x -= deltaX;
+                //console.log("Start Pos x: " + this.x);
+
                 // const currentTime = new Date().getTime();
                 // const delta = (currentTime*0.001 - this.startTime*0.001);
                 // console.log("Before X: " + this.exactSpawnX);
@@ -181,14 +207,14 @@ class Note extends Phaser.GameObjects.Sprite {
                 //     this.exactSpawnX = x;
                 // }
                 //tween.seek(-delayOffset);
-                const xBefore = this.x;
+                //const xBefore = this.x;
                 //tween.updateTo('x', this.exactSpawnX, true);
 
 
                 // this.x = this.exactSpawnX;
                 // console.log("After X: " + this.exactSpawnX);
-                const xAfter = this.x;
-                console.log("Bfore: " + xBefore + " XAfter: " + xAfter);
+                //const xAfter = this.x;
+                //console.log("Bfore: " + xBefore + " XAfter: " + xAfter);
                 //console.log("Delay Offset: " + delayOffset + "ms" + ", " + delta +"ms. " + "Total: " + (delayOffset + delta) + "ms");
             },
             // When the tween is complete
@@ -197,8 +223,13 @@ class Note extends Phaser.GameObjects.Sprite {
                  * If the note is still not destroy,
                  * create another tween with same properties (to have constant speed) to move it to behind
                  */
+                //console.log("Complete Time: " + CurrentSong.song.seek); // Check the complete time match with the expectedt beat time or not
+                console.log(noteSpawn.getTargetTime(this.travelTime*0.001) + " " + CurrentSong.song.seek);
+                //console.log(game.loop.delta);
+                //console.log("Delay offset: " + delayOffset + "ms");
+                console.log("Delay: " + (CurrentSong.song.seek - noteSpawn.getTargetTime(this.travelTime*0.001)) * 1000 + "ms")
                 const tween2 = scene.tweens.add({
-                    ease: 'Power0',
+                    ease: 'Linear',
                     targets: this,
                     x: this.x - distance, // Apply the distance between calculated here to have constant speed
                     duration: travelTime,
@@ -216,9 +247,16 @@ class Note extends Phaser.GameObjects.Sprite {
                 });
             },
             callbackScope: this
-        });     
-        this.x = this.exactSpawnX; // Skip some x position to align with the beat (Solve slight delay)
-        //tween.updateTo('x', this.exactSpawnX, true);
+        });
+        // tween.on('update', function(tween, key, target, current, previous){
+        //     if(key === "x" && !this.updateDelayPosition) {
+        //         // console.log(current + " " + previous)
+        //         // current = 100;
+        //         // console.log(tween);
+        //         //tween.callbackScope.x = 50;
+        //         //tween.callbackScope.x = 
+        //     }
+        // }, this);
 
         // Different note type will have move in from above        
         if(type === NoteType.HOLD || type === NoteType.BIG_NOTE) {
@@ -275,6 +313,19 @@ class Note extends Phaser.GameObjects.Sprite {
         // Collision body configuration
         this.setOrigin(0.5);
         this.body.setSize(NoteColliderSize * this.scale, NoteColliderSize * this.scale);
+    }
+
+    moveNote(initialValue, targetValue, currentDuration, totalDuration) {
+        // console.log(initialValue + " " + targetValue);
+        // console.log(currentDuration + " " + totalDuration);
+        // console.log(initialValue + (targetValue - initialValue) * (currentDuration / totalDuration));
+
+        // if(currentDuration > 0)
+        //     this.x = initialValue + (targetValue - initialValue) * (currentDuration / totalDuration);
+        // else
+        //     this.x = initialValue + (targetValue - initialValue) * (0 / totalDuration);
+        const smooth = 1;
+        this.x = initialValue + (targetValue - initialValue) * (((currentDuration * smooth) / (totalDuration * smooth)));
     }
 
     /**
@@ -374,17 +425,60 @@ class Note extends Phaser.GameObjects.Sprite {
         };
     }
 
-    static Instantiate(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote, delay) {
+    static Instantiate(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote, delay, targetTime) {
         let note;
         if(type === NoteType.END) {
-            note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, null, parentNote, delay);
+            note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, null, parentNote, delay, targetTime);
             parentNote.endNote = note;
         } else {
-            note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, null, delay);
+            note = new Note(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, null, delay, targetTime);
         }
         note.setId(Note.NoteCount);
         Note.NoteCount++;
         return note;
+    }
+
+    static InstantiateNote(travelTime, down, type, holdTime, parentNote, delay, noteSpawn) {
+        let spawn; // Spawn position
+        let judgementPos; // Judgement position aka destination position
+        let n = null; // Note
+        if(down) {
+            spawn = new Phaser.Math.Vector2(NoteSpawnPoint[0].x, NoteSpawnPoint[0].y);
+            judgementPos = new Phaser.Math.Vector2(JudgementPositions[0].x, JudgementPositions[0].y);
+        }
+        else {
+            spawn = new Phaser.Math.Vector2(NoteSpawnPoint[1].x, NoteSpawnPoint[1].y);
+            judgementPos = new Phaser.Math.Vector2(JudgementPositions[1].x, JudgementPositions[1].y);
+        }
+
+        // Instantiate the note based on the type given
+        if(type == NoteType.HOLD) {
+            n = Note.Instantiate(Note.Scene, SpriteId.VEHICLE1, spawn.x, spawn.y, 
+                judgementPos.x, judgementPos.y, travelTime, down, type, holdTime, null, delay, noteSpawn);
+            n.play(AnimationId.VEHICLE1);
+            n.flipX = true;
+        } else if(type == NoteType.NORMAL) {
+            n = Note.Instantiate(Note.Scene, SpriteId.CONE, spawn.x, spawn.y, 
+                judgementPos.x, judgementPos.y, travelTime, down, type, null, null, delay, noteSpawn);
+            n.setScale(0.2);
+        } else if(type === NoteType.NO_HIT) {
+            n = Note.Instantiate(Note.Scene, SpriteId.MUSIC_NOTE, spawn.x, spawn.y, 
+                judgementPos.x, judgementPos.y, travelTime, down, type, null, null, delay, noteSpawn);
+            n.setScale(0.15);
+        } else if(type === NoteType.BIG_NOTE) {
+            n = Note.Instantiate(Note.Scene, SpriteId.VEHICLE2, spawn.x, spawn.y, 
+                judgementPos.x, judgementPos.y, travelTime, down, type, holdTime, null, delay, noteSpawn);
+            n.play(AnimationId.VEHICLE2);
+            n.flipX = true;
+            n.setScale(0.8);
+        } else if(type === NoteType.END && parentNote.result != NoteHitResult.MISS && parentNote.result != NoteHitResult.BAD) {
+            n = Note.Instantiate(Note.Scene, SpriteId.VEHICLE1, spawn.x, spawn.y, 
+                judgementPos.x, judgementPos.y, travelTime, down, type, holdTime, parentNote, delay, noteSpawn);
+            n.play(AnimationId.VEHICLE1);
+            n.flipX = true;
+        }
+
+        return n;
     }
 
     /**
@@ -395,11 +489,11 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {number} playTime 
      * @returns Note Array
      */
-    static UpdateHit(minimumDistance, player, scene) {
+    static UpdateHit(minimumDistance, player, scene, playtime) {
         let notesArray = []; // Empty note array
         for(let i = 0; i < Note.Notes.getChildren().length; i++) {
             let note = Note.Notes.getChildren()[i]; // Get the note
-            note.update(player); // Update note here
+            note.update(player, playtime); // Update note here
             let distance = 0; // Distance between note and the judgement colliders
 
             // Check which lane the note is to calculate the distance
@@ -497,7 +591,8 @@ class Note extends Phaser.GameObjects.Sprite {
         return note;
     }
 
-    update(player) {
+    update(player, playtime) {
+        //this.moveNote(this.initialValue, this.targetValue, CurrentSong.song.seek, this.noteSpawn.getTargetTime(this.travelTime*0.001));
         this.circle.x = this.x;
         this.circle.y = this.y;
 

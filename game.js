@@ -1,3 +1,11 @@
+/********************************************
+Course : TGD2251 Game Physics
+Session: Trimester 2, 2022/23
+ID and Name #1 : 1191100556 Liew Jiann Shen
+Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
+********************************************/
+
+
 /** Sample Beatmap setting to play the note and music correctly */
 let BeatmapConfig = {
   bpm: 160,

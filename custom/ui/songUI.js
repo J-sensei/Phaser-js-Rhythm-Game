@@ -1,3 +1,11 @@
+/********************************************
+Course : TGD2251 Game Physics
+Session: Trimester 2, 2022/23
+ID and Name #1 : 1191100556 Liew Jiann Shen
+Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
+********************************************/
+
+
 class SongUI extends Phaser.GameObjects.Sprite {
     constructor(scene, x, y, imageKey) {
         super(scene, x, y, imageKey);

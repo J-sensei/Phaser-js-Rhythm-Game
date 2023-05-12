@@ -1,6 +1,13 @@
 {
     "name": "Open Your Heart feat. Renko",
     "artist": "rejection",
+    "source": "Spd Gar 003",
+    "bpm": 150,
+    "offset": 0.222,
+    "previewStart": 102.522,
+    "previewEnd": 122.334,
+    "easyLaneSpeed": 5.5,
+    "hardLaneSpeed": 9.0,
     "_comment1": "Notes contains (beat, subBeat, beatSnapDivider, beatSnapDividerPosition)",
     "notes":   [[1, 2, 3, 0], 
                 [1, 4, 3, 0],

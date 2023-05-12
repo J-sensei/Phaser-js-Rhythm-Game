@@ -9,7 +9,7 @@ Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 /** Current song for the player to play */
 let CurrentSong = null;
 /** Current Difficulty selected for the song */
-let CurrentDifficulty = Difficulty.HARD
+let CurrentDifficulty = Difficulty.EASY;
 /**
  * Songs available in the game
  */
@@ -110,6 +110,7 @@ class Preload extends Phaser.Scene {
         //this.testSong = new Song(this, "Song1", "assets/songs/shinjuku2258");
         //this.testSong.preload();
         const songPaths = [
+            //"assets/songs/you aint see nothing like this",
             "assets/songs/PSYQUI-bye or not",
             "assets/songs/nini",
             "assets/songs/cyaegha",

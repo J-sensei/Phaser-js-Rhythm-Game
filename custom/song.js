@@ -1,7 +1,10 @@
-// const musicConfig = {
-//     volume: 0.5,
-//     loop: false,
-// }
+/********************************************
+Course : TGD2251 Game Physics
+Session: Trimester 2, 2022/23
+ID and Name #1 : 1191100556 Liew Jiann Shen
+Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
+********************************************/
+
 
 /**
  * Song data, contains function use to play song and song data

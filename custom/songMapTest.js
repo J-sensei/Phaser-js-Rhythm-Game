@@ -1,3 +1,11 @@
+/********************************************
+Course : TGD2251 Game Physics
+Session: Trimester 2, 2022/23
+ID and Name #1 : 1191100556 Liew Jiann Shen
+Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
+********************************************/
+
+
 const ByeOrNotHardMap = [
     new NoteData(0, 0, 1, 0, 1, 1, 8, 0),
     new NoteData(2, 0, 1, 0, 1, 1, 6, 1),
@@ -2797,5 +2805,445 @@ const CyaeghaHardMap = [
 
 
 const CyaeghaEasyMap = [
+    new NoteData(0, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(1, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(2, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(3, 0, 1, 0, 0, 0, 0, 1),
 
+    new NoteData(4, 0, 1, 0, 3, 0, 0, 0),
+
+    new NoteData(4, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(4, 3, 1, 0, 2, 0, 0, 1),
+    new NoteData(5, 0, 1, 0, 2, 0, 0, 1),
+
+    new NoteData(5, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(5, 3, 1, 0, 2, 0, 0, 0),
+    new NoteData(6, 0, 1, 0, 2, 0, 0, 0),
+
+    new NoteData(6, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(6, 3, 1, 0, 2, 0, 0, 1),
+    new NoteData(7, 0, 1, 0, 3, 0, 0, 1),
+
+    new NoteData(7, 2, 1, 0, 1, 1, 2, 0),
+    new NoteData(8, 0, 1, 0, 3, 0, 0, 1),
+    new NoteData(8, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(8, 2, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(9, 0, 1, 0, 0, 0, 0, 0),
+    new NoteData(9, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(9, 2, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(10, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(10, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(10, 2, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(11, 0, 1, 0, 0, 0, 0, 0),
+    new NoteData(11, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(11, 2, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(12, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(12, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(12, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(12, 3, 1, 0, 0, 0, 0, 0),
+    new NoteData(13, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(13, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(13, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(13, 3, 1, 0, 0, 0, 0, 0),
+
+    // 1 2 3
+    new NoteData(14, 0, 1, 0, 3, 0, 0, 1), 
+    new NoteData(14, 2, 1, 0, 3, 0, 0, 1), 
+    new NoteData(15, 0, 1, 0, 3, 0, 0, 1), 
+
+    new NoteData(16, 0, 1, 0, 0, 0, 0, 0), 
+    new NoteData(16, 2, 1, 0, 3, 0, 0, 0), 
+    new NoteData(17, 0, 1, 0, 0, 0, 0, 0), 
+    new NoteData(17, 2, 1, 0, 3, 0, 0, 0), 
+
+    new NoteData(18, 0, 1, 0, 0, 0, 0, 1), 
+    new NoteData(18, 2, 1, 0, 3, 0, 0, 1), 
+    new NoteData(19, 0, 1, 0, 0, 0, 0, 1), 
+    new NoteData(19, 2, 1, 0, 3, 0, 0, 1), 
+
+    new NoteData(20, 0, 1, 0, 1, 1, 2, 0), 
+    new NoteData(20, 3, 1, 0, 0, 0, 0, 1), 
+
+    new NoteData(21, 0, 1, 0, 1, 1, 2, 0), 
+    new NoteData(21, 3, 1, 0, 0, 0, 0, 1), 
+
+    new NoteData(22, 0, 1, 0, 1, 1, 2, 0), 
+    new NoteData(22, 3, 1, 0, 0, 0, 0, 1), 
+    new NoteData(23, 0, 1, 0, 3, 0, 0, 1), 
+
+    new NoteData(24, 0, 1, 0, 0, 0, 0, 0), 
+    new NoteData(24, 2, 1, 0, 3, 0, 0, 0), 
+    new NoteData(25, 0, 1, 0, 0, 0, 0, 1), 
+    new NoteData(25, 2, 1, 0, 3, 0, 0, 1), 
+
+    new NoteData(26, 0, 1, 0, 0, 0, 0, 0), 
+    new NoteData(26, 2, 1, 0, 3, 0, 0, 0), 
+    new NoteData(27, 0, 1, 0, 0, 0, 0, 1), 
+    new NoteData(27, 2, 1, 0, 3, 0, 0, 1), 
+
+    new NoteData(28, 0, 1, 0, 0, 0, 0, 0), 
+    new NoteData(28, 2, 1, 0, 3, 0, 0, 0), 
+    new NoteData(29, 0, 1, 0, 0, 0, 0, 1), 
+    new NoteData(29, 2, 1, 0, 3, 0, 0, 1), 
+
+    new NoteData(30, 0, 1, 0, 0, 0, 0, 0), 
+    new NoteData(30, 2, 1, 0, 3, 0, 0, 0), 
+    new NoteData(31, 0, 1, 0, 0, 0, 0, 0), 
+
+    new NoteData(32, 0, 1, 0, 1, 1, 6, 1), 
+    new NoteData(32, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(33, 0, 1, 0, 3, 0, 0, 1),
+    new NoteData(33, 2, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(34, 0, 1, 0, 1, 1, 6, 0), 
+    new NoteData(34, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(35, 0, 1, 0, 3, 0, 0, 0),
+    new NoteData(35, 2, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(36, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(36, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(36, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(36, 3, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(37, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(37, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(37, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(37, 3, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(38, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(38, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(38, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(38, 3, 1, 0, 0, 0, 0, 1),
+    new NoteData(39, 0, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(39, 1, 1, 0, 0, 0, 0, 0), // Lets
+    new NoteData(39, 2, 1, 0, 0, 0, 0, 0), // Go
+
+    new NoteData(40, 0, 1, 0, 1, 1, 6, 1), 
+    new NoteData(40, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(41, 0, 1, 0, 3, 0, 0, 1),
+    new NoteData(41, 2, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(42, 0, 1, 0, 1, 1, 6, 0), 
+    new NoteData(42, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(43, 0, 1, 0, 3, 0, 0, 0),
+    new NoteData(43, 2, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(44, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(44, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(44, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(44, 3, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(45, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(45, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(45, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(45, 3, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(46, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(46, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(46, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(46, 3, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(47, 0, 1, 0, 3, 0, 0, 1),
+    new NoteData(48, 0, 1, 0, 3, 0, 0, 1),
+
+    new NoteData(48, 2, 1, 0, 2, 0, 0, 1),
+    new NoteData(49, 2, 1, 0, 2, 0, 0, 0),
+    new NoteData(50, 2, 1, 0, 2, 0, 0, 1),
+    new NoteData(51, 2, 1, 0, 2, 0, 0, 0),
+    new NoteData(52, 2, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(53, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(53, 3, 1, 0, 2, 0, 0, 0),
+    new NoteData(54, 0, 1, 0, 2, 0, 0, 0),
+    new NoteData(54, 1, 1, 0, 2, 0, 0, 0),
+
+    new NoteData(54, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(54, 3, 1, 0, 2, 0, 0, 1),
+    new NoteData(55, 0, 1, 0, 2, 0, 0, 1),
+    new NoteData(55, 1, 1, 0, 2, 0, 0, 1),
+
+    new NoteData(55, 2, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(56, 0, 1, 0, 3, 0, 0, 1),
+    new NoteData(56, 1, 1, 0, 2, 0, 0, 1),
+    new NoteData(56, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(56, 3, 1, 0, 2, 0, 0, 1),
+
+    new NoteData(57, 0, 1, 0, 3, 0, 0, 0),
+    new NoteData(57, 1, 1, 0, 2, 0, 0, 0),
+    new NoteData(57, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(57, 3, 1, 0, 2, 0, 0, 0),
+
+    new NoteData(58, 0, 1, 0, 3, 0, 0, 1),
+    new NoteData(58, 1, 1, 0, 2, 0, 0, 1),
+    new NoteData(58, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(58, 3, 1, 0, 2, 0, 0, 1),
+
+    new NoteData(59, 0, 1, 0, 3, 0, 0, 0),
+    new NoteData(59, 1, 1, 0, 2, 0, 0, 0),
+    new NoteData(59, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(59, 3, 1, 0, 2, 0, 0, 1),
+
+    new NoteData(60, 0, 1, 0, 3, 0, 0, 0),
+    new NoteData(60, 1, 1, 0, 2, 0, 0, 0),
+    new NoteData(60, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(60, 3, 1, 0, 2, 0, 0, 0),
+
+    new NoteData(61, 0, 1, 0, 3, 0, 0, 1),
+    new NoteData(61, 1, 1, 0, 2, 0, 0, 1),
+    new NoteData(61, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(61, 3, 1, 0, 2, 0, 0, 1),
+
+    new NoteData(62, 0, 1, 0, 3, 0, 0, 0),
+    new NoteData(62, 1, 1, 0, 2, 0, 0, 0),
+    new NoteData(62, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(62, 3, 1, 0, 2, 0, 0, 1),
+
+    new NoteData(63, 0, 1, 0, 3, 0, 0, 0),
+    new NoteData(63, 1, 1, 0, 2, 0, 0, 0),
+    new NoteData(63, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(63, 3, 1, 0, 2, 0, 0, 1),
+
+    new NoteData(64, 0, 1, 0, 3, 0, 0, 0),
+    new NoteData(65, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(66, 0, 1, 0, 0, 0, 0, 1),
+
+    new NoteData(67, 0, 1, 0, 1, 1, 3, 0),
+
+    new NoteData(68, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(68, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(68, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(68, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(69, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(69, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(69, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(69, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(70, 0, 2, 0, 0, 0, 0, 0),
+    new NoteData(70, 0, 2, 1, 0, 0, 0, 0),
+    new NoteData(70, 1, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(70, 2, 2, 0, 0, 0, 0, 1),
+    new NoteData(70, 2, 2, 1, 0, 0, 0, 1),
+    new NoteData(70, 3, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(71, 0, 2, 0, 1, 1, 2, 0),
+
+    new NoteData(72, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(72, 1, 2, 1, 0, 0, 0, 1),
+    new NoteData(72, 3, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(73, 0, 1, 0, 0, 0, 0, 0),
+    new NoteData(73, 1, 2, 1, 0, 0, 0, 0),
+    new NoteData(73, 3, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(74, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(74, 1, 2, 1, 0, 0, 0, 1),
+    new NoteData(74, 3, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(75, 0, 1, 0, 0, 0, 0, 0),
+    new NoteData(75, 1, 1, 0, 1, 1, 3, 0),
+
+    new NoteData(76, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(76, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(76, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(76, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(77, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(77, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(77, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(77, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(78, 0, 1, 0, 3, 0, 0, 1),
+    new NoteData(78, 2, 1, 0, 3, 0, 0, 1),
+    new NoteData(79, 0, 1, 0, 3, 0, 0, 1),
+
+    //
+    new NoteData(80, 0, 1, 0, 1, 1, 1, 1),
+    new NoteData(80, 2, 2, 0, 0, 0, 0, 1),
+    new NoteData(80, 2, 2, 1, 0, 0, 0, 1),
+    new NoteData(80, 3, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(81, 0, 1, 0, 1, 1, 1, 0),
+    new NoteData(81, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(81, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(81, 3, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(82, 0, 1, 0, 1, 1, 1, 1),
+    new NoteData(82, 2, 2, 0, 0, 0, 0, 1),
+    new NoteData(82, 2, 2, 1, 0, 0, 0, 1),
+    new NoteData(82, 3, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(83, 0, 1, 0, 1, 1, 1, 0),
+    new NoteData(83, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(83, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(83, 3, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(84, 0, 1, 0, 1, 1, 1, 1),
+    new NoteData(84, 2, 2, 0, 0, 0, 0, 1),
+    new NoteData(84, 2, 2, 1, 0, 0, 0, 1),
+    new NoteData(84, 3, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(85, 0, 1, 0, 1, 1, 1, 0),
+    new NoteData(85, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(85, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(85, 3, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(86, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(86, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(86, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(86, 3, 1, 0, 0, 0, 0, 0),
+    new NoteData(87, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(87, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(87, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(87, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(88, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(88, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(88, 2, 1, 0, 1, 1, 2, 0),
+    new NoteData(89, 0, 1, 0, 1, 1, 2, 1),
+    new NoteData(89, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(89, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(90, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(90, 1, 1, 0, 0, 0, 0, 1),
+    new NoteData(90, 2, 1, 0, 1, 1, 2, 0),
+    new NoteData(91, 0, 1, 0, 1, 1, 2, 1),
+    new NoteData(91, 2, 1, 0, 0, 0, 0, 0),
+    new NoteData(91, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(92, 0, 1, 0, 3, 0, 0, 1),
+    new NoteData(92, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(92, 2, 1, 0, 3, 0, 0, 1),
+    new NoteData(92, 3, 1, 0, 0, 0, 0, 0),
+    new NoteData(93, 0, 1, 0, 3, 0, 0, 1),
+    new NoteData(93, 1, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(93, 2, 1, 0, 3, 0, 0, 1),
+    new NoteData(93, 3, 1, 0, 3, 0, 0, 1),
+
+    new NoteData(94, 0, 1, 0, 3, 0, 0, 0),
+    new NoteData(94, 1, 1, 0, 3, 0, 0, 0),
+
+    new NoteData(94, 2, 1, 0, 1, 1, 1, 1),
+    new NoteData(95, 0, 1, 0, 1, 1, 1, 0),
+
+    new NoteData(95, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(95, 3, 1, 0, 0, 0, 0, 0),
+
+    // Hype
+    new NoteData(96, 0, 2, 0, 0, 0, 0, 1),
+    new NoteData(96, 0, 2, 1, 0, 0, 0, 1),
+    new NoteData(96, 1, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(96, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(96, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(96, 3, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(97, 0, 2, 0, 0, 0, 0, 1),
+    new NoteData(97, 0, 2, 1, 0, 0, 0, 1),
+    new NoteData(97, 1, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(97, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(97, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(97, 3, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(98, 0, 2, 0, 0, 0, 0, 1),
+    new NoteData(98, 0, 2, 1, 0, 0, 0, 1),
+    new NoteData(98, 1, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(98, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(98, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(98, 3, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(99, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(99, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(99, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(99, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(100, 0, 2, 0, 0, 0, 0, 1),
+    new NoteData(100, 0, 2, 1, 0, 0, 0, 1),
+    new NoteData(100, 1, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(100, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(100, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(100, 3, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(101, 0, 2, 0, 0, 0, 0, 1),
+    new NoteData(101, 0, 2, 1, 0, 0, 0, 1),
+    new NoteData(101, 1, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(101, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(101, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(101, 3, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(102, 0, 2, 0, 0, 0, 0, 1),
+    new NoteData(102, 0, 2, 1, 0, 0, 0, 1),
+    new NoteData(102, 1, 2, 0, 0, 0, 0, 1),
+
+    new NoteData(102, 2, 2, 0, 0, 0, 0, 0),
+    new NoteData(102, 2, 2, 1, 0, 0, 0, 0),
+    new NoteData(102, 3, 2, 0, 0, 0, 0, 0),
+
+    new NoteData(103, 0, 1, 0, 0, 0, 0, 1),
+    new NoteData(103, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(103, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(103, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(104, 0, 1, 0, 1, 1, 1, 1),
+    new NoteData(104, 1, 1, 0, 3, 0, 0, 0),
+    new NoteData(104, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(104, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(105, 0, 1, 0, 1, 1, 1, 1),
+    new NoteData(105, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(105, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(105, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(106, 0, 1, 0, 1, 1, 1, 1),
+    new NoteData(106, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(106, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(106, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(107, 0, 1, 0, 1, 1, 1, 1),
+    new NoteData(107, 1, 1, 0, 0, 0, 0, 0),
+    new NoteData(107, 2, 1, 0, 0, 0, 0, 1),
+    new NoteData(107, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(108, 0, 2, 0, 0, 0, 0, 1),
+    new NoteData(108, 0, 2, 1, 0, 0, 0, 1),
+    new NoteData(108, 1, 2, 0, 3, 0, 0, 0),
+
+    new NoteData(108, 2, 2, 0, 0, 0, 0, 1),
+    new NoteData(108, 2, 2, 1, 0, 0, 0, 1),
+    new NoteData(108, 3, 2, 0, 3, 0, 0, 0),
+
+    new NoteData(109, 0, 2, 0, 0, 0, 0, 1),
+    new NoteData(109, 0, 2, 1, 0, 0, 0, 1),
+    new NoteData(109, 1, 2, 0, 3, 0, 0, 0),
+
+    new NoteData(109, 2, 2, 0, 0, 0, 0, 1),
+    new NoteData(109, 2, 2, 1, 0, 0, 0, 1),
+    new NoteData(109, 3, 2, 0, 3, 0, 0, 0),
+
+    new NoteData(110, 0, 2, 0, 0, 0, 0, 1),
+    new NoteData(110, 0, 2, 1, 0, 0, 0, 1),
+    new NoteData(110, 1, 2, 0, 3, 0, 0, 0),
+
+    new NoteData(110, 2, 2, 0, 0, 0, 0, 1),
+    new NoteData(110, 2, 2, 1, 0, 0, 0, 1),
+    new NoteData(110, 3, 2, 0, 3, 0, 0, 0),
+
+    new NoteData(111, 0, 1, 0, 1, 1, 1, 1),
+    new NoteData(111, 1, 1, 0, 1, 1, 1, 0),
+    new NoteData(111, 2, 1, 0, 1, 1, 1, 1),
+    new NoteData(111, 3, 1, 0, 0, 0, 0, 0),
+
+    new NoteData(112, 0, 1, 0, 3, 0, 0, 0),
 ];

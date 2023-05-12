@@ -15,7 +15,7 @@ class Debug extends Phaser.Scene {
 
     create() {
         // Song Skip config
-        this.skipTime = 120;
+        this.skipTime = 84;
         this.skip = false;
         this.autoStart  = true;
 

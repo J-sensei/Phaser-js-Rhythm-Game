@@ -10,22 +10,18 @@ Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
  */
 class Debug extends Phaser.Scene {
     constructor() {
-        super("Debug");
+        super(SceneKey.DEBUG);
     }
 
     create() {
         // Song Skip config
-        this.skipTime = 84;
+        this.skipTime = 110;
         this.skip = false;
         this.autoStart  = true;
 
-        this.noteCount = 0; // Reset the note count
-
         /** Travel time (Milisecond) / Early time to spawn notes */
         this.travelTime = CurrentSong.getLaneSpeed(CurrentDifficulty);
-        //this.travelTime = 850;
-        //this.travelTime = 1250;
-        this.beatmap = new Beatmap(this, CurrentSong, CurrentSong.beatmapConfig); // Test
+        this.beatmap = new Beatmap(this, CurrentSong, CurrentSong.beatmapConfig, this.travelTime); // Test
         this.beatmap.create();
         this.beatmap.drawBeatLine = false;
         this.beatmap.playMetronome = false;
@@ -38,16 +34,25 @@ class Debug extends Phaser.Scene {
         // Background
         const {width, height} = this.scale; // Take the screen width and height
         const backgroundData = [
-            new BackgroundData(BackgroundType.TILE_SPRITE, BackgroundId.SUNSET_BACK, 0, 360, width, height, 3.5, 0.1, 0),
-            new BackgroundData(BackgroundType.TILE_SPRITE, BackgroundId.SUNSET_BUILDINGS, 0, 400, width, 240, 2.5, 0.3, 0),
-            new BackgroundData(BackgroundType.TILE_SPRITE, BackgroundId.SUNSET_PALMS, 0, 470, width, 240, 2.5, 0.5, 0),
-            new BackgroundData(BackgroundType.TILE_SPRITE, BackgroundId.SUNSET_HIGHWAY, 0, height - 240, width, 240, 2, 1.5, 0),
-            new BackgroundData(BackgroundType.OBJECT, BackgroundId.SUNSET_PALMTREE, width, height - 200, 133, 208, 3, 3, 100)
+            new BackgroundData(BackgroundType.TILE_SPRITE, BackgroundId.SUNSET_BACK, 0, 360, width, height, 3.5, 50, 0),
+            new BackgroundData(BackgroundType.TILE_SPRITE, BackgroundId.SUNSET_BUILDINGS, 0, 400, width, 240, 2.5, 100, 0),
+            new BackgroundData(BackgroundType.TILE_SPRITE, BackgroundId.SUNSET_PALMS, 0, 470, width, 240, 2.5, 200, 0),
+            new BackgroundData(BackgroundType.TILE_SPRITE, BackgroundId.SUNSET_HIGHWAY, 0, height - 240, width, 240, 2, 300, 0),
+            new BackgroundData(BackgroundType.OBJECT, BackgroundId.SUNSET_PALMTREE, width, height - 200, 133, 208, 3, 500, 100)
         ];
 
         /** Parallax background object */
         this.background = new Background(this, backgroundData);
-        this.background.setSpeed(1); // 1 is normal speed, higher number means faster
+
+        let backgroundSpeed;
+        if(CurrentDifficulty == Difficulty.EASY) {
+            backgroundSpeed = CurrentSong.easyLaneSpeed;
+        } else {
+            backgroundSpeed = CurrentSong.hardLaneSpeed;
+        }
+        console.log(backgroundSpeed);
+        const basedSpeed = 1.2
+        this.background.setSpeed(basedSpeed * (backgroundSpeed * 0.1)); // 1 is normal speed, higher number means faster
 
         // Player
         this.player = new PlayerCar(this, PlayerPosition.x, PlayerPosition.y);
@@ -67,26 +72,31 @@ class Debug extends Phaser.Scene {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
-        this.playerLabel = this.add.text(game.config.width / 5, 90, this.player.getDebugString(), {
+        this.playerLabel = this.add.text(game.config.width / 5, 120, this.player.getDebugString(), {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
-        this.noteLabel = this.add.text(game.config.width / 4.5, 150, "Perfect: 0, Great: 0, Bad: 0, Miss: 0", {
+        this.noteLabel = this.add.text(game.config.width / 4.5, 180, "Perfect: 0, Great: 0, Bad: 0, Miss: 0", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
-        this.accLabel = this.add.text(game.config.width / 5, 180, "Accuracy: 0", {
+        this.accLabel = this.add.text(game.config.width / 5, 210, "Accuracy: 0", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
-        this.comboLabel = this.add.text(game.config.width / 5, 210, "Combo: 0", {
+        this.comboLabel = this.add.text(game.config.width / 5, 240, "Combo: 0", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
-        this.scoreLabel = this.add.text(game.config.width / 5, 240, "Score: 0", {
+        this.scoreLabel = this.add.text(game.config.width / 5, 270, "Score: 0", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
+        this.beatmapFinishLabel = this.add.text(game.config.width / 5, 300, "Finish: " + this.beatmap.finish(), {
+            fontFamily: 'Silkscreen', 
+            fontSize: 24
+        }).setOrigin(0.5); 
+        
         this.fpsLabel = this.add.text(game.config.width / 1.1, 30, "FPS: 0", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
@@ -124,8 +134,12 @@ class Debug extends Phaser.Scene {
         /** Is the song has started since the scene loaded */
         this.startOnce = false;
 
-        this.missCollider = this.physics.add.sprite(this.player.x - 80, this.player.y);
+        const missColliderPos = new Phaser.Math.Vector2(this.player.x, this.player.y);
+
+        this.missCollider = this.physics.add.sprite(missColliderPos.x, missColliderPos.y);
         this.missCollider.setSize(20, 200);
+
+        // Note hit miss collider
         this.physics.add.overlap(this.missCollider, Note.Notes, function(missCollider, note) {
             if(!note.hitted && !(note.type === NoteType.NO_HIT)) {
                 note.result = NoteHitResult.MISS;
@@ -136,7 +150,26 @@ class Debug extends Phaser.Scene {
                     this.score.add(NoteHitResult.MISS);
                 }
 
-                let t = new HitText(this, this.player.x - 80, this.player.y, "X", null, 64);
+                let t = new HitText(this, missColliderPos.x, missColliderPos.y, "X", null, 64);
+                t.setColor("#eb3434");
+                t.destroyText();
+                note.destroyNote();
+            }
+        }, null, this);
+
+        // Note hit player
+        this.physics.add.overlap(this.player, Note.Notes, function(player, note) {
+            if(!note.hitted && !(note.type === NoteType.NO_HIT)) {
+                player.damage(note);
+                note.result = NoteHitResult.MISS;
+                this.score.add(NoteHitResult.MISS);
+
+                // Double miss for hold note
+                if(note.type === NoteType.HOLD) {
+                    this.score.add(NoteHitResult.MISS);
+                }
+
+                let t = new HitText(this, this.player.x, this.player.y, "X", null, 64);
                 t.setColor("#eb3434");
                 t.destroyText();
                 note.destroyNote();
@@ -223,7 +256,7 @@ class Debug extends Phaser.Scene {
         }
 
         if(this.startOnce && !CurrentSong.song.isPlaying) {
-            this.scene.start("SongSelectScene");
+            this.scene.start(SceneKey.SONG_SELECT);
         }
 
         if(this.pause) return; // If pausing don't bother to check the note hitting logic
@@ -272,6 +305,7 @@ class Debug extends Phaser.Scene {
         this.accLabel.text = "Accuracy: " + (this.score.accuracy * 100).toFixed(2) + "% ";
         this.comboLabel.text = "Combo: " + this.score.combo;
         this.scoreLabel.text = "Score: " + this.score.score;
+        this.beatmapFinishLabel.text = "Finish: " + this.beatmap.finish();
 
         // Song playtime label
         if(!CurrentSong.playing())
@@ -283,57 +317,57 @@ class Debug extends Phaser.Scene {
         if(CurrentSong.song.isPlaying) {
             this.playTime = CurrentSong.song.seek; // Get the accurate current time of the song
         }
-        if(!this.pause) {
-            this.beatmap.update(this.playTime);
-        }
+        // if(!this.pause) {
+        //     this.beatmap.update(this.playTime);
+        // }
     }
 
-    /**
-     * Instantiate note to the current scene
-     * @param {string} type 
-     * @param {bool} down 
-     * @param {number} holdTime 
-     * @returns Note
-     */
-    instantiateNote(type, down, holdTime, parentNote, delay, targetTime) {
-        let spawn;
-        let judgementPos;
-        let n = null; // Note
-        if(down) {
-            spawn = new Phaser.Math.Vector2(NoteSpawnPoint[0].x, NoteSpawnPoint[0].y);
-            judgementPos = new Phaser.Math.Vector2(JudgementPositions[0].x, JudgementPositions[0].y);
-        }
-        else {
-            spawn = new Phaser.Math.Vector2(NoteSpawnPoint[1].x, NoteSpawnPoint[1].y);
-            judgementPos = new Phaser.Math.Vector2(JudgementPositions[1].x, JudgementPositions[1].y);
-        }
+    // /**
+    //  * Instantiate note to the current scene
+    //  * @param {string} type 
+    //  * @param {bool} down 
+    //  * @param {number} holdTime 
+    //  * @returns Note
+    //  */
+    // instantiateNote(type, down, holdTime, parentNote, delay, targetTime) {
+    //     let spawn;
+    //     let judgementPos;
+    //     let n = null; // Note
+    //     if(down) {
+    //         spawn = new Phaser.Math.Vector2(NoteSpawnPoint[0].x, NoteSpawnPoint[0].y);
+    //         judgementPos = new Phaser.Math.Vector2(JudgementPositions[0].x, JudgementPositions[0].y);
+    //     }
+    //     else {
+    //         spawn = new Phaser.Math.Vector2(NoteSpawnPoint[1].x, NoteSpawnPoint[1].y);
+    //         judgementPos = new Phaser.Math.Vector2(JudgementPositions[1].x, JudgementPositions[1].y);
+    //     }
 
-        if(type == NoteType.HOLD) {
-            n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
-                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, null, delay, targetTime);
-            n.play(AnimationId.VEHICLE1);
-            n.flipX = true;
-        } else if(type == NoteType.NORMAL) {
-            n = Note.Instantiate(this, SpriteId.CONE, spawn.x, spawn.y, 
-                judgementPos.x, judgementPos.y, this.travelTime, down, type, null, null, delay, targetTime);
-            n.setScale(0.2);
-        } else if(type === NoteType.NO_HIT) {
-            n = Note.Instantiate(this, SpriteId.MUSIC_NOTE, spawn.x, spawn.y, 
-                judgementPos.x, judgementPos.y, this.travelTime, down, type, null, null, delay, targetTime);
-            n.setScale(0.15);
-        } else if(type === NoteType.BIG_NOTE) {
-            n = Note.Instantiate(this, SpriteId.VEHICLE2, spawn.x, spawn.y, 
-                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, null, delay, targetTime);
-            n.play(AnimationId.VEHICLE2);
-            n.flipX = true;
-            n.setScale(0.8);
-        } else if(type === NoteType.END && parentNote.result != NoteHitResult.MISS && parentNote.result != NoteHitResult.BAD) {
-            n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
-                judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, parentNote, delay, targetTime);
-            n.play(AnimationId.VEHICLE1);
-            n.flipX = true;
-        }
+    //     if(type == NoteType.HOLD) {
+    //         n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
+    //             judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, null, delay, targetTime);
+    //         n.play(AnimationId.VEHICLE1);
+    //         n.flipX = true;
+    //     } else if(type == NoteType.NORMAL) {
+    //         n = Note.Instantiate(this, SpriteId.CONE, spawn.x, spawn.y, 
+    //             judgementPos.x, judgementPos.y, this.travelTime, down, type, null, null, delay, targetTime);
+    //         n.setScale(0.2);
+    //     } else if(type === NoteType.NO_HIT) {
+    //         n = Note.Instantiate(this, SpriteId.MUSIC_NOTE, spawn.x, spawn.y, 
+    //             judgementPos.x, judgementPos.y, this.travelTime, down, type, null, null, delay, targetTime);
+    //         n.setScale(0.15);
+    //     } else if(type === NoteType.BIG_NOTE) {
+    //         n = Note.Instantiate(this, SpriteId.VEHICLE2, spawn.x, spawn.y, 
+    //             judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, null, delay, targetTime);
+    //         n.play(AnimationId.VEHICLE2);
+    //         n.flipX = true;
+    //         n.setScale(0.8);
+    //     } else if(type === NoteType.END && parentNote.result != NoteHitResult.MISS && parentNote.result != NoteHitResult.BAD) {
+    //         n = Note.Instantiate(this, SpriteId.VEHICLE1, spawn.x, spawn.y, 
+    //             judgementPos.x, judgementPos.y, this.travelTime, down, type, holdTime, parentNote, delay, targetTime);
+    //         n.play(AnimationId.VEHICLE1);
+    //         n.flipX = true;
+    //     }
 
-        return n;
-    }
+    //     return n;
+    // }
 }

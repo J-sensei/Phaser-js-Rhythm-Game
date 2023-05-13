@@ -11,6 +11,7 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         super(scene, x, y, SpriteId.CAR_RUNNING).setOrigin(0.5);
         this.scene = scene
         this.setScale(2);
+        this.setDepth(LayerConfig.PLAYER);
         this.play(AnimationId.CAR_RUNNING);
 
         this.initialPosition = new Phaser.Math.Vector2(x, y); // Remember the inital position, later might need to use it
@@ -20,13 +21,32 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         scene.physics.add.existing(this);
         //scene.physics.world.enableBody(this);
         scene.add.existing(this); // Add game object to the scene
-        this.body.setSize(20, 12);
-        this.body.offset.x = 70;
-        this.body.offset.y = 40;
+        this.body.setSize(5, 12);
+        this.body.offset.x = 105;
+        this.body.offset.y = 42;
 
         this.isDownLane = true; // Default is down lane
         this.beating = false;
         this.holding = false;
+        this.hp = 100;
+    }
+
+    /**
+     * Take the damage to the player based on the note that hit the car
+     * @param {Note} note Note that hit the player
+     */
+    damage(note) {
+        switch(note.type) {
+            case NoteType.NORMAL: case NoteType.END:
+                this.hp -= 1;
+                break;
+            case NoteType.HOLD:
+                this.hp -= 2;
+                break;
+            case NoteType.BIG_NOTE:
+                this.hp -= 3;
+                break;
+        }
     }
 
     create() {
@@ -37,26 +57,15 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         this.down2 = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K);
 
         /** Time to allow player press two note at different lane, Only happen when the lane switching is true */
-        this.gracePeriod = 0.25; // 0.5seconds
+        this.gracePeriod = 0.05; // 0.5seconds
         this.currentGracePeriod = 0;
-        this.lastTime = 0;
     }
 
     update() {
-        this.beating = false;
-        // if(Phaser.Input.Keyboard.JustDown(this.switchLaneKey) || Phaser.Input.Keyboard.JustDown(this.switchLaneKey2)) {
-        //     if(this.isDownLane) {
-        //         this.y = this.initialPosition.y - this.moveDistance;
-        //         this.isDownLane = false; // up lane
-        //     } else {
-        //         this.y = this.initialPosition.y;
-        //         this.isDownLane = true; // down lane
-        //     }
-        // }
+        this.beating = false; // Every frame reset the beating to false to have accurate beat judgement
         if(Phaser.Input.Keyboard.JustDown(this.up1) || Phaser.Input.Keyboard.JustDown(this.up2)) {
             this.swtichUp();
             this.beating = true;
-
         }
 
         if(Phaser.Input.Keyboard.JustDown(this.down1) || Phaser.Input.Keyboard.JustDown(this.down2)) {
@@ -70,11 +79,10 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
             this.holding = false;
         }
 
+        // Calculate grace period to determine which lane the player currently moving
         if(this.currentGracePeriod > 0) {
-            const t = new Date().getTime();
-            const deltaTime = (t * 0.001) - (this.lastTime * 0.001);
-            this.currentGracePeriod -= deltaTime;
-            this.lastTime = t;
+            //this.currentGracePeriod -= deltaTime;
+            this.currentGracePeriod -= (game.loop.delta * 0.001);
         }
     }
 
@@ -120,6 +128,6 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
     }
 
     getDebugString() {
-        return "IsDownLane: " + this.isDownLane + ", Beating: " + this.beating + '\n' + "Holding: " + this.holding + " GracePeriod: " + this.currentGracePeriod.toFixed(2);
+        return "IsDownLane: " + this.isDownLane + ", Beating: " + this.beating + '\n' + "Holding: " + this.holding + " GracePeriod: " + this.currentGracePeriod.toFixed(2) + "\n" + "HP: " + this.hp;
     }
 }

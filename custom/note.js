@@ -224,10 +224,10 @@ class Note extends Phaser.GameObjects.Sprite {
                  * create another tween with same properties (to have constant speed) to move it to behind
                  */
                 //console.log("Complete Time: " + CurrentSong.song.seek); // Check the complete time match with the expectedt beat time or not
-                console.log(noteSpawn.getTargetTime(this.travelTime*0.001) + " " + CurrentSong.song.seek);
+                //console.log(noteSpawn.getTargetTime(this.travelTime*0.001) + " " + CurrentSong.song.seek);
                 //console.log(game.loop.delta);
                 //console.log("Delay offset: " + delayOffset + "ms");
-                console.log("Delay: " + (CurrentSong.song.seek - noteSpawn.getTargetTime(this.travelTime*0.001)) * 1000 + "ms")
+                //console.log("Delay: " + (CurrentSong.song.seek - noteSpawn.getTargetTime(this.travelTime*0.001)) * 1000 + "ms")
                 const tween2 = scene.tweens.add({
                     ease: 'Linear',
                     targets: this,

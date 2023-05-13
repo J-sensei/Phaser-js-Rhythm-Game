@@ -80,7 +80,8 @@ class Song extends Phaser.GameObjects.Sprite {
         // Create beatmap to get the beat!
         this.beatmapConfig = {
             bpm: this.bpm,
-            offset: this.offset
+            offset: this.offset,
+            laneSpeed: this.getLaneSpeed(CurrentDifficulty),
         }
         this.beatmap = new Beatmap(this, this, this.beatmapConfig);
         this.beatmap.create();
@@ -96,6 +97,11 @@ class Song extends Phaser.GameObjects.Sprite {
             this.hardLaneSpeed = 1.0;
     }
 
+    /**
+     * Get the lane speed based on the song difficulty
+     * @param {Difficulty} difficulty Difficulty enum
+     * @returns number
+     */
     getLaneSpeed(difficulty) {
         const baseDuration = 1800;
         switch(difficulty) {
@@ -108,20 +114,69 @@ class Song extends Phaser.GameObjects.Sprite {
         }
     }
 
-    /** Song UI */
-    createImage(scene, x, y) {
+    /**
+     * Create the song UI to display as the menu UI
+     * @param {Scene} scene Current scene to create the song UI
+     * @param {number} x X position of the UI
+     * @param {number} y Y position of the UI
+     */
+    createSongUI(scene, x, y) {
+        if(this.image == null) { 
+            this.createSongImage(scene, x, y);   
+        } else {
+            this.image.x = x;
+            this.image.y = y;
+            //this.image.alpha = 1;
 
-        const size = 400;
-        this.image = scene.add.rexCircleMaskImage(x, y, this.imageId, null, null);
+            scene.tweens.add({
+                ease: "Linear",
+                targets: this.image,
+                alpha: 1,
+                duration: 150,
+                repeat: 0,
+                callbackScope: this,
+            });
+        }
 
+        if(this.songLabels == null) {
+            this.createSongLabels(scene, x, y);
+        } else {
+            const labelOffset = 250;
+            const labelY = 32;
+            for(let i = 0; i < this.songLabels.length; i++) {
+                let off = 0;
+                if(i > 0) {
+                    off = 5;
+                }
+                this.songLabels[i].x = x;
+                this.songLabels[i].y = y + labelOffset + (labelY * i) + off;
+                scene.tweens.add({
+                    ease: "Linear",
+                    targets: this.songLabels[i],
+                    alpha: 1,
+                    duration: 150,
+                    repeat: 0,
+                    callbackScope: this,
+                });    
+            }
+        }
+    }
+
+    createSongImage(scene, x, y) {
+        const size = 400; // Fixed size of the image
+        this.image = scene.add.rexCircleMaskImage(x, y, this.imageId, null, null); // Create a circle image using the plugin
+
+        // Scale the image based on the constant size given above
         this.imageScaleX = size / this.image.width;
         this.imageScaleY = size / this.image.height;
-
         this.image.setScale(this.imageScaleX, this.imageScaleY);
 
+        // Remember the original positions
         this.originalX = this.image.x;
         this.originalY = this.image.y;
-        this.image.alpha = 0;
+        this.image.alpha = 0; // Set the alpha value to 0 for the tween transition
+
+        // Transition to make the image fade in when selected
         scene.tweens.add({
             ease: "Linear",
             targets: this.image,
@@ -131,9 +186,10 @@ class Song extends Phaser.GameObjects.Sprite {
             callbackScope: this,
         });
 
-        //const easeList = ["Linear", "Sine.easeInOut", "Bounce.easeInOut"];
-        const easeList = ["Linear", "Sine.easeInOut"];
         // Rotate the image
+        //const easeList = ["Linear", "Sine.easeInOut", "Bounce.easeInOut"];
+        //const easeList = ["Linear", "Sine.easeInOut"];
+        const easeList = ["Linear"];
         const tween = scene.tweens.add({
             ease: easeList[Phaser.Math.Between(0, easeList.length)],
             targets: this.image,
@@ -142,39 +198,84 @@ class Song extends Phaser.GameObjects.Sprite {
             repeat: -1,
             callbackScope: this,
         });
-        
-        // Create labels
+    }
+
+    createSongLabels(scene, x, y) {
+        /** Array of all song labels */
+        this.songLabels = []; 
+        const fontSize = 32;
+        const fontFamily = "Silkscreen";
+        const origin = 0.5;
+
+        // Create song labels
+        // Source (Where the song from e.g. video game, anime, album name)
         this.sourceLabel = scene.add.text(x, y + 250, "Source: " + this.source, {
-            fontFamily: 'Silkscreen', 
-            fontSize: 32
-        }).setOrigin(0.5); 
+            fontFamily: fontFamily, 
+            fontSize: fontSize
+        }).setOrigin(origin); 
+        // Name of the song
         this.songNameLabel = scene.add.text(x, y + 250 + 32 + 5, "Name: " + this.name, {
-            fontFamily: 'Silkscreen', 
-            fontSize: 32
-        }).setOrigin(0.5); 
+            fontFamily: fontFamily, 
+            fontSize: fontSize
+        }).setOrigin(origin); 
+        // Creator of the song
         this.artistLabel = scene.add.text(x, y + 250 + 32*2 + 5, "Artist: " + this.artist, {
-            fontFamily: 'Silkscreen', 
-            fontSize: 32
-        }).setOrigin(0.5); 
+            fontFamily: fontFamily, 
+            fontSize: fontSize
+        }).setOrigin(origin); 
+        // BPM of the song (Beat per minute)
         this.bpmLabel = scene.add.text(x, y + 250 + 32*3 + 5, "BPM: " + this.bpm, {
-            fontFamily: 'Silkscreen', 
-            fontSize: 32
-        }).setOrigin(0.5); 
+            fontFamily: fontFamily, 
+            fontSize: fontSize
+        }).setOrigin(origin); 
 
+        // Get the duration of the song (seconds)
         const totalSeconds = this.song.totalDuration;
-        const totalMinutes = Math.floor(totalSeconds / 60);
-
-        const seconds = totalSeconds % 60;
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-
-        const date = new Date(0);
-        date.setSeconds(totalSeconds - this.offset); // specify value for SECONDS here
+        const date = new Date(0); // Create date object
+        // Set the date object to the duration of the song (minus offset as no note will spawn there)
+        date.setSeconds(totalSeconds - this.offset); // Specify value for SECONDS here 
         const timeString = date.toISOString().substring(14, 19);
+        // Length of the song (Expect value of how long the song should be)
         this.lengthLabel = scene.add.text(x, y + 250 + 32*4 + 5, "Length: " + timeString , {
-            fontFamily: 'Silkscreen', 
-            fontSize: 32
-        }).setOrigin(0.5); 
+            fontFamily: fontFamily, 
+            fontSize: fontSize
+        }).setOrigin(origin); 
+
+        // Add into the song array
+        this.songLabels.push(this.sourceLabel);
+        this.songLabels.push(this.songNameLabel);
+        this.songLabels.push(this.artistLabel);
+        this.songLabels.push(this.bpmLabel);
+        this.songLabels.push(this.lengthLabel);
+
+        for(let i = 0; i < this.songLabels.length; i++) {
+            this.songLabels[i].alpha = 0;
+            scene.tweens.add({
+                ease: "Linear",
+                targets: this.songLabels[i],
+                alpha: 1,
+                duration: 150,
+                repeat: 0,
+                callbackScope: this,
+            });      
+        }
+    }
+
+    /** Destroy and remove the image and labels properly */
+    disposeSongUI() {
+        // Destroy the image and set it to null
+        if(this.image != null) {
+            this.image.destroy();
+            this.image = null;
+        }
+
+        // Destroy text labels and set to null
+        if(this.songLabels != null) {
+            for(let i = 0; i < this.songLabels.length; i++) {
+                this.songLabels[i].destroy();
+            }
+            this.songLabels = null;
+        }
     }
 
     moveImage(scene, x, y) {
@@ -199,18 +300,10 @@ class Song extends Phaser.GameObjects.Sprite {
         let alpha = 0;
         if(x == null || y == null) alpha = 1;
 
-        const textTweenList = [this.sourceLabel, this.songNameLabel, this.artistLabel, this.bpmLabel, this.lengthLabel];
-
-        // this.sourceLabel.alpha = alpha;
-        // this.songNameLabel.alpha = alpha;
-        // this.artistLabel.alpha = alpha;
-        // this.bpmLabel.alpha = alpha;
-        // this.lengthLabel.alpha = alpha;
-
-        for(let i = 0; i < textTweenList.length; i++) {
+        for(let i = 0; i < this.songLabels.length; i++) {
             scene.tweens.add({
                 ease: "Linear",
-                targets: textTweenList[i],
+                targets: this.songLabels[i],
                 alpha: alpha,
                 duration: 150,
                 repeat: 0,
@@ -219,6 +312,10 @@ class Song extends Phaser.GameObjects.Sprite {
         }
     }
 
+    /**
+     * Start preview the song
+     * @param {Scene} scene Current scene
+     */
     preview(scene) {        
         this.previewAudio = scene.plugins.get('rexsoundfadeplugin').fadeIn(this.song, 2000, AudioConfig.music, 0);
         this.previewAudio.seek = this.previewStartTimeline;
@@ -234,12 +331,6 @@ class Song extends Phaser.GameObjects.Sprite {
 
     switchOut(scene, isLeft) {
         this.previewAudio.stop();
-        //this.image.destroy();
-        // this.sourceLabel.destroy();
-        // this.songNameLabel.destroy();
-        // this.artistLabel.destroy();
-        // this.bpmLabel.destroy();
-        // this.lengthLabel.destroy();
 
         const moveDistance = 250;
         let moveX = 0;
@@ -254,24 +345,17 @@ class Song extends Phaser.GameObjects.Sprite {
             duration: 150,
             repeat: 0,
             callbackScope: this,
-            onComplete: function() {
-                this.image.destroy();
-            }
         });    
 
-        const textTweenList = [this.sourceLabel, this.songNameLabel, this.artistLabel, this.bpmLabel, this.lengthLabel];
-        for(let i = 0; i < textTweenList.length; i++) {
+        for(let i = 0; i < this.songLabels.length; i++) {
             scene.tweens.add({
                 ease: "Linear",
-                targets: textTweenList[i],
+                targets: this.songLabels[i],
                 x: moveX,
                 alpha: 0,
                 duration: 150,
                 repeat: 0,
                 callbackScope: this,
-                onComplete: function() {
-                    textTweenList[i].destroy();
-                }
             });      
         }
 

@@ -25,8 +25,9 @@ class Beatmap {
      * @param {Scene} scene Beatmap scene reference
      * @param {Song} song Song reference
      * @param {BeatmapConfig} config Configuration of the beatmap
+     * @param {number} travelTime Travel time of the note, determine how early the note should spawn
      */
-    constructor(scene, song, config) {
+    constructor(scene, song, config, travelTime) {
         this.scene = scene;
         this.drawBeatLine = true;
         this.playMetronome = true;
@@ -43,6 +44,9 @@ class Beatmap {
             this.offset = 0.874; // milisecond
             this.bpm = 170; // test
         }
+
+        if(travelTime != null) this.travelTime = travelTime;
+        else travelTime = 0;
 
         this.songDuration = song.duration(); 
         this.tempo = this.bpm / 60.0; // 2 beat per second
@@ -76,12 +80,12 @@ class Beatmap {
         let nextTempo = 0;
 
         /** Need to determine by the hit position and the spawn position to know how many sec needed  */
-        let earlyTime;
-        if(this.scene.travelTime == null) {
-            earlyTime = 0;
-        } else {
-            earlyTime = this.scene.travelTime * 0.001;
-        }
+        let earlyTime = this.travelTime * 0.001;
+        // if(this.scene.travelTime == null) {
+        //     earlyTime = 0;
+        // } else {
+        //     earlyTime = this.scene.travelTime * 0.001;
+        // }
         /** Time early of the accurate beat time */
         this.travelTime = earlyTime;
         const spawnEarlySec = earlyTime; 
@@ -287,6 +291,12 @@ class Beatmap {
                 this.spawnBeats.pop(); // Remove it from current beats
             }
         }
+    }
+
+    /** Has the beatmap finish spawned all the notes */
+    finish() {
+        // Check both note and end note spawn
+        return this.noteSpawns.length == 0 && this.endNoteSpawns.length == 0;
     }
 
     /** Start to run the beatmap with note spawn logic, 

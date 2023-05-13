@@ -5,7 +5,7 @@ ID and Name #1 : 1191100556 Liew Jiann Shen
 Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
-// Global
+// Global variables
 /** Current song for the player to play */
 let CurrentSong = null;
 /** Current Difficulty selected for the song */
@@ -17,25 +17,24 @@ let SongList = [];
 
 /** Scene keys naming */
 const SceneKey = {
-    PRELOAD: "Preload",
+    PRELOAD: "PreloadScene",
+    SONG_SELECT: "SongSlection",
+    DEBUG: "DebugScene",
+    LEVEL: "LevelScene",
 }
 
 /** Sprite keys naming */
 const SpriteId = {
-    PLAYER_RUN: "PlayerRun",
-    PLAYER_ATTACK: "PlayerAttack",
     CAR_RUNNING: "CarRunning",
-    BOT_RUNNING: "BotRunning",
-    RC_CAR: "RcCar",
-    BUTTON_UP: "ButtonUp",
-    BUTTON_DOWN: "ButtonDown",
     CONE: "Cone",
     VEHICLE1: "Vehicle1",
     VEHICLE2: "Vehicle2",
     VEHICLE3: "Vehicle3",
     MUSIC_NOTE: "MusicNote",
+    PROGRESS_FILL: "ProgressFill",
 }
 
+/** Particle keys */
 const ParticleKey = {
     HIT_PARTICLE: "HitParticle",
 }
@@ -76,11 +75,22 @@ const SFXId = {
     CLICK: "ClickSound",
     BACK: "BackSound",
     NOTE_HOLDING: "NoteHoldingSound",
+    COUTDOWN_3: "CountDown3Sound",
+    COUTDOWN_2: "CountDown2Sound",
+    COUTDOWN_1: "CountDown1Sound",
+    COUTDOWN_GO: "CountDownGoSound",
 }
 
 /** Layer depth configuration */
 const LayerConfig = {
-    NOTE: 10,
+    PLAYER: 10,
+    BACKGROUND: 0,
+    FOREGROUND: 100,
+    NOTE_UP: 20,
+    NOTE_DOWN: 30,
+    UI_PANEL: 150,
+    UI: 200,
+    DEBUG_UI: 300,
 }
 
 /** Fixed player position */
@@ -95,7 +105,7 @@ let NoteSpawnPoint = [];
  */
 class Preload extends Phaser.Scene {
     constructor() {
-        super("Preload");
+        super(SceneKey.PRELOAD);
     }
 
     preload() {
@@ -104,31 +114,29 @@ class Preload extends Phaser.Scene {
         this.load.plugin('rexsoundfadeplugin', 'library/rexsoundfadeplugin.min.js', true);
         // Circle image
         this.load.plugin('rexcirclemaskimageplugin', 'library/rexcirclemaskimageplugin.min.js', true);
-        // Load song
-        //this.testSong = new Song(this, "Song1", "assets/songs/PSYQUI-bye or not");
-        //this.testSong = new Song(this, "Song1", "assets/songs/rejection-open your heart");
-        //this.testSong = new Song(this, "Song1", "assets/songs/shinjuku2258");
-        //this.testSong.preload();
+
+        // Load songs
+        // Define the songs that need to load here
         const songPaths = [
-            //"assets/songs/you aint see nothing like this",
             "assets/songs/PSYQUI-bye or not",
             "assets/songs/nini",
             "assets/songs/cyaegha",
         ];
+
+        // Song all the songs
         for(let i = 0; i < songPaths.length; i++) {
+            // Scene, Key (Just to make it unique), song path, song position (iteration number)
             const song = new Song(this, "Song" + i, songPaths[i], i);
-            song.preload();
-            SongList.push(song);
+            song.preload(); // Preload the song resources
+            SongList.push(song); // Push it into the song list
         }
 
         // Load player sprite
-        this.load.spritesheet(SpriteId.PLAYER_RUN, "assets/player/run_sheet.png", {frameWidth: 80, frameHeight: 80});
-        this.load.spritesheet(SpriteId.PLAYER_ATTACK, "assets/player/attack_sheet.png", {frameWidth: 96, frameHeight: 80});
         this.load.spritesheet(SpriteId.CAR_RUNNING, "assets/player/car_running.png", {frameWidth: 184, frameHeight: 68});
 
         // Note sprite
-        this.load.spritesheet(SpriteId.BOT_RUNNING, "assets/note/bot_running.png", {frameWidth: 61, frameHeight: 64});
-        this.load.spritesheet(SpriteId.RC_CAR, "assets/note/rc_car.png", {frameWidth: 32, frameHeight: 32});
+        // this.load.spritesheet(SpriteId.BOT_RUNNING, "assets/note/bot_running.png", {frameWidth: 61, frameHeight: 64});
+        // this.load.spritesheet(SpriteId.RC_CAR, "assets/note/rc_car.png", {frameWidth: 32, frameHeight: 32});
         this.load.spritesheet(SpriteId.CONE, "assets/note/cone.png", {frameWidth: 371, frameHeight: 421});
         this.load.spritesheet(SpriteId.VEHICLE1, "assets/note/vehicle1.png", {frameWidth: 176, frameHeight: 96});
         this.load.spritesheet(SpriteId.VEHICLE2, "assets/note/vehicle2.png", {frameWidth: 176, frameHeight: 125});
@@ -146,7 +154,10 @@ class Preload extends Phaser.Scene {
         // Particle
         this.load.image(ParticleKey.HIT_PARTICLE, "assets/particle/star.png");
 
-        // Sound Effect
+        // UI
+        this.load.image(SpriteId.PROGRESS_FILL, "assets/ui/progress_fill.png");
+
+        // Note hit Sound Effect
         this.load.audio(SFXId.NOTE_HIT, "assets/sfx/punch.wav");
         this.load.audio(SFXId.NOTE_HOLD_HIT, "assets/sfx/holdHit.wav");
         this.load.audio(SFXId.MUSIC_HIT, "assets/sfx/music_hit.wav");
@@ -154,32 +165,36 @@ class Preload extends Phaser.Scene {
         this.load.audio(SFXId.METAL_HIT, "assets/sfx/metalHit.wav");
         this.load.audio(SFXId.NOTE_HOLDING, "assets/sfx/note_holding.wav");
 
+        // For debuging metronome sound
         this.load.audio(SFXId.METRONOME1, "assets/sfx/metronome1.mp3");
         this.load.audio(SFXId.METRONOME2, "assets/sfx/metronome2.mp3");
 
+        // UI Audio
         this.load.audio(SFXId.SELECT, "assets/sfx/song_select.mp3");
         this.load.audio(SFXId.BACK, "assets/sfx/song_back.mp3");
         this.load.audio(SFXId.CLICK, "assets/sfx/song_click.mp3");
 
-        // UI
-        this.load.spritesheet(SpriteId.BUTTON_DOWN, "assets/ui/ARROWDOWN.png", {frameWidth: 17, frameHeight: 16});
-        this.load.spritesheet(SpriteId.BUTTON_UP, "assets/ui/ARROWUP.png", {frameWidth: 17, frameHeight: 16});
+        // Count down audio
+        this.load.audio(SFXId.COUTDOWN_3, "assets/sfx/countdown_3.wav");
+        this.load.audio(SFXId.COUTDOWN_2, "assets/sfx/countdown_2.wav");
+        this.load.audio(SFXId.COUTDOWN_1, "assets/sfx/countdown_1.wav");
+        this.load.audio(SFXId.COUTDOWN_GO, "assets/sfx/countdown_go.wav");
     }
 
     create() {
-        // Initialize SFX for neccessary class
+        // Show the text to indicate loading is happening right now
+        this.add.text(game.config.width / 2, game.config.height / 2, "Loading assets...", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 24
+        }).setOrigin(0.5); // Set origin to center the text
+
+        // Initialize SFX for neccessary classes
         Note.LoadSFX(this);
         Beatmap.LoadSFX(this);
 
         // Initialize score
         Score.SetSingleton(new Score());
-        Score.GetInstance().reset();
-
-        // Set origin to center the text
-        this.add.text(game.config.width / 2, game.config.height / 2, "Loading assets...", {
-            fontFamily: 'Silkscreen', 
-            fontSize: 24
-        }).setOrigin(0.5); 
+        Score.GetInstance().reset(); // Reset the score just in case
 
         // Define Positions
         PlayerPosition = new Phaser.Math.Vector2(200, game.config.height - 60);
@@ -192,55 +207,23 @@ class Preload extends Phaser.Scene {
             new Phaser.Math.Vector2(game.config.width + 100, game.config.height - 64 - 10 - 25), // Up
         ];
 
-        // Test load music
-        // let song = new Song(this, "Song1");
-        // song.play();
-        //this.testSong.create();
+        // Initialize song list
         for(let i = 0; i < SongList.length;  i++) {
             SongList[i].create();
         }
 
-        CurrentSong = SongList[2]; // Bye or Not
+        // By default choosing the first song
+        CurrentSong = SongList[0]; // Bye or Not
 
-        const atkFrame = 20;
-        const runFrame = 15;
         // Animations
-        this.anims.create({
-            key: AnimationId.PLAYER_RUN,
-            frames: this.anims.generateFrameNumbers(SpriteId.PLAYER_RUN),
-            frameRate: runFrame,
-            repeat: -1
-        });
-        this.anims.create({
-            key: AnimationId.PLAYER_ATTACK1,
-            frames: this.anims.generateFrameNumbers(SpriteId.PLAYER_ATTACK, {start: 0, end: 3}), // Get the first 4 frames only
-            frameRate: atkFrame,
-            repeat: 0
-        });
-        this.anims.create({
-            key: AnimationId.PLAYER_ATTACK2,
-            frames: this.anims.generateFrameNumbers(SpriteId.PLAYER_ATTACK, {start: 4, end: 7}), // Get the last 4 frames only
-            frameRate: atkFrame,
-            repeat: 0
-        });
+        // Player car animation
         this.anims.create({
             key: AnimationId.CAR_RUNNING,
             frames: this.anims.generateFrameNumbers(SpriteId.CAR_RUNNING, {start: 1, end: 4}),
             frameRate: 16,
             repeat: -1
         });
-        this.anims.create({
-            key: AnimationId.BOT_RUNNING,
-            frames: this.anims.generateFrameNumbers(SpriteId.BOT_RUNNING),
-            frameRate: 20,
-            repeat: -1
-        });
-        this.anims.create({
-            key: AnimationId.RC_CAR_RUNNING,
-            frames: this.anims.generateFrameNumbers(SpriteId.RC_CAR, {start: 6, end: 9}),
-            frameRate: 20,
-            repeat: -1
-        });
+        // Note animations
         this.anims.create({
             key: AnimationId.VEHICLE1,
             frames: this.anims.generateFrameNumbers(SpriteId.VEHICLE1),
@@ -260,11 +243,7 @@ class Preload extends Phaser.Scene {
             repeat: -1
         });
 
-        //this.scene.start("Debug");
-        this.scene.start("SongSelectScene"); // Test
-    }
-
-    update() {
-
+        //this.scene.start(SceneKey.DEBUG);
+        this.scene.start(SceneKey.SONG_SELECT); // Test
     }
 }

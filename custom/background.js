@@ -52,13 +52,14 @@ class Background {
 
     update() {
         if(this.pause) return; // Do not scroll the background if game is pausing
+        const deltaTime = (game.loop.delta * 0.001);
         
         /* Background Array should have same size with Background Data Array */
         for(let i = 0; i < this.backgroundArray.length; i++) {
             if(this.backgroundDataArray[i].type == BackgroundType.TILE_SPRITE) {
-                this.backgroundArray[i].tilePositionX += this.backgroundDataArray[i].speed * this.speedMultiplier;
+                this.backgroundArray[i].tilePositionX += (this.backgroundDataArray[i].speed * this.speedMultiplier) * deltaTime;
             } else if(this.backgroundDataArray[i].type == BackgroundType.OBJECT) {
-                this.backgroundArray[i].x -= this.backgroundDataArray[i].speed * this.speedMultiplier;
+                this.backgroundArray[i].x -= (this.backgroundDataArray[i].speed * this.speedMultiplier) * deltaTime;
 
                 // Reset background position
                 if(this.backgroundArray[i].x < -this.backgroundDataArray[i].width) {

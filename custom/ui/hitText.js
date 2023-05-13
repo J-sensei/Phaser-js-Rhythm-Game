@@ -5,11 +5,14 @@ ID and Name #1 : 1191100556 Liew Jiann Shen
 Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
-
+/**
+ * Text game object when note is destroy
+ */
 class HitText extends Phaser.GameObjects.Text {
     constructor(scene, x, y, text, fontFamily, fontSize, color) {
         super(scene, x, y, text);
         this.setOrigin(0.5);
+        this.setDepth(LayerConfig.UI);
         this.scene = scene;
         this.initialY = y;
 
@@ -40,7 +43,7 @@ class HitText extends Phaser.GameObjects.Text {
             d = duration;
         }
 
-        let tween = this.scene.tweens.add({
+        const tween = this.scene.tweens.add({
             targets: this,
             ease: "Bounce.easeOut",
             y: this.y - 125,
@@ -54,6 +57,33 @@ class HitText extends Phaser.GameObjects.Text {
             },
             callbackScope: this,
         });
+    }
+
+    tweenDestroy(ease, duration, y, alpha, scale) {
+        let easeType = "Linear";
+        if(ease != null) easeType = ease;
+        const targetX = this.y + y;
+
+        const tween = this.scene.tweens.add({
+            targets: this,
+            ease: easeType,
+            y: targetX,
+            alpha: alpha,
+            scale: scale,
+            duration: duration,
+            repeat: 0,
+            onComplete: function() {
+                this.destroy();
+            },
+            callbackScope: this,
+        });
+    }
+
+    static CountDownTextInstantiate(scene, text, fontSize, color) {
+        const t = new HitText(scene, game.config.width / 2, game.config.height / 2, text, null, fontSize, color);
+        t.tweenDestroy("Linear", 600, -100, 0, 0.5);
+
+        return t;
     }
 
     static NoteHitInstantiate(scene, note) {
@@ -101,8 +131,8 @@ class HitText extends Phaser.GameObjects.Text {
         text.setColor(color);
 
         if(note.type === NoteType.BIG_NOTE && !(note.result === NoteHitResult.BAD || note.result === NoteHitResult.MISS))
-            text.destroyText(900);
+            text.destroyText(900); // Big note will have longer duration
         else
-            text.destroyText();
+            text.destroyText(); // Else will just follow the default duration
     }
 }

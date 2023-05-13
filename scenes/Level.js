@@ -84,10 +84,6 @@ class Level extends Phaser.Scene {
         /** Current playtime of the song (Negative value means count down is counting) */
         this.playTime = this.currentCountDown; // Need to have negative value to pre spawn the note before the song
 
-
-        /** Is the song started */
-        this.start = false;
-
         // initialize miss collider
         const missColliderPos = new Phaser.Math.Vector2(this.player.x, this.player.y); // Position
         this.missCollider = this.physics.add.sprite(missColliderPos.x, missColliderPos.y); // Create
@@ -136,6 +132,11 @@ class Level extends Phaser.Scene {
 
         // Keys
         this.escapeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+        this.upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        this.upKey2 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+        this.downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        this.downKey2 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
         // Countdown sfx
         this.countdown_3 = this.sound.add(SFXId.COUTDOWN_3);
@@ -156,19 +157,30 @@ class Level extends Phaser.Scene {
 
         this.createPauseMenu();
 
+        // Load the UI audios
+        this.selectAudio = this.sound.add(SFXId.SELECT);
+        this.backAudio = this.sound.add(SFXId.BACK);
+        this.clickAudio = this.sound.add(SFXId.CLICK);
+
         // Pause / Unpause based on the screen is in focus or not
         // Game window is out of focus (Switch other tab or applocationi)
         this.game.events.on(Phaser.Core.Events.BLUR, () => {
             // Auto pause the game if window is blur out (Prevent anything bad happen if player if switch the screen out)
-            this.pause(); 
+            if(this.start)
+                this.pause(); 
         });
         // Game window is focus back
         this.game.events.on(Phaser.Core.Events.FOCUS, () => {
             //this.togglePause();
         });
 
+        this.createUI();
+
         // Start updating beatmap
         this.beatmap.start();
+
+        /** Level is finish loaded and ready to start */
+        this.start = true;
     }
 
     update() {
@@ -178,16 +190,64 @@ class Level extends Phaser.Scene {
         // Unpause
         if(this.songPause) {
             if(Phaser.Input.Keyboard.JustDown(this.escapeKey) && !this.unpause) {
-                this.unpause = true;
-                this.unpauseCountDown = this.countDown + 1;
-                this.unpauseCountDown_3 = false;
-                this.unpauseCountDown_2 = false;
-                this.unpauseCountDown_1 = false;
-                this.unpauseCountDown_go = false;
-                // Hide the pause menu
-                this.pausePanel.alpha = 0;
-                for(let i = 0; i < this.menuLabels.length; i++) {
-                    this.menuLabels[i].alpha = 0;
+                // this.unpause = true;
+                // if(this.playTime < 0) {
+                //     this.unpauseCountDown = 0.5;
+                //     this.unpauseCountDown_3 = true;
+                //     this.unpauseCountDown_2 = true;
+                //     this.unpauseCountDown_1 = true;
+                //     this.unpauseCountDown_go = false;
+                // } else {
+                //     this.unpauseCountDown = this.countDown + 0.5;
+                //     this.unpauseCountDown_3 = false;
+                //     this.unpauseCountDown_2 = false;
+                //     this.unpauseCountDown_1 = false;
+                //     this.unpauseCountDown_go = false;
+                // }
+
+                // // Hide the pause menu
+                // this.tweens.add({
+                //     targets: this.pausePanel,
+                //     ease: "Linear",
+                //     alpha: 0,
+                //     duration: 150,
+                //     repeat: 0,
+                //     callbackScope: this,
+                // });
+                // for(let i = 0; i < this.menuLabels.length; i++) {
+                //     this.tweens.add({
+                //         targets: this.menuLabels[i],
+                //         ease: "Linear",
+                //         alpha: 0,
+                //         duration: 150,
+                //         repeat: 0,
+                //         callbackScope: this,
+                //     });
+                // }
+                this.selectAudio.play(Note.SFXConfig);
+                this.readyUnpause();
+            }
+
+            if(!this.unpause) {
+                if(Phaser.Input.Keyboard.JustDown(this.upKey) || Phaser.Input.Keyboard.JustDown(this.upKey2)) {
+                    this.updateMenuOption(true);
+                } else if(Phaser.Input.Keyboard.JustDown(this.downKey) || Phaser.Input.Keyboard.JustDown(this.downKey2)) {
+                    this.updateMenuOption(false);
+                }
+                
+                if(Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+                    this.selectAudio.play(Note.SFXConfig);
+                    switch(this.menuOption) {
+                        case 0:
+                            this.readyUnpause();
+                            break;
+                        case 1:
+                            this.scene.start(SceneKey.LEVEL);
+                            break;
+                        case 2:
+                            this.scene.start(SceneKey.SONG_SELECT);
+                            break;
+                    }
                 }
             }
 
@@ -212,6 +272,10 @@ class Level extends Phaser.Scene {
                     HitText.CountDownTextInstantiate(this, "3", 128);
                     this.unpauseCountDown_3 = true;
                 }
+            }
+        } else {
+            if(Phaser.Input.Keyboard.JustDown(this.escapeKey)) {
+                this.pause();
             }
         }
 
@@ -288,12 +352,218 @@ class Level extends Phaser.Scene {
                 } else {
                     this.upJudge.emitter.explode(explodeSize);
                 }
+
+                this.updateCombo(this.score.combo, n);
             }
         }
 
         // Go back to menu if song is playing and finish
         if(!CurrentSong.song.isPlaying && this.beatmap.finish()) {
+            this.start = false;
             this.scene.start(SceneKey.SONG_SELECT);
+        }
+
+        this.updateCombo(this.score.combo, null);
+        this.updateScore(this.score.score, (this.score.accuracy * 100).toFixed(2));
+    }
+
+    updateMenuOption(up) {
+        this.selectAudio.play(Note.SFXConfig);
+        if(up)
+            this.menuOption--;
+        else
+            this.menuOption++;
+            
+        if(this.menuOption < 0) this.menuOption = 2;
+        if(this.menuOption > 2) this.menuOption = 0;
+
+        let continueString = "Continue";
+        let retryString = "Retry";
+        let backString = "Song Selection";
+
+        switch(this.menuOption) {
+            case 0:
+                continueString = "> " + continueString;
+                break;
+            case 1:
+                retryString = "> " + retryString;
+                break;
+            case 2:
+                backString = "> " + backString;
+                break;
+        }
+
+        const combineString = continueString + "\n" + retryString + "\n" + backString;
+        this.pauseSubLabel.text = combineString;
+    }
+
+    readyUnpause() {
+        this.unpause = true;
+        if(this.playTime < 0) {
+            this.unpauseCountDown = 0.5;
+            this.unpauseCountDown_3 = true;
+            this.unpauseCountDown_2 = true;
+            this.unpauseCountDown_1 = true;
+            this.unpauseCountDown_go = false;
+        } else {
+            this.unpauseCountDown = this.countDown + 0.5;
+            this.unpauseCountDown_3 = false;
+            this.unpauseCountDown_2 = false;
+            this.unpauseCountDown_1 = false;
+            this.unpauseCountDown_go = false;
+        }
+
+        // Hide the pause menu
+        this.tweens.add({
+            targets: this.pausePanel,
+            ease: "Linear",
+            alpha: 0,
+            duration: 150,
+            repeat: 0,
+            callbackScope: this,
+        });
+        for(let i = 0; i < this.menuLabels.length; i++) {
+            this.tweens.add({
+                targets: this.menuLabels[i],
+                ease: "Linear",
+                alpha: 0,
+                duration: 150,
+                repeat: 0,
+                callbackScope: this,
+            });
+        }
+    }
+
+    createUI() {
+        this.scoreLabels = [];
+        this.comboLabels = [];
+        /** Combo value before update the combo value  */
+        this.currentCombo = 0;
+        this.currentScore = {
+            score: 0,
+        };
+        this.currentAccuracy = {
+            accuracy: 0.00,
+        }
+
+        this.scoreLabel = this.add.text(200, 50, "0", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 36
+        }).setOrigin(0.5).setDepth(LayerConfig.UI); 
+        this.scoreTitleLabel = this.add.text(200, 100, "SCORE", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 40
+        }).setOrigin(0.5).setDepth(LayerConfig.UI); 
+        this.scoreLabels.push(this.scoreLabel);
+        this.scoreLabels.push(this.scoreTitleLabel);
+
+        this.accuracyLabel = this.add.text(200, 150, "Accuracy: 0.00%", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 24
+        }).setOrigin(0.5).setDepth(LayerConfig.UI); 
+
+        this.comboLabel = this.add.text(game.config.width / 2, 150, "9999", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 36
+        }).setOrigin(0.5).setDepth(LayerConfig.UI);
+        this.comboTitleLabel = this.add.text(game.config.width / 2, 200, "Combo", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 40
+        }).setOrigin(0.5).setDepth(LayerConfig.UI);  
+        this.comboLabels.push(this.comboLabel);
+        this.comboLabels.push(this.comboTitleLabel);
+
+        for(let i = 0; i < this.comboLabels.length; i++) {
+            this.comboLabels[i].alpha = 0;
+        }
+    }
+
+    updateScore(score, accuracy) {
+        if(this.currentScore.score != score) {
+            this.tweens.add({
+                ease: 'Linear',
+                targets: this.currentScore, // Set to this note object
+                score: score,
+                duration: 50,
+                repeat: 0,
+                onUpdate: function() {
+                    this.scoreLabel.text = Math.ceil(this.currentScore.score);
+                },
+                callbackScope: this
+            });    
+        }
+
+        if(this.currentAccuracy.accuracy != accuracy) {
+            this.tweens.add({
+                ease: 'Linear',
+                targets: this.currentAccuracy, // Set to this note object
+                accuracy: accuracy,
+                duration: 50,
+                repeat: 0,
+                onUpdate: function() {
+                    this.accuracyLabel.text = "Accuracy: " + this.currentAccuracy.accuracy.toFixed(2) + "%";
+                },
+                callbackScope: this
+            });         
+        }
+    }
+
+    updateCombo(combo, note) {
+        if(this.currentCombo != combo) {
+            this.currentCombo = combo;
+            // Only display combo if its bigger than 5
+            if(combo >= 5) {
+                for(let i = 0; i < this.comboLabels.length; i++) {
+                    this.tweens.add({
+                        ease: 'Linear',
+                        targets: this.comboLabels[i], // Set to this note object
+                        alpha: 1,
+                        duration: 150,
+                        repeat: 0,
+                        callbackScope: this
+                    });   
+                }
+                this.comboLabel.text = combo;
+
+                // Tween the scale of combo text
+                if(note != null) {
+                    let scaleMultiplier = 1;
+                    switch(note.type) {
+                        case NoteType.NORMAL:
+                            scaleMultiplier = 1.5;
+                            break;
+                        case NoteType.HOLD:
+                            scaleMultiplier = 1.8;
+                            break;
+                        case NoteType.BIG_NOTE:
+                            scaleMultiplier = 2.2;
+                            break;
+                    }
+                    const comboTween = this.tweens.add({
+                        ease: 'Linear',
+                        targets: this.comboLabel, // Set to this note object
+                        scale: scaleMultiplier,
+                        duration: 50,
+                        repeat: 0,
+                        onComplete: function() {
+                            this.comboLabel.setScale(1);
+                        },
+                        callbackScope: this
+                    });     
+                }
+            } else {
+                for(let i = 0; i < this.comboLabels.length; i++) {
+                    // this.comboLabels[i].alpha = 0;
+                    this.tweens.add({
+                        ease: 'Linear',
+                        targets: this.comboLabels[i], // Set to this note object
+                        alpha: 0,
+                        duration: 150,
+                        repeat: 0,
+                        callbackScope: this
+                    });   
+                }  
+            }
         }
     }
 
@@ -306,35 +576,32 @@ class Level extends Phaser.Scene {
         this.pausePanel.fillRect(0, 0, game.config.width, game.config.height);
         this.pausePanel.setDepth(LayerConfig.UI_PANEL);
         this.pausePanel.alpha = 0;
+        this.pausePanel.setDepth(LayerConfig.UI + 1);
 
         this.pauseLabel = this.add.text(game.config.width / 2, game.config.height / 2.5, "Pause", {
             fontFamily: 'Silkscreen', 
             fontSize: 128
-        }).setOrigin(0.5).setDepth(LayerConfig.UI); 
-        this.pauseSubLabel = this.add.text(game.config.width / 2, game.config.height / 2 + 36, "Press (escape) to unpause", {
+        }).setOrigin(0.5).setDepth(LayerConfig.UI + 1); 
+        this.pauseSubLabel = this.add.text(game.config.width / 2, game.config.height / 2 + 64, 
+            "> Continue\nRetry\nSong Selection", {
             fontFamily: 'Silkscreen', 
             fontSize: 36
-        }).setOrigin(0.5).setDepth(LayerConfig.UI); 
-        this.pauseSubLabel2 = this.add.text(game.config.width / 2, game.config.height / 2 + 36 * 2, "Press (R) back to retry", {
-            fontFamily: 'Silkscreen', 
-            fontSize: 36
-        }).setOrigin(0.5).setDepth(LayerConfig.UI); 
-        this.pauseSubLabel3 = this.add.text(game.config.width / 2, game.config.height / 2 + 36 * 3, "Press (B) back to song selection", {
-            fontFamily: 'Silkscreen', 
-            fontSize: 36
-        }).setOrigin(0.5).setDepth(LayerConfig.UI); 
+        }).setOrigin(0.5).setDepth(LayerConfig.UI + 1); 
 
         this.menuLabels.push(this.pauseLabel);
         this.menuLabels.push(this.pauseSubLabel);
-        this.menuLabels.push(this.pauseSubLabel2);
-        this.menuLabels.push(this.pauseSubLabel3);
 
         for(let i = 0; i < this.menuLabels.length; i++) {
             this.menuLabels[i].alpha = 0;
         }
+
+        this.menuOption = 0;
     }
 
     pause() {
+        if(this.songPause) return; // No need to run again if the game is already pause
+
+        this.clickAudio.play(Note.SFXConfig);
         this.songPause = true;
         this.stopSeek = this.playTime; // Get the current stop time
         CurrentSong.song.stop();
@@ -350,10 +617,26 @@ class Level extends Phaser.Scene {
             }
         }
 
-        this.pausePanel.alpha = 0.5;
+        //this.pausePanel.alpha = 0.5;
+        const tween = this.tweens.add({
+            targets: this.pausePanel,
+            ease: "Linear",
+            alpha: 0.5,
+            duration: 150,
+            repeat: 0,
+            callbackScope: this,
+        });
 
         for(let i = 0; i < this.menuLabels.length; i++) {
-            this.menuLabels[i].alpha = 1;
+            //this.menuLabels[i].alpha = 1;
+            this.tweens.add({
+                targets: this.menuLabels[i],
+                ease: "Linear",
+                alpha: 1,
+                duration: 150,
+                repeat: 0,
+                callbackScope: this,
+            });
         }
     }
 
@@ -422,11 +705,11 @@ class Level extends Phaser.Scene {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
-        this.comboLabel = this.add.text(game.config.width / 5, 240, "Combo: 0", {
+        this.comboDebugLabel = this.add.text(game.config.width / 5, 240, "Combo: 0", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
-        this.scoreLabel = this.add.text(game.config.width / 5, 270, "Score: 0", {
+        this.scoreDebugLabel = this.add.text(game.config.width / 5, 270, "Score: 0", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5); 
@@ -449,8 +732,8 @@ class Level extends Phaser.Scene {
         this.debugLabels.push(this.playerLabel);
         this.debugLabels.push(this.noteLabel);
         this.debugLabels.push(this.accLabel);
-        this.debugLabels.push(this.comboLabel);
-        this.debugLabels.push(this.scoreLabel);
+        this.debugLabels.push(this.comboDebugLabel);
+        this.debugLabels.push(this.scoreDebugLabel);
         this.debugLabels.push(this.beatmapFinishLabel);
         this.debugLabels.push(this.songPlayingLabel);
         this.debugLabels.push(this.fpsLabel);
@@ -464,8 +747,8 @@ class Level extends Phaser.Scene {
         this.playerLabel.text = this.player.getDebugString();
         this.noteLabel.text = "Perfect: "+this.score.perfect+" Great: "+this.score.great+" Bad: "+this.score.bad+" Miss: " + this.score.miss;
         this.accLabel.text = "Accuracy: " + (this.score.accuracy * 100).toFixed(2) + "% ";
-        this.comboLabel.text = "Combo: " + this.score.combo;
-        this.scoreLabel.text = "Score: " + this.score.score;
+        this.comboDebugLabel.text = "Combo: " + this.score.combo;
+        this.scoreDebugLabel.text = "Score: " + this.score.score;
         this.songPlayingLabel.text = "Song Playing: " + CurrentSong.song.isPlaying;
         this.beatmapFinishLabel.text = "Finish: " + this.beatmap.finish();
 

@@ -60,11 +60,11 @@ class SongSelectScene extends Phaser.Scene {
             fontSize: 24
         }).setOrigin(0); 
 
-        this.difficultyLabel = this.add.text(game.config.width / 1.8, game.config.height / 3, "Select Difficulty\n*Lane Speed (0 - 10)", {
+        this.difficultyLabel = this.add.text(game.config.width / 1.8, game.config.height / 2.8, "Select Difficulty\n*Lane Speed (0 - 10)", {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0); 
-        this.difficultySelectLabel = this.add.text(game.config.width / 1.8, game.config.height / 2.2, "> Easy\nHard", {
+        this.difficultySelectLabel = this.add.text(game.config.width / 1.8, game.config.height / 2, "> Easy\nHard", {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0); 

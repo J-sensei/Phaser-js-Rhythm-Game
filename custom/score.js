@@ -110,6 +110,7 @@ class Score {
             break;
         }
 
+        // All note will contribute to the accracy except no hit
         if(noteType != NoteHitResult.NO_HIT) {
             this.currentTotal++; // Plus total hitted note
             this.accuracySum += accuracyWeight;

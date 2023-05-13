@@ -1,20 +1,16 @@
 class ProgressBar extends Phaser.GameObjects.Group {
-    constructor(scene, x, y, fillSize, hex) {
+    constructor(scene, x, y, fillSize, hex, scale) {
         super(scene);
-        this.imageFill = scene.add.tileSprite(x, y, fillSize, 32, SpriteId.PROGRESS_FILL)
+        this.imageFill = scene.add.tileSprite(x, y, fillSize, 32, SpriteId.PROGRESS_FILL);
+        this.imageFill.setOrigin(0);
         this.add(this.imageFill);
+        if(scale != null)
+            this.imageFill.setScale(scale);
 
         this.fillSize = fillSize;
         
         if(hex != null)
             this.imageFill.tint = Phaser.Display.Color.HexStringToColor(hex).color;
-        // this.imageFill.width = 
-        // this.image = this.create(0, 0, SpriteId.PROGRESS_FILL);
-        // this.image.x = 0;
-
-        // const width = 32;
-        // this.fillScale = game.config.width / this.image.width;
-        // this.image.scaleX = this.fillScale;
     }
 
     /**

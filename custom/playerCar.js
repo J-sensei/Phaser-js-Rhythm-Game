@@ -28,7 +28,8 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         this.isDownLane = true; // Default is down lane
         this.beating = false;
         this.holding = false;
-        this.hp = 100;
+        this.maxHp = 100;
+        this.hp = this.maxHp;
     }
 
     /**
@@ -36,17 +37,19 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
      * @param {Note} note Note that hit the player
      */
     damage(note) {
+        if(this.hp < 0) return;
         switch(note.type) {
             case NoteType.NORMAL: case NoteType.END:
-                this.hp -= 1;
+                this.hp -= 5;
                 break;
             case NoteType.HOLD:
-                this.hp -= 2;
+                this.hp -= 8;
                 break;
             case NoteType.BIG_NOTE:
-                this.hp -= 3;
+                this.hp -= 12;
                 break;
         }
+        this.hp = Phaser.Math.Clamp(this.hp, 0, this.maxHp);
     }
 
     create() {

@@ -7,8 +7,8 @@ Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 
 /** Difficulties constants */
 const Difficulty = {
-    EASY: "EasyDifficulty",
-    HARD: "HardDifficulty"
+    EASY: "Easy",
+    HARD: "Hard"
 }
 
 /**
@@ -435,7 +435,7 @@ class Beatmap {
 class NoteSpawn {
     constructor(time, tempo, noteData, id) {
         this.spawnTime = time + ((tempo / noteData.beatSnapDivisor) * noteData.beatSnapDivisorPosition);
-        //this.spawnTime = this.spawnTime.toFixed(3);
+        
         this.type = noteData.type;
         if(this.type == NoteType.HOLD) {
             this.holdTime = (tempo / noteData.holdSnapDivisor) * noteData.holdMultiplier;

@@ -5,7 +5,7 @@ ID and Name #1 : 1191100556 Liew Jiann Shen
 Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
-
+/** Old class, don't use already */
 class Player extends Phaser.GameObjects.Sprite {
     constructor(scene, x, y) {
         super(scene, x, y, spriteId.PLAYER_RUN).setOrigin(0.5);

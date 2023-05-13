@@ -273,6 +273,28 @@ class Note extends Phaser.GameObjects.Sprite {
             });
         }
 
+        // Set depth
+        let depth = 0;
+        if(down) {
+            depth = LayerConfig.NOTE_DOWN;
+        } else {
+            depth = LayerConfig.NOTE_UP;
+        }
+
+        switch(this.type) {
+            case NoteType.NORMAL:
+                depth += 5;
+            break;
+            case NoteType.HOLD:
+            break;
+            case NoteType.END:
+            break;
+            case NoteType.NO_HIT:
+                depth += 10;
+            break;
+        }
+        this.setDepth(depth);
+
         // Create hit circle to let player see the perfect point
         let circleColor;
         if(down) {
@@ -290,6 +312,7 @@ class Note extends Phaser.GameObjects.Sprite {
             repeat: -1,
             callbackScope: this,
         });
+        this.circle.setDepth(depth + 2);
         scene.add.existing(this.circle);
 
         // Only apply this to hold note
@@ -304,6 +327,7 @@ class Note extends Phaser.GameObjects.Sprite {
             this.line = this.scene.add.line(this.x, this.y, 0, 0, x, 0,  Phaser.Display.Color.HexStringToColor(circleColor).color).setOrigin(0);
             this.line.setLineWidth(lineHeight, lineHeight);
             this.line.alpha = 0.5; // Make it transparent
+            this.line.setDepth(depth - 1);
             this.scene.add.existing(this.line); // Add it to the current scene
         }
 

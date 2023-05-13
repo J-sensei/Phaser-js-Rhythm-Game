@@ -149,10 +149,20 @@ class Level extends Phaser.Scene {
         this.playCountdown_go = false;
 
         // UI
-        this.songProgressBar = new ProgressBar(this, 0, 0, game.config.width * 2, NoteCircleColor.DOWN);
+        this.songProgressBar = new ProgressBar(this, 0, -16, game.config.width);
         this.songProgressBar.setValue(0);
+        this.songProgressBar.setDepth(LayerConfig.UI)
+        
+        this.healthProgressBarBackground = new ProgressBar(this, game.config.width / 2 - 150, 50 - 16, 300, "#9c3333");
+        this.healthProgressBar = new ProgressBar(this, game.config.width / 2 - 150, 50 - 16, 300, "#e64e4e");
+        this.healthProgressBar.setValue(this.player.hp / this.player.maxHp);
+        this.healthProgressBar.setDepth(LayerConfig.UI)
+        this.healthLabel = this.add.text(game.config.width / 2, 50, this.player.hp + "/" + this.player.maxHp, {
+            fontFamily: 'Silkscreen', 
+            fontSize: 24
+        }).setOrigin(0.5).setDepth(LayerConfig.UI);
 
-        HitText.CountDownTextInstantiate(this, "Get Ready...", 128); // Tell player to get ready
+        // HitText.CountDownTextInstantiate(this, "Get Ready...", 128); // Tell player to get ready
         this.displayDebug(this.debug);
 
         this.createPauseMenu();
@@ -175,6 +185,7 @@ class Level extends Phaser.Scene {
         });
 
         this.createUI();
+        CurrentSong.createSongPreviewUI(this);
 
         // Start updating beatmap
         this.beatmap.start();
@@ -190,40 +201,6 @@ class Level extends Phaser.Scene {
         // Unpause
         if(this.songPause) {
             if(Phaser.Input.Keyboard.JustDown(this.escapeKey) && !this.unpause) {
-                // this.unpause = true;
-                // if(this.playTime < 0) {
-                //     this.unpauseCountDown = 0.5;
-                //     this.unpauseCountDown_3 = true;
-                //     this.unpauseCountDown_2 = true;
-                //     this.unpauseCountDown_1 = true;
-                //     this.unpauseCountDown_go = false;
-                // } else {
-                //     this.unpauseCountDown = this.countDown + 0.5;
-                //     this.unpauseCountDown_3 = false;
-                //     this.unpauseCountDown_2 = false;
-                //     this.unpauseCountDown_1 = false;
-                //     this.unpauseCountDown_go = false;
-                // }
-
-                // // Hide the pause menu
-                // this.tweens.add({
-                //     targets: this.pausePanel,
-                //     ease: "Linear",
-                //     alpha: 0,
-                //     duration: 150,
-                //     repeat: 0,
-                //     callbackScope: this,
-                // });
-                // for(let i = 0; i < this.menuLabels.length; i++) {
-                //     this.tweens.add({
-                //         targets: this.menuLabels[i],
-                //         ease: "Linear",
-                //         alpha: 0,
-                //         duration: 150,
-                //         repeat: 0,
-                //         callbackScope: this,
-                //     });
-                // }
                 this.selectAudio.play(Note.SFXConfig);
                 this.readyUnpause();
             }
@@ -302,8 +279,9 @@ class Level extends Phaser.Scene {
                 this.playCountdown_2 = true;
             } else if(this.currentCountDown >= -3 && !this.playCountdown_3) {
                 this.countdown_3.play(Note.SFXConfig);
-                const tweens = this.tweens.getTweensOf(HitText.CountDownTextInstantiate(this, "3", 128), true);
-
+                HitText.CountDownTextInstantiate(this, "3", 128);
+                // Move the preview image
+                CurrentSong.movePreviewUI(this, (game.config.width) - (400 / 4) - 100 , 400 / 4 + 30);
                 this.playCountdown_3 = true;
             }
 
@@ -365,6 +343,10 @@ class Level extends Phaser.Scene {
 
         this.updateCombo(this.score.combo, null);
         this.updateScore(this.score.score, (this.score.accuracy * 100).toFixed(2));
+
+        // Update player health
+        this.healthProgressBar.setValue(this.player.hp / this.player.maxHp);
+        this.healthLabel.text = this.player.hp + "/" + this.player.maxHp;
     }
 
     updateMenuOption(up) {

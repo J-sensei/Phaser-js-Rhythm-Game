@@ -114,6 +114,85 @@ class Song extends Phaser.GameObjects.Sprite {
         }
     }
 
+    // Preview song UI for the player when start the game
+    createSongPreviewUI(scene) {
+        const size = 400; // Fixed size of the image
+        this.previewImage = scene.add.image(game.config.width / 2, game.config.height / 2 - (size / 4), this.imageId).setOrigin(0.5).setDepth(LayerConfig.UI);
+
+        this.previewImageScaleX = size / this.previewImage.width;
+        this.previewImageScaleY = size / this.previewImage.height;
+        this.previewImage.setScale(this.previewImageScaleX, this.previewImageScaleY);
+
+        this.previewLabels = [];
+        const fontSize = 24;
+        const fontFamily = "Silkscreen";
+        const origin = 0.5;
+        this.previewNameLabel = scene.add.text(game.config.width / 2, game.config.height / 2 + (size / 4) + 30, this.name, {
+            fontFamily: fontFamily, 
+            fontSize: fontSize
+        }).setOrigin(origin).setDepth(LayerConfig.UI); 
+        this.previewArtistLabel = scene.add.text(game.config.width / 2, game.config.height / 2 + (size / 4) + 60, this.artist, {
+            fontFamily: fontFamily, 
+            fontSize: fontSize
+        }).setOrigin(origin).setDepth(LayerConfig.UI); 
+        this.previewBpmLabel = scene.add.text(game.config.width / 2, game.config.height / 2 + (size / 4) + 90, "BPM: " + this.bpm, {
+            fontFamily: fontFamily, 
+            fontSize: fontSize
+        }).setOrigin(origin).setDepth(LayerConfig.UI); 
+        let laneSpeed = 0;
+        if(CurrentDifficulty == Difficulty.HARD) laneSpeed = this.hardLaneSpeed;
+        else laneSpeed = this.easyLaneSpeed;
+
+        this.previewLaneSpeedLabel = scene.add.text(game.config.width / 2, game.config.height / 2 + (size / 4) + 120, "Lane Speed: " 
+        + laneSpeed + " ("+CurrentDifficulty+")", {
+            fontFamily: fontFamily, 
+            fontSize: fontSize
+        }).setOrigin(origin).setDepth(LayerConfig.UI); 
+        this.previewLabels.push(this.previewNameLabel);
+        this.previewLabels.push(this.previewArtistLabel);
+        this.previewLabels.push(this.previewBpmLabel);
+        this.previewLabels.push(this.previewLaneSpeedLabel);
+
+        //this.movePreviewUI(scene, (game.config.width) - (size / 4) - 100 , size / 4 + 30);
+    }
+
+    movePreviewUI(scene, x, y) {
+        const delay = 0;
+
+        scene.tweens.add({
+            ease: "Linear",
+            targets: this.previewImage,
+            x: x,
+            y: y,
+            scaleX: this.previewImageScaleX * 0.5,
+            scaleY: this.previewImageScaleY * 0.5,
+            alpha: 0.8,
+            delay: delay,
+            duration: 150,
+            repeat: 0,
+            callbackScope: this,
+        });
+
+        // let alpha = 0;
+        // if(x == null || y == null) alpha = 1;
+
+        const textScale = 0.8;
+        const offset = 30 * textScale;
+        for(let i = 0; i < this.previewLabels.length; i++) {
+            scene.tweens.add({
+                ease: "Linear",
+                targets: this.previewLabels[i],
+                x: x,
+                y: (y + (offset * (i + 1))) + 100,
+                scale: textScale,
+                delay: delay,
+                duration: 150,
+                repeat: 0,
+                callbackScope: this,
+            });      
+        }
+    }
+
     /**
      * Create the song UI to display as the menu UI
      * @param {Scene} scene Current scene to create the song UI
@@ -279,7 +358,6 @@ class Song extends Phaser.GameObjects.Sprite {
     }
 
     moveImage(scene, x, y) {
-
         let targetX = this.originalX;
         let targetY = this.originalY;
         if(x != null)
@@ -471,7 +549,6 @@ class Song extends Phaser.GameObjects.Sprite {
             }
         }
     }
-
 
     /**
      * Get array of note datas

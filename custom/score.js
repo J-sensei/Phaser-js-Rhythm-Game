@@ -47,6 +47,7 @@ class Score {
         this.bad = 0;
         this.miss = 0;
         this.combo = 0;
+        this.maxCombo = 0;
 
         this.accuracySum = 0;
         this.accuracy = 0;
@@ -61,11 +62,22 @@ class Score {
         this.bad = 0;
         this.miss = 0;
         this.combo = 0;
+        this.maxCombo = 0;
 
         this.accuracySum = 0;
         this.accuracy = 0;
 
         this.score = 0;
+    }
+
+    fullCombo() {
+        // We can know that if miss and bad is zero then player will never miss
+        return this.miss == 0 && this.bad == 0;
+    }
+
+    allPerfect() {
+        // Only perfect is hitted, so all perfect
+        return this.miss == 0 && this.bad == 0 && this.great == 0;
     }
 
     add(noteType) {
@@ -110,6 +122,11 @@ class Score {
             break;
         }
 
+        // Update max combo
+        if(this.combo > this.maxCombo) {
+            this.maxCombo = this.combo;
+        }
+
         // All note will contribute to the accracy except no hit
         if(noteType != NoteHitResult.NO_HIT) {
             this.currentTotal++; // Plus total hitted note
@@ -119,6 +136,7 @@ class Score {
 
         // Score simply multiply by current combo
         // Higher combo hold = higher score
-        this.score += (noteScore * this.combo);
+        // Score will affect by accuract, so 100% accuracy only will maximize the score
+        this.score += Math.round((noteScore * this.combo) * this.accuracy);
     }
 }

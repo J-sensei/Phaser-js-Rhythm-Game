@@ -538,6 +538,9 @@ class Note extends Phaser.GameObjects.Sprite {
                 text.destroyText();
                 Score.GetInstance().add(NoteHitResult.NO_HIT);
                 Note.MusicHit.play(Note.SFXConfig);
+                // Heal player
+                player.heal(note);
+
                 note.destroyNote();
                 continue;
             }

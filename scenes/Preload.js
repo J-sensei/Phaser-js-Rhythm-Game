@@ -21,6 +21,7 @@ const SceneKey = {
     SONG_SELECT: "SongSlection",
     DEBUG: "DebugScene",
     LEVEL: "LevelScene",
+    RESULT: "ResultScene",
 }
 
 /** Sprite keys naming */
@@ -79,6 +80,9 @@ const SFXId = {
     COUTDOWN_2: "CountDown2Sound",
     COUTDOWN_1: "CountDown1Sound",
     COUTDOWN_GO: "CountDownGoSound",
+    RESULT_BGM: "ResultBGMSound",
+    FULL_COMBO: "FullComboSound",
+    ALL_PERFECT: "AllPerfectSound",
 }
 
 /** Layer depth configuration */
@@ -173,6 +177,9 @@ class Preload extends Phaser.Scene {
         this.load.audio(SFXId.SELECT, "assets/sfx/song_select.mp3");
         this.load.audio(SFXId.BACK, "assets/sfx/song_back.mp3");
         this.load.audio(SFXId.CLICK, "assets/sfx/song_click.mp3");
+        this.load.audio(SFXId.RESULT_BGM, "assets/sfx/result_bgm.mp3");
+        this.load.audio(SFXId.FULL_COMBO, "assets/sfx/fullcombo.mp3");
+        this.load.audio(SFXId.ALL_PERFECT, "assets/sfx/allperfect.mp3");
 
         // Count down audio
         this.load.audio(SFXId.COUTDOWN_3, "assets/sfx/countdown_3.wav");
@@ -243,7 +250,8 @@ class Preload extends Phaser.Scene {
             repeat: -1
         });
 
-        //this.scene.start(SceneKey.DEBUG);
-        this.scene.start(SceneKey.SONG_SELECT); // Test
+        //this.scene.start(SceneKey.RESULT); // Test
+        //this.scene.start(SceneKey.DEBUG); // Test
+        this.scene.start(SceneKey.SONG_SELECT); 
     }
 }

@@ -121,7 +121,7 @@ class Level extends Phaser.Scene {
                     this.score.add(NoteHitResult.MISS);
                 }
 
-                let t = new HitText(this, this.player.x, this.player.y, "X", null, 64);
+                let t = new HitText(this, note.x, note.y, "X", null, 64);
                 t.setColor("#eb3434");
                 t.destroyText();
                 note.destroyNote();
@@ -171,6 +171,8 @@ class Level extends Phaser.Scene {
         this.selectAudio = this.sound.add(SFXId.SELECT);
         this.backAudio = this.sound.add(SFXId.BACK);
         this.clickAudio = this.sound.add(SFXId.CLICK);
+        this.fullcombo = this.sound.add(SFXId.FULL_COMBO);
+        this.allperfect = this.sound.add(SFXId.ALL_PERFECT);
 
         // Pause / Unpause based on the screen is in focus or not
         // Game window is out of focus (Switch other tab or applocationi)
@@ -185,7 +187,12 @@ class Level extends Phaser.Scene {
         });
 
         this.createUI();
+        this.createLoseUI();
         CurrentSong.createSongPreviewUI(this);
+
+        this.end = false;
+        this.endCountdown = 3;
+        this.showFullCombo = false;
 
         // Start updating beatmap
         this.beatmap.start();
@@ -197,6 +204,48 @@ class Level extends Phaser.Scene {
     update() {
         const deltaTime = (game.loop.delta * 0.001); // Get the delta time of this frame
         this.updateDebugLabels(); // Update debug labels
+
+        if(this.end) {
+            this.endCountdown -= deltaTime;
+            if(this.endCountdown <= 0) {
+                this.scene.start(SceneKey.RESULT);
+            }
+
+            if(this.score.fullCombo() && !this.showFullCombo) {
+                if(this.score.allPerfect()) {
+                    this.allperfect.play(Note.SFXConfig);
+                    HitText.CountDownTextInstantiate(this, "ALL Perfect!!!", 128, null, 2500);
+                } else {
+                    this.fullcombo.play(Note.SFXConfig);
+                    HitText.CountDownTextInstantiate(this, "Full Combo!!!", 128, null, 2500);
+                }
+
+                this.showFullCombo = true;
+            }
+            return;
+        }
+
+        if(this.gameOver) {
+            if(Phaser.Input.Keyboard.JustDown(this.upKey) || Phaser.Input.Keyboard.JustDown(this.upKey2)) {
+                this.updateLoaseOption(true);
+            } else if(Phaser.Input.Keyboard.JustDown(this.downKey) || Phaser.Input.Keyboard.JustDown(this.downKey2)) {
+                this.updateLoaseOption(false);
+            }
+            
+            if(Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+                this.selectAudio.play(Note.SFXConfig);
+                switch(this.loseOption) {
+                    case 0:
+                        this.scene.start(SceneKey.LEVEL);
+                        break;
+                    case 1:
+                        this.scene.start(SceneKey.SONG_SELECT);
+                        break;
+                }
+            }
+
+            return; // Game over no need to take care other thing
+        }
 
         // Unpause
         if(this.songPause) {
@@ -290,8 +339,12 @@ class Level extends Phaser.Scene {
                 CurrentSong.play(0);
             }
         } else {
-            this.playTime = CurrentSong.song.seek;
-            this.songProgressBar.setValue(this.playTime / CurrentSong.song.totalDuration);
+            if(CurrentSong.song.isPlaying) {
+                this.playTime = CurrentSong.song.seek;
+                this.songProgressBar.setValue(this.playTime / CurrentSong.song.totalDuration);
+            } else {
+                this.songProgressBar.setValue(1);
+            }
         }
 
         // Parallax background scrolling
@@ -338,7 +391,14 @@ class Level extends Phaser.Scene {
         // Go back to menu if song is playing and finish
         if(!CurrentSong.song.isPlaying && this.beatmap.finish()) {
             this.start = false;
-            this.scene.start(SceneKey.SONG_SELECT);
+            //this.scene.start(SceneKey.SONG_SELECT);
+            this.end = true; // Song is ended
+
+            if(this.score.fullCombo()) {
+                this.endCountdown = 4;
+            } else {
+                this.endCountdown = 1;
+            }
         }
 
         this.updateCombo(this.score.combo, null);
@@ -347,6 +407,42 @@ class Level extends Phaser.Scene {
         // Update player health
         this.healthProgressBar.setValue(this.player.hp / this.player.maxHp);
         this.healthLabel.text = this.player.hp + "/" + this.player.maxHp;
+
+        if(this.player.hp <= 0) {
+            this.gameOver = true;
+
+            // Show game over UI
+            this.lose();
+
+            // Fade out song
+            CurrentSong.fadeOutStop(this, 1000);
+        }
+    }
+
+    updateLoaseOption(up) {
+        this.selectAudio.play(Note.SFXConfig);
+        if(up)
+            this.loseOption--;
+        else
+            this.loseOption++;
+            
+        if(this.loseOption < 0) this.loseOption = 1;
+        if(this.loseOption > 1) this.loseOption = 0;
+
+        let retryString = "Retry";
+        let backString = "Song Selection";
+
+        switch(this.loseOption) {
+            case 0:
+                retryString = "> " + retryString;
+                break;
+            case 1:
+                backString = "> " + backString;
+                break;
+        }
+
+        const combineString = retryString + "\n" + backString;
+        this.loseSubLabel.text = combineString;    
     }
 
     updateMenuOption(up) {
@@ -414,6 +510,62 @@ class Level extends Phaser.Scene {
                 callbackScope: this,
             });
         }
+    }
+
+    lose() {
+        //this.pausePanel.alpha = 0.5;
+        const tween = this.tweens.add({
+            targets: this.losePanel,
+            ease: "Linear",
+            alpha: 0.5,
+            duration: 150,
+            repeat: 0,
+            callbackScope: this,
+        });
+
+        for(let i = 0; i < this.loseLabels.length; i++) {
+            this.tweens.add({
+                targets: this.loseLabels[i],
+                ease: "Linear",
+                alpha: 1,
+                duration: 150,
+                repeat: 0,
+                callbackScope: this,
+            });
+        }
+    }
+
+    createLoseUI() {
+        this.loseLabels = [];
+
+        // Create pause panel
+        this.losePanel = this.add.graphics();
+        this.losePanel.fillStyle(0x000000, 1);
+        this.losePanel.fillRect(0, 0, game.config.width, game.config.height);
+        this.losePanel.setDepth(LayerConfig.UI_PANEL + 500);
+        this.losePanel.alpha = 0;
+        //this.losePanel.setDepth(LayerConfig.UI + 1);
+
+        this.loseLabel = this.add.text(game.config.width / 2, game.config.height / 2.5, "Game Over", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 128
+        }).setOrigin(0.5).setDepth(LayerConfig.UI + 500); 
+        this.loseSubLabel = this.add.text(game.config.width / 2, game.config.height / 2 + 64, 
+            "> Retry\nSong Selection", {
+            fontFamily: 'Silkscreen', 
+            fontSize: 36
+        }).setOrigin(0.5).setDepth(LayerConfig.UI + 500); 
+
+        this.loseLabels.push(this.loseLabel);
+        this.loseLabels.push(this.loseSubLabel);
+
+        for(let i = 0; i < this.loseLabels.length; i++) {
+            this.loseLabels[i].alpha = 0;
+        }
+
+        this.loseOption = 0;
+        /** Determine if the game is over (Player HP drop to 0) */
+        this.gameOver = false;
     }
 
     createUI() {

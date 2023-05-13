@@ -21,8 +21,8 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         scene.physics.add.existing(this);
         //scene.physics.world.enableBody(this);
         scene.add.existing(this); // Add game object to the scene
-        this.body.setSize(5, 12);
-        this.body.offset.x = 105;
+        this.body.setSize(20, 12);
+        this.body.offset.x = 125;
         this.body.offset.y = 42;
 
         this.isDownLane = true; // Default is down lane
@@ -47,6 +47,16 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
                 break;
             case NoteType.BIG_NOTE:
                 this.hp -= 12;
+                break;
+        }
+        this.hp = Phaser.Math.Clamp(this.hp, 0, this.maxHp);
+    }
+
+    heal(note) {
+        if(this.hp >= this.maxHp) return;
+        switch(note.type) {
+            case NoteType.NO_HIT: 
+                this.hp += 10;
                 break;
         }
         this.hp = Phaser.Math.Clamp(this.hp, 0, this.maxHp);

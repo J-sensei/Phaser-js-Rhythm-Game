@@ -79,9 +79,11 @@ class HitText extends Phaser.GameObjects.Text {
         });
     }
 
-    static CountDownTextInstantiate(scene, text, fontSize, color) {
+    static CountDownTextInstantiate(scene, text, fontSize, color, duration) {
         const t = new HitText(scene, game.config.width / 2, game.config.height / 2, text, null, fontSize, color);
-        t.tweenDestroy("Linear", 600, -100, 0, 0.5);
+        let d = 600;
+        if(duration != null) d = duration;
+        t.tweenDestroy("Linear", d, -100, 0, 0.5);
 
         return t;
     }

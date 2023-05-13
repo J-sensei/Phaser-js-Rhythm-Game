@@ -18,12 +18,12 @@ let config = {
   width: 1280,
   height: 720,
   backgroundColor: 0x000000,
-  scene: [Preload, Debug, SongSelectScene, Level],
+  scene: [Preload, Debug, SongSelectScene, Level, Result],
   pixelArt: true, // Make images sharp
   physics: {
     default: "arcade",
     arcade: {
-        debug: true, // True will display collider boxes
+        debug: false, // True will display collider boxes
         gravity: { y: 0 },
     },
   },

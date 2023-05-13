@@ -116,8 +116,16 @@ class Song extends Phaser.GameObjects.Sprite {
 
     // Preview song UI for the player when start the game
     createSongPreviewUI(scene) {
+        // Panel
+        this.previewPanel = scene.add.graphics();
+        this.previewPanel.fillStyle(0x000000, 1);
+        this.previewPanel.fillRect(0, 0, game.config.width, game.config.height);
+        this.previewPanel.setDepth(LayerConfig.UI_PANEL + 200);
+        this.previewPanel.alpha = 0.5;
+        console.log(this.previewPanel);
+
         const size = 400; // Fixed size of the image
-        this.previewImage = scene.add.image(game.config.width / 2, game.config.height / 2 - (size / 4), this.imageId).setOrigin(0.5).setDepth(LayerConfig.UI);
+        this.previewImage = scene.add.image(game.config.width / 2, game.config.height / 2 - (size / 4), this.imageId).setOrigin(0.5).setDepth(LayerConfig.UI + 200);
 
         this.previewImageScaleX = size / this.previewImage.width;
         this.previewImageScaleY = size / this.previewImage.height;
@@ -130,15 +138,15 @@ class Song extends Phaser.GameObjects.Sprite {
         this.previewNameLabel = scene.add.text(game.config.width / 2, game.config.height / 2 + (size / 4) + 30, this.name, {
             fontFamily: fontFamily, 
             fontSize: fontSize
-        }).setOrigin(origin).setDepth(LayerConfig.UI); 
+        }).setOrigin(origin).setDepth(LayerConfig.UI + 200); 
         this.previewArtistLabel = scene.add.text(game.config.width / 2, game.config.height / 2 + (size / 4) + 60, this.artist, {
             fontFamily: fontFamily, 
             fontSize: fontSize
-        }).setOrigin(origin).setDepth(LayerConfig.UI); 
+        }).setOrigin(origin).setDepth(LayerConfig.UI + 200); 
         this.previewBpmLabel = scene.add.text(game.config.width / 2, game.config.height / 2 + (size / 4) + 90, "BPM: " + this.bpm, {
             fontFamily: fontFamily, 
             fontSize: fontSize
-        }).setOrigin(origin).setDepth(LayerConfig.UI); 
+        }).setOrigin(origin).setDepth(LayerConfig.UI + 200); 
         let laneSpeed = 0;
         if(CurrentDifficulty == Difficulty.HARD) laneSpeed = this.hardLaneSpeed;
         else laneSpeed = this.easyLaneSpeed;
@@ -147,7 +155,7 @@ class Song extends Phaser.GameObjects.Sprite {
         + laneSpeed + " ("+CurrentDifficulty+")", {
             fontFamily: fontFamily, 
             fontSize: fontSize
-        }).setOrigin(origin).setDepth(LayerConfig.UI); 
+        }).setOrigin(origin).setDepth(LayerConfig.UI + 200); 
         this.previewLabels.push(this.previewNameLabel);
         this.previewLabels.push(this.previewArtistLabel);
         this.previewLabels.push(this.previewBpmLabel);
@@ -158,6 +166,7 @@ class Song extends Phaser.GameObjects.Sprite {
 
     movePreviewUI(scene, x, y) {
         const delay = 0;
+        const duration = 350;
 
         scene.tweens.add({
             ease: "Linear",
@@ -168,9 +177,22 @@ class Song extends Phaser.GameObjects.Sprite {
             scaleY: this.previewImageScaleY * 0.5,
             alpha: 0.8,
             delay: delay,
-            duration: 150,
+            duration: duration,
+            repeat: 0,
+            callbackScope: this
+        });
+
+        scene.tweens.add({
+            ease: "Linear",
+            targets: this.previewPanel,
+            alpha: 0,
+            delay: delay,
+            duration: duration,
             repeat: 0,
             callbackScope: this,
+            onComplete: function() {
+                this.previewPanel.destroy(); // Destroy to free up memory as this will not using anymore
+            }
         });
 
         // let alpha = 0;
@@ -186,7 +208,7 @@ class Song extends Phaser.GameObjects.Sprite {
                 y: (y + (offset * (i + 1))) + 100,
                 scale: textScale,
                 delay: delay,
-                duration: 150,
+                duration: duration,
                 repeat: 0,
                 callbackScope: this,
             });      
@@ -599,6 +621,13 @@ class Song extends Phaser.GameObjects.Sprite {
         }
         //this.song.setSeek(100); // Set to target time
         console.log("Play " + this.name + " by " + this.artist); // Test
+    }
+
+    fadeOutStop(scene, duration) {
+        const seek = this.song.seek;
+        this.song.stop();
+        const fadeOutAudio = scene.plugins.get('rexsoundfadeplugin').fadeOut(this.song, duration, false);
+        fadeOutAudio.seek = seek;
     }
 
     /**

@@ -28,30 +28,37 @@ class Beatmap {
      * @param {number} travelTime Travel time of the note, determine how early the note should spawn
      */
     constructor(scene, song, config, travelTime) {
+        /** Current scene reference */
         this.scene = scene;
+        /** Debug to draw beat line */
         this.drawBeatLine = true;
+        /** Debug to play metronome */
         this.playMetronome = true;
+        /** Song class reference */
         this.song = song;
         
-        // Open your heart
-        //this.offset = 0.222; // milisecond
-        //this.bpm = 150; // test
-        // Bye or not
         if(config != null) {
             this.offset = config.offset;
             this.bpm = config.bpm;
         } else {
+            // This will not happen as long as config is valid
             this.offset = 0.874; // milisecond
             this.bpm = 170; // test
         }
 
-        if(travelTime != null) this.travelTime = travelTime;
-        else travelTime = 0;
+        /** Time travel for a note (miliseconds) */
+        this.travelTime = 0;
+        if(travelTime != null) 
+            this.travelTime = travelTime;
 
+        /** Song duration (length) */
         this.songDuration = song.duration(); 
-        this.tempo = this.bpm / 60.0; // 2 beat per second
+        /** Beat per seconds */
+        this.tempo = this.bpm / 60.0;
+        /** Seconds for a beat */
         this.secondPerBeat = 1.0 / this.tempo;
 
+        /** Counting beat when song is playing */
         this.currentBeatCount = new BeatCount();
 
         // Based on song playtime
@@ -74,37 +81,32 @@ class Beatmap {
         /** Define should the beatmap start to running with all the calculated bpm and notes */
         this.running = false;
 
+        /** Time iteration */
         let n = 0;
-        //let nextTempo = this.offset;
         /** Updated tempo when looping the song */
         let nextTempo = 0;
 
         /** Need to determine by the hit position and the spawn position to know how many sec needed  */
         let earlyTime = this.travelTime * 0.001;
-        // if(this.scene.travelTime == null) {
-        //     earlyTime = 0;
-        // } else {
-        //     earlyTime = this.scene.travelTime * 0.001;
-        // }
         /** Time early of the accurate beat time */
         this.travelTime = earlyTime;
+        /** Time different to spawn a note (seconds) */
         const spawnEarlySec = earlyTime; 
         /** Time adding in the loop when counting beat timing, more decimal places means more precise the timing calculate will be */
         const timePrecision = 0.001;
 
         /** All beats for the song */
         this.beats = []; 
-        /** Beat accurate to the song */
+        /** Accurate Beats (No minus by spawn early seconds) of the song */
         this.accurateBeats = []; 
         /** Notes to spawn */
         this.noteSpawns = [];
         /** Beat count when looping the song */
         let beatCounting = new BeatCount();
 
-        // TODO: upgrade end note logic
         /** End Notes queue to spawn */
         this.endNoteSpawns = [];
-        
+        /** Current note data array of the song */
         const currentData = this.song.getNoteData(); // Map data for the song
 
         // Loop the whole song in miliseconds precision
@@ -112,14 +114,15 @@ class Beatmap {
             // If the time if bigger / equal to the tempo
             if(n >= nextTempo) {
                 beatCounting.count(); // Add the beat count
-                const accurateBeatCount = new BeatCount();
-                //this.beatArray.push(nextTempo + this.offset); // Add the time for the accurate beat
-                accurateBeatCount.set(beatCounting.beat, beatCounting.subBeat, nextTempo + this.offset);
+
+                const accurateBeatCount = new BeatCount(); // Create beat count
+                accurateBeatCount.set(beatCounting.beat, beatCounting.subBeat, nextTempo + this.offset); // set the beat with the time
                 this.accurateBeats.push(accurateBeatCount);
+
                 let t = (nextTempo + this.offset) - spawnEarlySec; // Beat with spawn time offset
-                const beatCount = new BeatCount();
+
+                const beatCount = new BeatCount(); // Beat count for note spawn
                 beatCount.set(beatCounting.beat, beatCounting.subBeat, t);
-                //this.beats.push(new Beat(beatCounting.beat, beatCounting.subBeat, t));
                 this.beats.push(beatCount);
 
                 nextTempo += this.secondPerBeat; // Update the next tempo
@@ -128,6 +131,7 @@ class Beatmap {
         }
 
         // Note data instantiate
+        /** Unique id for note spawn */
         let idCount = 0;
         // Loop through all the beats available
         for(let i = 0; i < this.beats.length; i++) {
@@ -162,13 +166,12 @@ class Beatmap {
         this.noteSpawns.reverse();
         this.accurateBeats.reverse();
         this.endNoteSpawns.reverse();
+
         // Debug variables
         this.lastNoteSpawnTime = -9999;
         this.deltaNoteTime = 0;
         /** Determine how many delay the note is spawn than the expected time */
         this.noteSpawnDelay = 0;
-        
-        //console.log(this.noteSpawns);
     }
 
     /**
@@ -177,18 +180,18 @@ class Beatmap {
      */
     update(playTime) {
         this.noteSpawnDelay = 0; // Assume no delay at first
-        // Song Skip
+
+        // Song Skip (Use to skip the beatmap when creating map of a song)
         if(this.skip) {
             if(playTime >= this.skipTime) {
                 this.skip = false;
             }
-            return;
+            return; // Don't bother to update the rest
         }
         
         // Counting beat
         if(this.running && playTime >= this.offset && this.accurateBeats.length > 0 && 
             this.accurateBeats[this.accurateBeats.length - 1].time <= playTime) {
-            //if(playTime > this.nextSongTempo) {
             if(this.accurateBeats.length > 0) {
                 if(playTime >= this.accurateBeats[this.accurateBeats.length - 1].time) {
                     this.currentBeatCount.count(); // Count the beat
@@ -209,7 +212,6 @@ class Beatmap {
         // Spawn notes
         if(this.running && (this.noteSpawns.length > 0 && this.noteSpawns[this.noteSpawns.length - 1].spawnTime <= playTime) || 
             (this.endNoteSpawns.length > 0 && this.endNoteSpawns[this.endNoteSpawns.length - 1].noteSpawn.spawnTime <= playTime)) {
-            // TODO: optimise the code here
             /** Determine wherether to remove first note in the noteSpawns array */
             let remove = false;
             /** How many note are needed to be remove */
@@ -249,7 +251,6 @@ class Beatmap {
                 for(let i = 0; i < removeCount; i++) 
                     this.noteSpawns.pop();
             }
-            //console.log(this.deltaNoteTime);
 
             remove = false; // Reuse the variable for drawing beat line
             removeCount = 0;
@@ -340,30 +341,30 @@ class Beatmap {
 
     /**
      * Spawn an note from the scene (Beatmap scene)
-     * @param {Note} note 
-     * @returns Note
+     * @param {NoteSpawn} note Note Spawn data
+     * @param {Note} parentNote Parent note (Only use to spawn end note)
+     * @param {number} delay Delay in miliseconds when spawn the note
+     * @returns 
      */
     instantiateNote(note, parentNote, delay) {
-        // let n = null;
-        // if(note.type === NoteType.HOLD) {
-        //     n = this.scene.instantiateNote(note.type, note.down, note.holdTime, null, delay, targetTime); // Need hold time reference
-        // } else if(note.type === NoteType.END) {
-        //     n = this.scene.instantiateNote(note.type, note.down, null, parentNote, delay, targetTime);
-        // } else {
-        //     n = this.scene.instantiateNote(note.type, note.down, null, null, delay, targetTime);
-        // }
-        
-        // return n;
         const noteSpawned = Note.InstantiateNote(this.travelTime * 1000, note.down, note.type, note.holdTime, parentNote, delay, note);
         return noteSpawned;
     }
 
+    /**
+     * Get the different delay of the spawn time
+     * @param {number} actualTime Current seek value of the song
+     * @param {number} expectedTime Time should spawn the note
+     */
     calculateNoteDelay(actualTime, expectedTime) {
         this.noteSpawnDelay = actualTime - expectedTime;
         //console.log("Note Spawned Delay: " + this.noteSpawnDelay + "s :: " + (this.noteSpawnDelay * 1000) + "ms");
     }
 
-    // TODO: instantly jump to certain progress of the song and the notes
+    /**
+     * Remove arrays of beat and notes that wish to skip
+     * @param {number} t Target time value of the song (seconds)
+     */
     setSkip(t) {
         this.skip = true;
         this.skipTime = t;
@@ -412,11 +413,20 @@ class Beatmap {
         }
     }
 
+    /**
+     * Instantly skip the song
+     * @param {number} t Time 
+     */
     jumpTo(t) {
 
         this.song.song.setSeek(t);
     }
 
+    /**
+     * Get beats start from the time specify here
+     * @param {number} t Time
+     * @returns BeatCount[] - Array
+     */
     getPreviewBeats(t) {
         let removeCount = 0;
         for(let i = this.accurateBeats.length - 1; i >= 0; i--) {
@@ -432,7 +442,17 @@ class Beatmap {
     }
 }
 
+/**
+ * Note to spawn
+ */
 class NoteSpawn {
+    /**
+     * 
+     * @param {number} time Beat spawn time
+     * @param {number} tempo Seconds per beat
+     * @param {NoteData} noteData Note Data reference
+     * @param {number} id Unique identifier for a note spawn
+     */
     constructor(time, tempo, noteData, id) {
         this.spawnTime = time + ((tempo / noteData.beatSnapDivisor) * noteData.beatSnapDivisorPosition);
         
@@ -465,6 +485,11 @@ class NoteSpawn {
         this.completeTime = t;
     }
 
+    /**
+     * Compare the beat, spawn time and lane direction
+     * @param {Note Spawn} noteSpawn 
+     * @returns 
+     */
     equal(noteSpawn) {
         if(noteSpawn.spawnTime === this.spawnTime && noteSpawn.beatCount.equal(this.beatCount) && noteSpawn.down === this.down) {
             return true;
@@ -476,12 +501,18 @@ class NoteSpawn {
 
 /** Responsible to add the end note spawn logic */
 class EndNoteSpawn {
+    /**
+     * 
+     * @param {NoteSpawn} noteSpawn 
+     * @param {Note} parentNote 
+     */
     constructor(noteSpawn, parentNote) {
         this.noteSpawn = noteSpawn;
         this.parentNote = parentNote;
     }
 }
 
+/** Note Spawn (Only use for testing purposes) - deprecated */
 class NoteSpawnTest {
     constructor(time, beatSnapDivisor, position, tempo) {
         this.spawnTime = time + ((tempo / beatSnapDivisor) * position);
@@ -491,6 +522,7 @@ class NoteSpawnTest {
     } 
 }
 
+/** Data for a note */
 class NoteData {
     /**
      * 
@@ -552,6 +584,7 @@ class NoteData {
     }
 }
 
+/** Deprecated class */
 class Beat {
     /**
      * 
@@ -569,6 +602,7 @@ class Beat {
     }
 }
 
+/** Short hand class to count beats */
 class BeatCount {
     constructor() {
         this.beat = -1;
@@ -577,6 +611,10 @@ class BeatCount {
         this.time = -1;
     }
 
+    /**
+     * Add beats to the beat count
+     * @param {number} v Integer, number of beat to add
+     */
     count(v) {
         if(v == null || v <= 1) {
             this.subBeat++;
@@ -597,12 +635,19 @@ class BeatCount {
         }
     }
 
+    /** Reset to default value */
     reset() {
         this.beat = -1;
         this.subBeat = 3;
         this.totalBeat = 0;
     }
 
+    /**
+     * Set the beat count 
+     * @param {number} beat 
+     * @param {number} subBeat 
+     * @param {number} time 
+     */
     set(beat, subBeat, time) {
         this.beat = beat;
         this.subBeat = subBeat;
@@ -613,6 +658,11 @@ class BeatCount {
         }
     }
 
+    /**
+     * Compare the beatand sub beat
+     * @param {BeatCount} beatCount 
+     * @returns Boolean
+     */
     equal(beatCount) {
         if(beatCount.beat == this.beat && beatCount.subBeat == this.subBeat) {
             return true;
@@ -621,6 +671,7 @@ class BeatCount {
         }
     }
 
+    /** Display the beat string for debug purposes */
     getBeatCountString() {
         return "Beat: " + this.beat + ":" + this.subBeat + " (" + this.totalBeat + ")";
     }

@@ -8,9 +8,10 @@ Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 
 /**
  * Song data, contains function use to play song and song data
- * @param { Scene } scene Phaser Scene reference
- * @param { string } id Unique ID for the song
- * @param { string } path Location of the song resources 
+ * @param {Scene} scene Phaser Scene reference
+ * @param {string} id Unique ID for the song
+ * @param {string} path Location of the song resources 
+ * @param {number} indexId Index number of the song (Use for song selection)
  */
 class Song extends Phaser.GameObjects.Sprite {
     constructor(scene, id, path, indexId) {
@@ -44,18 +45,10 @@ class Song extends Phaser.GameObjects.Sprite {
      */
     create() {
         /** Audio reference */
-        this.song = this.scene.sound.add(this.id); // Crate the song
-        //this.image = this.scene.add.image(0, 0, this.imageId);
-        // this.image.width = 250;
-        // this.image.height = 250;
-        //console.log("Image width: " + this.image.width + " Image height: " + this.image.height);
-        // this.circleImage = new CircleImage(this.scene, 500, 350, this.image, 250/2);
-        // this.circleImage.setScale(0.5);
+        this.song = this.scene.sound.add(this.id); // Create the song
 
         /** Data of the song */
         let data = this.scene.cache.json.get(this.dataId); // Get json data
-        // TODO: load map data here
-        // this.mapData = 
 
         // Song details
         /** Song Name */
@@ -90,6 +83,7 @@ class Song extends Phaser.GameObjects.Sprite {
             laneSpeed: this.getLaneSpeed(CurrentDifficulty),
         }
 
+        // Load lane speed data
         if(data.easyLaneSpeed != null)
             this.easyLaneSpeed = data.easyLaneSpeed;
         else
@@ -150,14 +144,17 @@ class Song extends Phaser.GameObjects.Sprite {
         switch(difficulty) {
             case Difficulty.EASY:
                 return baseDuration - (this.easyLaneSpeed / 0.01);
-                break;
+                break; // Break is useless here
             case Difficulty.HARD:
                 return baseDuration - (this.hardLaneSpeed / 0.01);
-                break;
+                break; // Break is useless here
         }
     }
 
-    // Preview song UI for the player when start the game
+    /**
+     * Preview song UI for the player when start the game
+     * @param {Scene} scene Current scene reference
+     */
     createSongPreviewUI(scene) {
         // Panel
         this.previewPanel = scene.add.graphics();
@@ -202,14 +199,19 @@ class Song extends Phaser.GameObjects.Sprite {
         this.previewLabels.push(this.previewArtistLabel);
         this.previewLabels.push(this.previewBpmLabel);
         this.previewLabels.push(this.previewLaneSpeedLabel);
-
-        //this.movePreviewUI(scene, (game.config.width) - (size / 4) - 100 , size / 4 + 30);
     }
 
+    /**
+     * Move the preview song UI to certain postion
+     * @param {Scene} scene Current scene reference
+     * @param {number} x Target x position
+     * @param {number} y Target y position
+     */
     movePreviewUI(scene, x, y) {
         const delay = 0;
         const duration = 350;
 
+        // Use tween to move and scale image down
         scene.tweens.add({
             ease: "Linear",
             targets: this.previewImage,
@@ -224,6 +226,7 @@ class Song extends Phaser.GameObjects.Sprite {
             callbackScope: this
         });
 
+        // Tween to fade out the panel
         scene.tweens.add({
             ease: "Linear",
             targets: this.previewPanel,
@@ -237,9 +240,7 @@ class Song extends Phaser.GameObjects.Sprite {
             }
         });
 
-        // let alpha = 0;
-        // if(x == null || y == null) alpha = 1;
-
+        // Move the texts
         const textScale = 0.8;
         const offset = 30 * textScale;
         for(let i = 0; i < this.previewLabels.length; i++) {
@@ -305,6 +306,12 @@ class Song extends Phaser.GameObjects.Sprite {
         }
     }
 
+    /**
+     * Create circle image for the song selection
+     * @param {Scene} scene Current scene reference
+     * @param {number} x X position
+     * @param {number} y Y position
+     */
     createSongImage(scene, x, y) {
         const size = 400; // Fixed size of the image
         this.image = scene.add.rexCircleMaskImage(x, y, this.imageId, null, null); // Create a circle image using the plugin
@@ -343,6 +350,12 @@ class Song extends Phaser.GameObjects.Sprite {
         });
     }
 
+    /**
+     * Create text labels for the song selection
+     * @param {Scene} scene Current scene reference
+     * @param {number} x X position
+     * @param {number} y Y position
+     */
     createSongLabels(scene, x, y) {
         /** Array of all song labels */
         this.songLabels = []; 
@@ -421,6 +434,12 @@ class Song extends Phaser.GameObjects.Sprite {
         }
     }
 
+    /**
+     * Move song selection image to target position
+     * @param {Scene} scene Current scene reference
+     * @param {number} x Target x position
+     * @param {number} y Target y position
+     */
     moveImage(scene, x, y) {
         let targetX = this.originalX;
         let targetY = this.originalY;
@@ -429,6 +448,7 @@ class Song extends Phaser.GameObjects.Sprite {
         if(y != null)
             targetY= y;
 
+        // Use tween to move the image
         scene.tweens.add({
             ease: "Linear",
             targets: this.image,
@@ -439,6 +459,7 @@ class Song extends Phaser.GameObjects.Sprite {
             callbackScope: this,
         });
 
+        // Hide the texts
         let alpha = 0;
         if(x == null || y == null) alpha = 1;
 
@@ -456,9 +477,10 @@ class Song extends Phaser.GameObjects.Sprite {
 
     /**
      * Start preview the song
-     * @param {Scene} scene Current scene
+     * @param {Scene} scene Current scene reference
      */
     preview(scene) {        
+        // Fade in audio
         this.previewAudio = scene.plugins.get('rexsoundfadeplugin').fadeIn(this.song, 2000, AudioConfig.music, 0);
         this.previewAudio.seek = this.previewStartTimeline;
         this.previewStart = true;
@@ -466,13 +488,23 @@ class Song extends Phaser.GameObjects.Sprite {
         this.fadeOutStart = false;
     }
 
+    /**
+     * Set the title labels to scale up and down with the beat
+     * @param {Phaser.GameObjects.Text} title 
+     * @param {Phaser.GameObjects.Text} subTitle 
+     */
     setTitles(title, subTitle) {
         this.titleLabel = title;
         this.subTitleLabel = subTitle;
     }
 
+    /**
+     * Move the song selection image and labels out
+     * @param {Scene} scene Current scene reference
+     * @param {bool} isLeft Is switch out to left?
+     */
     switchOut(scene, isLeft) {
-        this.previewAudio.stop();
+        this.previewAudio.stop(); // Stop the audio rightaway
 
         const moveDistance = 250;
         let moveX = 0;
@@ -503,6 +535,10 @@ class Song extends Phaser.GameObjects.Sprite {
 
     }
 
+    /**
+     * Update the preview audio logic and scale up and down for the image and labels
+     * @param {Scene} scene Current scene reference
+     */
     updatePreview(scene) {
         if(this.previewAudio == null) return;
         // Fade out start
@@ -626,6 +662,10 @@ class Song extends Phaser.GameObjects.Sprite {
         }
     }
 
+    /**
+     * Play the music audio
+     * @param {number} delay Delay in miliseconds
+     */
     play(delay) {
         let config = {
             mute: false,
@@ -648,6 +688,11 @@ class Song extends Phaser.GameObjects.Sprite {
         console.log("Play " + this.name + " by " + this.artist); // Test
     }
 
+    /**
+     * Stop the audio with fade out effect
+     * @param {Scene} scene Current scene reference
+     * @param {number} duration Fade out duration
+     */
     fadeOutStop(scene, duration) {
         const seek = this.song.seek;
         this.song.stop();
@@ -679,6 +724,10 @@ class Song extends Phaser.GameObjects.Sprite {
         return this.song.isPlaying;
     }
 
+    /**
+     * Total duration of the song
+     * @returns number
+     */
     duration() {
         return this.song.totalDuration;
     }

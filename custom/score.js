@@ -22,13 +22,20 @@ const ScoreWeight = {
 
 class Score {
     // Singleton
+    /** Score singleton reference */
     static Instance;
+    /**
+     * Create singleton of the score
+     * @param {Score} score Score reference
+     */
     static SetSingleton(score) {
         if(Score.Instance == null)
             Score.Instance = score;
         else
             console.warn("Score instance already exist");
     }
+
+    /** Grab the singleton instance of the score */
     static GetInstance() {
         if(Score.Instance == null) {
             Score.Instance = new Score();
@@ -37,7 +44,6 @@ class Score {
         return Score.Instance;
     }
 
-    // TODO: add total note parameter
     constructor() {
         // Note hit counter
         /** Current total not hitted */
@@ -55,6 +61,7 @@ class Score {
         this.score = 0;
     }
 
+    /** Reset score counting to default values */
     reset() {
         this.currentTotal = 0;
         this.perfect = 0;
@@ -70,20 +77,26 @@ class Score {
         this.score = 0;
     }
 
+    /** Check if the player is full combo */
     fullCombo() {
         // We can know that if miss and bad is zero then player will never miss
         return this.miss == 0 && this.bad == 0;
     }
 
+    /** Check if the player is all perfect */
     allPerfect() {
         // Only perfect is hitted, so all perfect
         return this.miss == 0 && this.bad == 0 && this.great == 0;
     }
 
-    add(noteType) {
+    /**
+     * Add score based on the hit result
+     * @param {NoteHitResult} noteHitResult Hit result of the note
+     */
+    add(noteHitResult) {
         let accuracyWeight = 0;
         let noteScore = 0;
-        switch(noteType) {
+        switch(noteHitResult) {
             case NoteHitResult.PERFECT:
                 this.perfect++;
                 this.combo++;
@@ -118,7 +131,7 @@ class Score {
                 noteScore = ScoreWeight.PERFECT;
             break;
             default:
-                console.warn("[Score] Invalid note type: " + noteType);
+                console.warn("[Score] Invalid note type: " + noteHitResult);
             break;
         }
 
@@ -128,7 +141,7 @@ class Score {
         }
 
         // All note will contribute to the accracy except no hit
-        if(noteType != NoteHitResult.NO_HIT) {
+        if(noteHitResult != NoteHitResult.NO_HIT) {
             this.currentTotal++; // Plus total hitted note
             this.accuracySum += accuracyWeight;
             this.accuracy = this.accuracySum / this.currentTotal;

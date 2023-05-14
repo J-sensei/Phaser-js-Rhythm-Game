@@ -35,6 +35,10 @@ class HitText extends Phaser.GameObjects.Text {
         scene.add.existing(this);
     }
 
+    /**
+     * Destroy the text when hit a note
+     * @param {number} duration Tween duration
+     */
     destroyText(duration) {
         let d;
         if(duration == null) {
@@ -59,6 +63,14 @@ class HitText extends Phaser.GameObjects.Text {
         });
     }
 
+    /**
+     * Destroy the text using tween
+     * @param {string} ease Tween ease type
+     * @param {number} duration Tween duration
+     * @param {number} y Move to target y position
+     * @param {number} alpha Transparency 
+     * @param {number} scale Scale value
+     */
     tweenDestroy(ease, duration, y, alpha, scale) {
         let easeType = "Linear";
         if(ease != null) easeType = ease;
@@ -79,6 +91,15 @@ class HitText extends Phaser.GameObjects.Text {
         });
     }
 
+    /**
+     * Instantiate count down text
+     * @param {Scene} scene Current scene reference
+     * @param {string} text Text value
+     * @param {number} fontSize Font size
+     * @param {string} color Hex code
+     * @param {number} duration Tween duration
+     * @returns 
+     */
     static CountDownTextInstantiate(scene, text, fontSize, color, duration) {
         const t = new HitText(scene, game.config.width / 2, game.config.height / 2, text, null, fontSize, color);
         let d = 600;
@@ -88,6 +109,11 @@ class HitText extends Phaser.GameObjects.Text {
         return t;
     }
 
+    /**
+     * Instantiate an hit text when a note it hit by player
+     * @param {Scene} scene Current scene reference
+     * @param {Note} note Note reference
+     */
     static NoteHitInstantiate(scene, note) {
         const perfectColor = "#f55d92";
         const greatColor = "#cf69cf";

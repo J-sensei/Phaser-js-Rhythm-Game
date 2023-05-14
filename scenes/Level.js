@@ -204,6 +204,10 @@ class Level extends Phaser.Scene {
     update() {
         const deltaTime = (game.loop.delta * 0.001); // Get the delta time of this frame
         this.updateDebugLabels(); // Update debug labels
+        // Parallax background scrolling
+
+        if(!this.gameOver && !this.songPause)
+            this.background.update();
 
         if(this.end) {
             this.endCountdown -= deltaTime;
@@ -349,16 +353,21 @@ class Level extends Phaser.Scene {
             }
         }
 
-        // Parallax background scrolling
-        this.background.update();
-        //this.updateBeatmap();
-        this.beatmap.update(this.playTime);
+        // Update beatmap to spawn notes
+        //this.beatmap.update(CurrentSong.song.seek);
+        this.updateBeatmap();
+
         // Player update
         this.player.update();
 
         // Hit notes
         const notesArray = Note.UpdateHit(JudgeConfig.colWidth * 2, this.player, this, this.playTime);
         let n = Note.HitNotes(notesArray);
+
+        // Update beatmap to spawn notes
+        //this.beatmap.update(CurrentSong.song.seek);
+        this.updateBeatmap();
+
         if(n != null) { // If note is not empty, meaning a note is hit and destroy by the player
             // Debug update note destroy text
             this.noteDestroyCount++;
@@ -389,6 +398,10 @@ class Level extends Phaser.Scene {
                 this.updateCombo(this.score.combo, n);
             }
         }
+        // Update beatmap to spawn notes
+        //this.beatmap.update(CurrentSong.song.seek);
+        this.updateBeatmap();
+
 
         // Go back to menu if song is playing and finish
         if(!CurrentSong.song.isPlaying && this.beatmap.finish()) {
@@ -419,6 +432,9 @@ class Level extends Phaser.Scene {
             // Fade out song
             CurrentSong.fadeOutStop(this, 1000);
         }
+        // Update beatmap to spawn notes
+        //this.beatmap.update(CurrentSong.song.seek);
+        this.updateBeatmap();
     }
 
     updateLoaseOption(up) {
@@ -800,8 +816,8 @@ class Level extends Phaser.Scene {
     }
 
     updateBeatmap() {
-        if(this.currentCountDown < 0) {
-            this.beatmap.update(this.currentCountDown);
+        if(this.playTime < 0) {
+            this.beatmap.update(this.playTime);
         } else {
             this.beatmap.update(CurrentSong.song.seek);
         }

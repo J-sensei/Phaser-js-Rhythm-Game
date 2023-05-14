@@ -1,11 +1,19 @@
+/********************************************
+Course : TGD2251 Game Physics
+Session: Trimester 2, 2022/23
+ID and Name #1 : 1191100556 Liew Jiann Shen
+Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
+********************************************/
+
+/** Result scene to show the result after player finish a leevel */
 class Result extends Phaser.Scene {
     constructor() {
         super(SceneKey.RESULT);
     }
 
     create() {
-        this.labels = [];
-        this.score = Score.GetInstance();
+        this.labels = []; // Currently no use
+        this.score = Score.GetInstance(); // Get the score reference
 
         this.titleLabel = this.add.text(game.config.width / 2, 150, "Result", {
             fontFamily: 'Silkscreen', 
@@ -68,16 +76,21 @@ class Result extends Phaser.Scene {
             fontSize: 32
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
 
+        // Looping the BGM
         this.bgm = this.sound.add(SFXId.RESULT_BGM);
         this.bgm.play(Note.SFXConfigLooping);
 
+        // Keys reference
         this.upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
         this.upKey2 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
         this.downKey2 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
         this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
+        /** Current selected option */
         this.option = 0;
+
+        // Audios
         this.selectAudio = this.sound.add(SFXId.SELECT);
         this.backAudio = this.sound.add(SFXId.BACK);
         this.clickAudio = this.sound.add(SFXId.CLICK);
@@ -104,6 +117,10 @@ class Result extends Phaser.Scene {
         }
     }
 
+    /**
+     * Update the selected option
+     * @param {bool} up 
+     */
     updateOption(up) {
         this.selectAudio.play(Note.SFXConfig);
         if(up)
@@ -130,6 +147,11 @@ class Result extends Phaser.Scene {
         this.optionLabel.text = combineString;    
     }
 
+    /**
+     * Calculate grade based on the accuracy
+     * @param {number} accuracy 
+     * @returns String
+     */
     calculateGrade(accuracy) {
         if(accuracy >= 100) {
             return "SSS";

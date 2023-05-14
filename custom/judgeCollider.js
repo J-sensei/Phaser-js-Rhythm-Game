@@ -5,7 +5,7 @@ ID and Name #1 : 1191100556 Liew Jiann Shen
 Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
-
+/** Configuration of judgement colliders */
 const JudgeConfig = {
     origin: 0.5,
     scale: 3,
@@ -22,10 +22,20 @@ const JudgeConfig = {
     missDistance: 160,
 }
 
+/**
+ * Judgement Collider to judge the performance when pressing a note
+ */
 class JudgeCollider extends Phaser.GameObjects.Sprite {
     /** Physic group for judge colliders */
     static JudgeColliders;
 
+    /**
+     * 
+     * @param {Scene} scene Current scene reference
+     * @param {number} x X position
+     * @param {number} y Y position
+     * @param {string} color Hex value
+     */
     constructor(scene, x, y, color) {
         super(scene, x, y); // Cincai create a sprite
         this.alpha = 0; // Make it invisible
@@ -36,10 +46,11 @@ class JudgeCollider extends Phaser.GameObjects.Sprite {
         if(JudgeCollider.JudgeColliders == null) {
             JudgeCollider.JudgeColliders = scene.physics.add.group();
         }
-        scene.add.existing(this);
+        scene.add.existing(this); // Add to scene to make it appear
         JudgeCollider.JudgeColliders.add(this);
         this.body.setSize(JudgeConfig.colWidth, JudgeConfig.colHeight);
 
+        // Collider visual
         let circleColor;
         if(color == null) {
             circleColor = JudgeConfig.circleColor;
@@ -47,17 +58,19 @@ class JudgeCollider extends Phaser.GameObjects.Sprite {
             circleColor = color;
         }
         this.circle = scene.add.circle(x, y, JudgeConfig.circleRadius, Phaser.Display.Color.HexStringToColor(circleColor).color);
-        this.circle.iterations = JudgeConfig.circleIteration;
+        this.circle.iterations = JudgeConfig.circleIteration; // Reduce iteration to make it like pentagon
         this.circle.alpha = JudgeConfig.circleAplha;
+
+        // Make it rotate
         let tween = scene.tweens.add({
             targets: this.circle,
             angle: this.circle.angle + 360,
             duration: JudgeConfig.rotateDuration,
             repeat: -1,
         });
-        scene.add.existing(this.circle);
+        scene.add.existing(this.circle); // Add to scene to make it appear
 
-        // Add particle to the judge collider
+        // Add particle to the judge collider (Explode when hit note)
         this.emitter = scene.add.particles(x, y, ParticleKey.HIT_PARTICLE, {
             lifespan: 500,
             speed: { min: 300, max: 750 },
@@ -65,20 +78,16 @@ class JudgeCollider extends Phaser.GameObjects.Sprite {
             alpha: { start: 1, end: 0},
             gravityY: 1000,
             blendMode: 'ADD',
-            tint: 0xff0000,
+            tint: 0xff0000, // Red
             emitting: false,
         });
-        //scene.add.existing(this.emitter);
     }
 
+    /**
+     * Reset judgement colliders physic group for a new scene
+     * @param {Scene} scene Current scene reference
+     */
     static Reset(scene) {
-        // if(JudgeCollider.JudgeColliders != null) {
-        //     JudgeCollider.JudgeColliders.clear(); // Clear the judgement colliders physic group
-        // } else {
-        //     // The collider group is null, need to create it
-        //     JudgeCollider.JudgeColliders = scene.physics.add.group();
-        // }
-
         JudgeCollider.JudgeColliders = scene.physics.add.group();
     }
 }

@@ -68,7 +68,7 @@ class Note extends Phaser.GameObjects.Sprite {
 
     /**
      * 
-     * @param {Scene} scene Scene reference
+     * @param {Scene} scene Current scene reference
      * @param {string} key Key for the sprite
      * @param {number} x Position x
      * @param {number} y Position y
@@ -80,7 +80,7 @@ class Note extends Phaser.GameObjects.Sprite {
      * @param {number} holdTime Hold required to hold the note (Only use for hold note) (Deprecated)
      * @param {Note} parentNote Parent note to for the refenerece (Only use for end note)
      * @param {number} delay Delay happen when spawn the note (ms)
-     *  @param {number} targetTime Exact time of the note should be reached the judgment point (TEST)
+     *  @param {NoteSpawn} noteSpawn Note Spawn reference
      */
     constructor(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote, delay, noteSpawn) {
         super(scene, x, y, key); // Create sprite
@@ -171,6 +171,10 @@ class Note extends Phaser.GameObjects.Sprite {
 
         this.updateDelayPosition = false;
         this.x = this.exactSpawnX; // Skip some x position to align with the beat (Solve slight delay)
+
+        /**
+         * Delay might occur depends on the current fps
+         */
         // Create tweens
         const tween = scene.tweens.add({
             ease: 'Linear',
@@ -339,6 +343,7 @@ class Note extends Phaser.GameObjects.Sprite {
         this.body.setSize(NoteColliderSize * this.scale, NoteColliderSize * this.scale);
     }
 
+    /** Testing other way to move the note (Failed) */
     moveNote(initialValue, targetValue, currentDuration, totalDuration) {
         // console.log(initialValue + " " + targetValue);
         // console.log(currentDuration + " " + totalDuration);
@@ -435,6 +440,7 @@ class Note extends Phaser.GameObjects.Sprite {
         Note.Scene = scene;
     }
 
+    /** Update sfx configuration based on the audio config */
     static UpdateSFXConfig() {
         Note.SFXConfig = {
             mute: false,
@@ -449,6 +455,23 @@ class Note extends Phaser.GameObjects.Sprite {
         };
     }
 
+    /**
+     * Instantiate a note (deprecated) - use InstantiateNote instead
+     * @param {Scene} scene 
+     * @param {string} key 
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} destX 
+     * @param {number} destY 
+     * @param {number} travelTime 
+     * @param {bool} down 
+     * @param {string} type 
+     * @param {number} holdTime Holding time for hold note (deprecated) 
+     * @param {Note} parentNote Parent note for end note (Only use for end note)
+     * @param {number} delay Delay when spawn a note
+     * @param {number} targetTime 
+     * @returns 
+     */
     static Instantiate(scene, key, x, y, destX, destY, travelTime, down, type, holdTime, parentNote, delay, targetTime) {
         let note;
         if(type === NoteType.END) {
@@ -462,6 +485,17 @@ class Note extends Phaser.GameObjects.Sprite {
         return note;
     }
 
+    /**
+     * Instantiate a note
+     * @param {number} travelTime Time for the tween duration (miliseconds)
+     * @param {bool} down Lane direction
+     * @param {NoteType} type NoteType
+     * @param {number} holdTime hold time for a hold note (deprecated)
+     * @param {Note} parentNote Parent note reference for the end note spawn
+     * @param {number} delay Delay when spawn the note
+     * @param {NoteSpawn} noteSpawn Note Spawn reference
+     * @returns Note
+     */
     static InstantiateNote(travelTime, down, type, holdTime, parentNote, delay, noteSpawn) {
         let spawn; // Spawn position
         let judgementPos; // Judgement position aka destination position

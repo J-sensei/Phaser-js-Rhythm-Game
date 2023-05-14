@@ -5,8 +5,16 @@ ID and Name #1 : 1191100556 Liew Jiann Shen
 Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
-
+/**
+ * Player class, contains logic to hit note and detect lanes
+ */
 class PlayerCar extends Phaser.GameObjects.Sprite {
+    /**
+     * 
+     * @param {Scene} scene Current scene reference
+     * @param {number} x X position
+     * @param {number} y Y position
+     */
     constructor(scene, x, y) {
         super(scene, x, y, SpriteId.CAR_RUNNING).setOrigin(0.5);
         this.scene = scene
@@ -52,6 +60,10 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         this.hp = Phaser.Math.Clamp(this.hp, 0, this.maxHp);
     }
 
+    /**
+     * Heal the player based on the note
+     * @param {Note} note Note reference
+     */
     heal(note) {
         if(this.hp >= this.maxHp) return;
         switch(note.type) {
@@ -112,6 +124,7 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         }
     }
 
+    /** Switch to upper lane */
     switchDown() {
         if(!this.isDownLane) {
             this.currentGracePeriod = this.gracePeriod;
@@ -122,6 +135,7 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         this.isDownLane = true; // down lane
     }
 
+    /** Switch to lower lane */
     swtichUp() {
         if(this.isDownLane) {
             this.currentGracePeriod = this.gracePeriod;
@@ -140,6 +154,7 @@ class PlayerCar extends Phaser.GameObjects.Sprite {
         return new Phaser.Math.Vector2(this.x + this.body.offset.x + 20, this.y + this.body.offset.y);
     }
 
+    /** Debug string to show variables */
     getDebugString() {
         return "IsDownLane: " + this.isDownLane + ", Beating: " + this.beating + '\n' + "Holding: " + this.holding + " GracePeriod: " + this.currentGracePeriod.toFixed(2) + "\n" + "HP: " + this.hp;
     }

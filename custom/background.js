@@ -39,6 +39,10 @@ class Background {
         this.initializeBackground(this.scene, backgroundData);
     }
 
+    /**
+     * Set the speed multiplier of the background scrolling
+     * @param {number} v 
+     */
     setSpeed(v) {
         if(v == null) {
             this.speedMultiplier = 1;
@@ -47,12 +51,14 @@ class Background {
         }
     }
 
+    /** Start the background scrolling */
     start() { this.pause = false; }
+    /** Stop the background scrolling */
     stop() { this.pause = true; }
 
     update() {
         if(this.pause) return; // Do not scroll the background if game is pausing
-        const deltaTime = (game.loop.delta * 0.001);
+        const deltaTime = (game.loop.delta * 0.001); // Delta time (seconds)
         
         /* Background Array should have same size with Background Data Array */
         for(let i = 0; i < this.backgroundArray.length; i++) {

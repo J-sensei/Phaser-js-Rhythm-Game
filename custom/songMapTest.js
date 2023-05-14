@@ -5,6 +5,10 @@ ID and Name #1 : 1191100556 Liew Jiann Shen
 Contacts #1 : 0174922881 1191100556@student.mmu.edu.my
 ********************************************/
 
+/*
+    This file is just use for mapping, as its easier to make changes to adjust the map.
+    The final confirm map will put in data.json of the song and load into the program.
+*/
 
 const ByeOrNotHardMap = [
     new NoteData(0, 0, 1, 0, 1, 1, 8, 0),

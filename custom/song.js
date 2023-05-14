@@ -69,6 +69,12 @@ class Song extends Phaser.GameObjects.Sprite {
         /** Source of the music (From other video game or album) */
         this.source = data.source;
 
+        // Note data
+        /** Raw data of easy map load from json file */
+        this.easyData = data.easy;
+        /** Raw data of hard map load from json file */
+        this.hardData = data.hard;
+
         // Preview song
         // Test Bye or Not
         /** Preview start time */
@@ -83,8 +89,6 @@ class Song extends Phaser.GameObjects.Sprite {
             offset: this.offset,
             laneSpeed: this.getLaneSpeed(CurrentDifficulty),
         }
-        this.beatmap = new Beatmap(this, this, this.beatmapConfig);
-        this.beatmap.create();
 
         if(data.easyLaneSpeed != null)
             this.easyLaneSpeed = data.easyLaneSpeed;
@@ -95,6 +99,45 @@ class Song extends Phaser.GameObjects.Sprite {
             this.hardLaneSpeed = data.hardLaneSpeed;
         else
             this.hardLaneSpeed = 1.0;
+
+        /** Easy Note Data array */
+        this.easyNoteData = [];
+        /** Hard Note Data array */
+        this.hardNoteData = [];
+        // Load map data
+        if(this.easyData != null) {
+            for(let i = 0; i < this.easyData.length; i++) {
+                this.easyNoteData.push(new NoteData(
+                    this.easyData[i][0],
+                    this.easyData[i][1],
+                    this.easyData[i][2],
+                    this.easyData[i][3],
+                    this.easyData[i][4],
+                    this.easyData[i][5],
+                    this.easyData[i][6],
+                    this.easyData[i][7],
+                ));
+            }
+        }
+
+        if(this.hardData != null) {
+            for(let i = 0; i < this.hardData.length; i++) {
+                this.hardNoteData.push(new NoteData(
+                    this.hardData[i][0],
+                    this.hardData[i][1],
+                    this.hardData[i][2],
+                    this.hardData[i][3],
+                    this.hardData[i][4],
+                    this.hardData[i][5],
+                    this.hardData[i][6],
+                    this.hardData[i][7],
+                ));
+            }        
+        }
+
+        // Make sure data is loaded first then only create the beatmap
+        this.beatmap = new Beatmap(this, this, this.beatmapConfig);
+        this.beatmap.create();
     }
 
     /**
@@ -573,31 +616,14 @@ class Song extends Phaser.GameObjects.Sprite {
     }
 
     /**
-     * Get array of note datas
+     * Get array of note datas based on current difficulty
      * @returns Note Data[]
      */
     getNoteData() {
-        //return NiniEasyMap; // Testing Code
-        // TODO: load the data from json file instead!!
-        //console.log(this.id);
-        if(this.id === "Song0") {
-            if(CurrentDifficulty === Difficulty.EASY)
-                return ByeOrNotEasyMap;
-            else if(CurrentDifficulty === Difficulty.HARD)
-                return ByeOrNotHardMap;
-        } else if(this.id === "Song1") {
-            if(CurrentDifficulty === Difficulty.EASY)
-                return NiniEasyMap;
-            else if(CurrentDifficulty === Difficulty.HARD)
-                return NiniHardMap;
-        } else if(this.id === "Song2") {
-            if(CurrentDifficulty === Difficulty.EASY)
-                return CyaeghaEasyMap;
-            else if(CurrentDifficulty === Difficulty.HARD)
-                return CyaeghaHardMap;
-        }
-        else {
-            return [];
+        if(CurrentDifficulty === Difficulty.HARD) {
+            return this.hardNoteData;
+        } else if(CurrentDifficulty === Difficulty.EASY) {
+            return this.easyNoteData;
         }
     }
 

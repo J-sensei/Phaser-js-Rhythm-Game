@@ -55,7 +55,7 @@ class SongSelectScene extends Phaser.Scene {
             fontFamily: 'Silkscreen', 
             fontSize: 32
         }).setOrigin(0); 
-        this.add.text(35, 48 + 70, "(Q) - How to play\n(ENTER) - select\n(ESC) - back", {
+        this.add.text(35, 48 + 70, "(ENTER) - select\n(ESC) - back", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0); 

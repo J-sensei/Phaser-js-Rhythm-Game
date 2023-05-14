@@ -178,7 +178,7 @@ class Level extends Phaser.Scene {
         // Game window is out of focus (Switch other tab or applocationi)
         this.game.events.on(Phaser.Core.Events.BLUR, () => {
             // Auto pause the game if window is blur out (Prevent anything bad happen if player if switch the screen out)
-            if(this.start)
+            if(this.start && !this.gameOver)
                 this.pause(); 
         });
         // Game window is focus back
@@ -280,8 +280,10 @@ class Level extends Phaser.Scene {
             if(this.unpause) {
                 this.unpauseCountDown -= deltaTime;
                 if(this.unpauseCountDown <= 0 && !this.unpauseCountDown_go) {
-                    this.countdown_go.play(Note.SFXConfig);
-                    HitText.CountDownTextInstantiate(this, "GO!", 256);
+                    if(!this.unpauseImmediate) {
+                        this.countdown_go.play(Note.SFXConfig);
+                        HitText.CountDownTextInstantiate(this, "GO!", 256);
+                    }
                     this.unpauseCountDown_go = true;
                     this.unpause = false;
                     this.resume();
@@ -483,12 +485,14 @@ class Level extends Phaser.Scene {
             this.unpauseCountDown_2 = true;
             this.unpauseCountDown_1 = true;
             this.unpauseCountDown_go = false;
+            this.unpauseImmediate = true;
         } else {
             this.unpauseCountDown = this.countDown + 0.5;
             this.unpauseCountDown_3 = false;
             this.unpauseCountDown_2 = false;
             this.unpauseCountDown_1 = false;
             this.unpauseCountDown_go = false;
+            this.unpauseImmediate = false;
         }
 
         // Hide the pause menu
@@ -708,19 +712,19 @@ class Level extends Phaser.Scene {
         this.pausePanel = this.add.graphics();
         this.pausePanel.fillStyle(0x000000, 1);
         this.pausePanel.fillRect(0, 0, game.config.width, game.config.height);
-        this.pausePanel.setDepth(LayerConfig.UI_PANEL);
+        this.pausePanel.setDepth(LayerConfig.UI_PANEL + 200);
         this.pausePanel.alpha = 0;
-        this.pausePanel.setDepth(LayerConfig.UI + 1);
+        this.pausePanel.setDepth(LayerConfig.UI + 200);
 
         this.pauseLabel = this.add.text(game.config.width / 2, game.config.height / 2.5, "Pause", {
             fontFamily: 'Silkscreen', 
             fontSize: 128
-        }).setOrigin(0.5).setDepth(LayerConfig.UI + 1); 
+        }).setOrigin(0.5).setDepth(LayerConfig.UI + 200); 
         this.pauseSubLabel = this.add.text(game.config.width / 2, game.config.height / 2 + 64, 
             "> Continue\nRetry\nSong Selection", {
             fontFamily: 'Silkscreen', 
             fontSize: 36
-        }).setOrigin(0.5).setDepth(LayerConfig.UI + 1); 
+        }).setOrigin(0.5).setDepth(LayerConfig.UI + 200); 
 
         this.menuLabels.push(this.pauseLabel);
         this.menuLabels.push(this.pauseSubLabel);
@@ -740,7 +744,7 @@ class Level extends Phaser.Scene {
         this.stopSeek = this.playTime; // Get the current stop time
         CurrentSong.song.stop();
         //this.tweens.pauseAll();
-        //this.player.stop();
+        this.player.stop();
         Note.NoteHolding.pause();
         
         for(let i = 0; i < Note.Notes.getChildren().length; i++) {
@@ -784,6 +788,7 @@ class Level extends Phaser.Scene {
                 tweens[j].resume();
             }
         }
+        this.player.play(AnimationId.CAR_RUNNING);
 
         Note.NoteHolding.resume();
         //this.player.play();

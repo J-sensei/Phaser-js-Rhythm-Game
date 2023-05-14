@@ -163,12 +163,11 @@ class Song extends Phaser.GameObjects.Sprite {
         this.previewPanel = scene.add.graphics();
         this.previewPanel.fillStyle(0x000000, 1);
         this.previewPanel.fillRect(0, 0, game.config.width, game.config.height);
-        this.previewPanel.setDepth(LayerConfig.UI_PANEL + 200);
+        this.previewPanel.setDepth(LayerConfig.UI_PANEL + 100);
         this.previewPanel.alpha = 0.5;
-        console.log(this.previewPanel);
 
         const size = 400; // Fixed size of the image
-        this.previewImage = scene.add.image(game.config.width / 2, game.config.height / 2 - (size / 4), this.imageId).setOrigin(0.5).setDepth(LayerConfig.UI + 200);
+        this.previewImage = scene.add.image(game.config.width / 2, game.config.height / 2 - (size / 4), this.imageId).setOrigin(0.5).setDepth(LayerConfig.UI + 100);
 
         this.previewImageScaleX = size / this.previewImage.width;
         this.previewImageScaleY = size / this.previewImage.height;
@@ -181,15 +180,15 @@ class Song extends Phaser.GameObjects.Sprite {
         this.previewNameLabel = scene.add.text(game.config.width / 2, game.config.height / 2 + (size / 4) + 30, this.name, {
             fontFamily: fontFamily, 
             fontSize: fontSize
-        }).setOrigin(origin).setDepth(LayerConfig.UI + 200); 
+        }).setOrigin(origin).setDepth(LayerConfig.UI + 100); 
         this.previewArtistLabel = scene.add.text(game.config.width / 2, game.config.height / 2 + (size / 4) + 60, this.artist, {
             fontFamily: fontFamily, 
             fontSize: fontSize
-        }).setOrigin(origin).setDepth(LayerConfig.UI + 200); 
+        }).setOrigin(origin).setDepth(LayerConfig.UI + 100); 
         this.previewBpmLabel = scene.add.text(game.config.width / 2, game.config.height / 2 + (size / 4) + 90, "BPM: " + this.bpm, {
             fontFamily: fontFamily, 
             fontSize: fontSize
-        }).setOrigin(origin).setDepth(LayerConfig.UI + 200); 
+        }).setOrigin(origin).setDepth(LayerConfig.UI + 100); 
         let laneSpeed = 0;
         if(CurrentDifficulty == Difficulty.HARD) laneSpeed = this.hardLaneSpeed;
         else laneSpeed = this.easyLaneSpeed;
@@ -198,7 +197,7 @@ class Song extends Phaser.GameObjects.Sprite {
         + laneSpeed + " ("+CurrentDifficulty+")", {
             fontFamily: fontFamily, 
             fontSize: fontSize
-        }).setOrigin(origin).setDepth(LayerConfig.UI + 200); 
+        }).setOrigin(origin).setDepth(LayerConfig.UI + 100); 
         this.previewLabels.push(this.previewNameLabel);
         this.previewLabels.push(this.previewArtistLabel);
         this.previewLabels.push(this.previewBpmLabel);

@@ -17,36 +17,36 @@ class Result extends Phaser.Scene {
             fontSize: 32
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
 
-        this.scoreLabel = this.add.text(game.config.width / 2, 250, "Note Hit", {
+        this.noteHitTitleLabel = this.add.text(game.config.width / 2, 250, "Note Hit", {
             fontFamily: 'Silkscreen', 
             fontSize: 28
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
-        this.scoreLabel = this.add.text(game.config.width / 2, 280, "Perfect: " + this.score.perfect, {
+        this.perfectLabel = this.add.text(game.config.width / 2, 280, "Perfect: " + this.score.perfect, {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
-        this.scoreLabel = this.add.text(game.config.width / 2, 310, "Great: " + this.score.great, {
+        this.greatLabel = this.add.text(game.config.width / 2, 310, "Great: " + this.score.great, {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
-        this.scoreLabel = this.add.text(game.config.width / 2, 340, "Bad: " + this.score.bad, {
+        this.badLabel = this.add.text(game.config.width / 2, 340, "Bad: " + this.score.bad, {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
-        this.scoreLabel = this.add.text(game.config.width / 2, 370, "Miss: " + this.score.miss, {
+        this.missLabel = this.add.text(game.config.width / 2, 370, "Miss: " + this.score.miss, {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
 
-        this.scoreLabel = this.add.text(game.config.width / 2, 450, "Score", {
+        this.scoreTitleLabel = this.add.text(game.config.width / 2, 450, "Score", {
             fontFamily: 'Silkscreen', 
             fontSize: 28
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
-        this.scoreLabel = this.add.text(game.config.width / 2, 480, "Max Combo: " + this.score.maxCombo, {
+        this.maxComboabel = this.add.text(game.config.width / 2, 480, "Max Combo: " + this.score.maxCombo, {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
-        this.scoreLabel = this.add.text(game.config.width / 2, 510, "Accuracy: " + (this.score.accuracy * 100).toFixed(2) + "%", {
+        this.accuracyLabel = this.add.text(game.config.width / 2, 510, "Accuracy: " + (this.score.accuracy * 100).toFixed(2) + "%", {
             fontFamily: 'Silkscreen', 
             fontSize: 24
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
@@ -58,7 +58,7 @@ class Result extends Phaser.Scene {
         // Grade
         const grade = this.calculateGrade((this.score.accuracy * 100).toFixed(2));
 
-        this.scoreLabel = this.add.text(game.config.width - 250, game.config.height / 2, grade, {
+        this.gradeLabel = this.add.text(game.config.width - 250, game.config.height / 2, grade, {
             fontFamily: 'Silkscreen', 
             fontSize: 200
         }).setOrigin(0.5).setDepth(LayerConfig.UI); 
